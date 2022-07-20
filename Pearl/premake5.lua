@@ -22,7 +22,14 @@ project "Pearl"
 	includedirs
 	{
 		"src",
-		"editor/PearlCraft/src"
+		"editor/PearlCraft/src",
+		"vendor/imgui",
+		"vendor/spdlog/include"
+	}
+
+	links
+	{
+		"ImGui"
 	}
 
 	filter "system:windows"
@@ -37,4 +44,3 @@ project "Pearl"
 		defines "PEARL_RELEASE"
 		runtime "Release"
 		optimize "on"
-

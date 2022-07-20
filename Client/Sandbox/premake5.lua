@@ -1,4 +1,3 @@
-
 project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
@@ -21,7 +20,9 @@ project "Sandbox"
 
 	includedirs
 	{
-		"%{wks.location}/Pearl/src"
+		"%{wks.location}/Pearl/src",
+		"%{wks.location}/Pearl/vendor/spdlog/include"
+
 	}
 
 	links
@@ -41,4 +42,3 @@ project "Sandbox"
 		defines "PEARL_Release"
 		runtime "Release"
 		optimize "on"
-	

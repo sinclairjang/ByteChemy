@@ -1,4 +1,3 @@
-
 project "Main"
 	kind "ConsoleApp"
 	language "C++"
@@ -41,4 +40,3 @@ project "Main"
 		defines "PEARL_Release"
 		runtime "Release"
 		optimize "on"
-	
