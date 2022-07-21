@@ -3,16 +3,13 @@
 
 namespace Pearl
 {	
-	// Forward Declarations
-	// - Note: This is only temporary; they are going to be replaced later.
-	class GameObject;
-	typedef unsigned int RenderProgramID;
-
 	class RenderManager 
 	{
 	public:
-		RenderManager() {}
-		~RenderManager() {}
+		RenderManager();
+		RenderManager(const RenderManager& rhs) = delete;
+		RenderManager& operator=(const RenderManager& rhs) = delete;
+		~RenderManager();
 
 		//---------------------------------------------------------------
 		// Application's High-Level View of Rendering Pipeline
