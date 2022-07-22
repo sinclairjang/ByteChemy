@@ -6,11 +6,11 @@ namespace Pearl
 	RenderManager::RenderManager() 
 	{
 		// do nothing; merely in place to give precedence control
-	};
+	}
 	RenderManager::~RenderManager() 
 	{
 		// do nothing; merely in place to give precedence control
-	};
+	}
 
 	//---------------------------------------------------------------
 	// Delegate to Underlying Renderer Service API(ex. Direct3D, OpenGL, Vulkan, Metal, etc)

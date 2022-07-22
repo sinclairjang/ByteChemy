@@ -1,10 +1,13 @@
 #pragma once
 #include "Renderer.h"
+#include "ServiceLocator.h"
 
 namespace Pearl
 {	
 	class RenderManager 
 	{
+		friend ServiceLocator<Renderer>;
+
 	public:
 		RenderManager();
 		RenderManager(const RenderManager& rhs) = delete;
