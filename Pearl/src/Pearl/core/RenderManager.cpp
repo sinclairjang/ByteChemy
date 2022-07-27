@@ -21,9 +21,9 @@ namespace Pearl
 		RenderManager::Renderer_->StartUp();
 	}
 
-	void RenderManager::CreateRenderProgram(const GameObject& gameObject)
+	void RenderManager::CreateRenderProgram(const std::fstream& shaderFile)
 	{
-		RenderManager::Renderer_->CreateRenderProgram(gameObject);
+		RenderManager::Renderer_->CreateRenderProgram(shaderFile);
 	}
 
 	void RenderManager::UseRenderProgram(RenderProgramID id)

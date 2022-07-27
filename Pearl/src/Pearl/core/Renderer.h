@@ -5,7 +5,7 @@ namespace Pearl
 	// Forward Declarations
 	// - Note: This is only temporary; they are going to be replaced later.
 	class GameObject;
-	typedef unsigned int RenderProgramID;
+	using RenderProgramID = unsigned int;
 	
 	class Renderer
 	{
@@ -13,7 +13,7 @@ namespace Pearl
 		virtual ~Renderer();
 
 		virtual void StartUp();
-		virtual void CreateRenderProgram(const GameObject& gameObject);
+		virtual void CreateRenderProgram(const std::fstream& shaderFile);
 		virtual void UseRenderProgram(RenderProgramID id);
 		virtual void BindResources(const GameObject& gameObject);
 		virtual void Render();

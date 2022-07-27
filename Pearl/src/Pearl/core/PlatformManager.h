@@ -15,7 +15,7 @@ namespace Pearl
 		}
 	};
 
-	class Window 
+	class PlatformManager 
 	{
 	public:
 		virtual ~Window() {}

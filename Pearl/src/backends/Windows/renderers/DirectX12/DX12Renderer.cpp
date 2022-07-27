@@ -3,22 +3,18 @@
 
 namespace Pearl
 {
-	D3D12Renderer::D3D12Renderer(const RenderOption& renderOption) {}
+	D3D12Renderer::D3D12Renderer(const RenderOption& renderOption) : renderOption_(renderOption) {}
 
 	void D3D12Renderer::StartUp()
 	{
-		if (opt = gRenderOption("Game Mode"))
-		{
-			// ...
+		Characters chOption;
+		renderOption_.QueryOptionValue("Application Mode", &chOption);
 
-			if (opt = gRenderOption("Anti-Aliasing"))
-			{
-				auto mode = opt
-			}
-		}
-
-		else // == gRenderOption("Editor Mode")
+		if (chOption == "Game")
 		{
-			// ...
+
+
 		}
+	};
 }
+	
