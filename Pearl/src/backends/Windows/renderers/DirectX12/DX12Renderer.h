@@ -1,16 +1,18 @@
 #pragma once
 #include "Pearl/core/Renderer.h"
-#include "Pearl/core/RenderOption.h"
+#include "Pearl/core/Option.h"
 
 namespace Pearl
 {
+	class PlatformManager;
+
 	class D3D12Renderer : public Renderer
 	{
 	public:
-		D3D12Renderer(const RenderOption& renderOption);
+		D3D12Renderer(const Option& renderOption);
 		virtual ~D3D12Renderer() override;
 
-		virtual void StartUp() override;
+		virtual void StartUp(const PlatformManager& platform) override;
 		virtual void CreateRenderProgram(const std::fstream& shaderFile) override;
 		virtual void UseRenderProgram(RenderProgramID id) override;
 		virtual void BindResources(const GameObject& gameObject) override;
@@ -18,7 +20,7 @@ namespace Pearl
 		virtual void ShutDown() override;
 
 	private:
-		const RenderOption& renderOption_;
+		const Option& renderOption_;
 	};
 }
 

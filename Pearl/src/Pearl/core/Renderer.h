@@ -12,7 +12,7 @@ namespace Pearl
 	public:
 		virtual ~Renderer();
 
-		virtual void StartUp();
+		virtual void StartUp(const PlatformManager& platform);
 		virtual void CreateRenderProgram(const std::fstream& shaderFile);
 		virtual void UseRenderProgram(RenderProgramID id);
 		virtual void BindResources(const GameObject& gameObject);

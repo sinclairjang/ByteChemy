@@ -4,21 +4,20 @@
 namespace Pearl
 {
 	RenderManager::RenderManager() 
+		: Renderer_(), renderOption_()
 	{
-		// do nothing; merely in place to give precedence control
 	}
 	RenderManager::~RenderManager() 
 	{
-		// do nothing; merely in place to give precedence control
 	}
 
 	//---------------------------------------------------------------
 	// Delegate to Underlying Renderer Service API(ex. Direct3D, OpenGL, Vulkan, Metal, etc)
 	//---------------------------------------------------------------
 
-	void RenderManager::StartUp()
+	void RenderManager::StartUp(const PlatformManager& platform)
 	{
-		RenderManager::Renderer_->StartUp();
+		RenderManager::Renderer_->StartUp(platform);
 	}
 
 	void RenderManager::CreateRenderProgram(const std::fstream& shaderFile)

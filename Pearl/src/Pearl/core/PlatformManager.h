@@ -1,5 +1,8 @@
 #pragma once
 
+#include "ServiceLocator.h"
+#include "Window.h"
+
 namespace Pearl 
 {
 	struct WindowSpec {
@@ -17,14 +20,18 @@ namespace Pearl
 
 	class PlatformManager 
 	{
+		friend ServiceLocator<Window>;
+
 	public:
-		virtual ~Window() {}
-		//TODO: virtual void OnUpdate() = 0;
+		PlatformManager();
+		PlatformManager(const PlatformManager& rhs) = delete;
+		PlatformManager& operator=(const PlatformManager& rhs) = delete;
+		~PlatformManager();
+		
+		void Init(const WindowSpec* windowSpec = &WindowSpec()); // Create an application window managed by OS
 
-		virtual unsigned int GetWidth()	 const = 0;
-		virtual unsigned int GetHeight() const = 0;
-
-		static Window* Init(const WindowSpec& windowSpec = WindowSpec());
+	private:
+		std::unique_ptr<Window> Window_; // Service API to be set by ServiceLocator
 	};
 }
 

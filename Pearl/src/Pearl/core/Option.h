@@ -6,9 +6,12 @@ namespace Pearl
 	using Numeric = float;
 	using Characters = std::string;
 
-	class RenderOption
+	class Option
 	{
 	public:
+		Option();
+		~Option();
+
 		void Set(Key key, Numeric value) const;
 		void Set(Key key, Characters value) const;
 
@@ -16,7 +19,7 @@ namespace Pearl
 		void QueryOptionValue(Key key, Characters* value) const;
 
 	private:
-		static std::map<Key, Numeric> nBST_;
-		static std::map<Key, Characters> chBST_;
+		mutable std::map<Key, Numeric> nBST_;
+		mutable std::map<Key, Characters> chBST_;
 	};
 }

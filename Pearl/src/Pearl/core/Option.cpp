@@ -1,19 +1,28 @@
 #include "prlpch.h"
-#include "RenderOption.h"
+#include "Option.h"
 
 namespace Pearl
 {
-	void RenderOption::Set(Key key, Numeric value) const
+	Option::Option()
+		: nBST_(), chBST_()
+	{
+	}
+
+	Option::~Option()
+	{
+	}
+
+	void Option::Set(Key key, Numeric value) const
 	{
 		nBST_[key] = value;
 	}
 
-	void RenderOption::Set(Key key, Characters value) const
+	void Option::Set(Key key, Characters value) const
 	{
 		chBST_[key] = value;
 	}
 
-	void RenderOption::QueryOptionValue(Key key, Numeric* value) const
+	void Option::QueryOptionValue(Key key, Numeric* value) const
 	{
 		auto q = nBST_.find(key);
 
@@ -27,7 +36,7 @@ namespace Pearl
 		}
 	}
 
-	void RenderOption::QueryOptionValue(Key key, Characters* value) const
+	void Option::QueryOptionValue(Key key, Characters* value) const
 	{
 		auto q = chBST_.find(key);
 
