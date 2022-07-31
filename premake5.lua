@@ -1,6 +1,6 @@
 workspace "Pearl"
 	architecture "x64"
-	startproject "Sandbox"
+	startproject "PearlCraft"
 
 	configurations
 	{
@@ -16,11 +16,9 @@ workspace "Pearl"
 		
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-
 group "dependencies"
-	include "Pearl/vendor/imgui"
+	include "vendor/imgui"
 group ""
 
-include "Pearl"
-include "Client/Sandbox"
-include "Client/Main"
+include "PearlCraft"
+include "Game"
