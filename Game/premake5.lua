@@ -20,15 +20,16 @@ project "Game"
 
 	includedirs
 	{
-		"%{wks.location}/Pearl/src"
+		"%{wks.location}/Game/src"
 	}
 
 	links
 	{
-		"Pearl"
+		
 	}
 
 	filter "system:windows"
+		defines "PEARL_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"

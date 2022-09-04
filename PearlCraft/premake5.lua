@@ -7,6 +7,9 @@ project "PearlCraft"
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "prlcraft_pch.h"
+	pchsource("src/prlcraft_pch.cpp")
+
 	files
 	{
 		"assets/scenes/**.prl",
@@ -20,18 +23,17 @@ project "PearlCraft"
 
 	includedirs
 	{
-		"%{wks.location}/Pearl/src",
-		"%{wks.location}/Pearl/vendor/spdlog/include"
+		"%{wks.location}/PearlCraft/src",
+		"%{wks.location}/vendor/imgui"
 	}
 
 	links
 	{
-		"Pearl",
 		"Imgui"
 	}
 
 	filter "system:windows"
-		defines "PEARL_WINDOWS"
+		defines "PEARL_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"
