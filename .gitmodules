@@ -1,6 +1,3 @@
-[submodule "Pearl/vendor/imgui"]
-	path = Pearl/vendor/imgui
+[submodule "vendor/imgui"]
+	path = vendor/imgui
 	url = https://github.com/sinclairjang/imgui.git
-[submodule "Pearl/vendor/spdlog"]
-	path = Pearl/vendor/spdlog
-	url = https://github.com/gabime/spdlog.git
