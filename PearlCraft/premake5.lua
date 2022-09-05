@@ -17,14 +17,14 @@ project "PearlCraft"
 		"assets/shaders/**.glsl",
 		"assets/textures/**.png",
 
-		"src/**.h",
-		"src/**.cpp"
+		"./**.h",
+		"./**.cpp",
 	}
 
 	includedirs
 	{
-		"%{wks.location}/PearlCraft/src",
-		"%{wks.location}/vendor/imgui"
+		".",
+		"../vendor/imgui"
 	}
 
 	links
