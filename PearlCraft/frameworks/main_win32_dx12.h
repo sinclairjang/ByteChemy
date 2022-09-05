@@ -1,5 +1,3 @@
-#pragma once
-
 // Main loop using Win32 API interact with Windows OS to get access to Windows OS subsystems and DirectX12 API to get a low-level access to graphics card and its functionalities
 // This is largely based on (as-is) https://github.com/ocornut/imgui/blob/docking/backends/examples/example_win32_directx12/main.cpp (as of Jun 15, 2022).
 
@@ -8,9 +6,12 @@
 //	[X] Render-to-texture: 
 //	[ ] Entity Component System:
 
-#include "imgui.h"
-#include "backends/imgui_impl_win32.h"
-#include "backends/imgui_impl_dx12.h"
+#ifndef _MAIN_WIN32_DX12_H
+#define _MAIN_WIN32_DX12_H
+
+#include <imgui.h>
+#include <backends/imgui_impl_win32.h>
+#include <backends/imgui_impl_dx12.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <tchar.h>
@@ -483,3 +484,4 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
+#endif // _MAIN_WIN32_DX12_H

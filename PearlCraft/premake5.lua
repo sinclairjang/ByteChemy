@@ -8,7 +8,7 @@ project "PearlCraft"
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "prlcraft_pch.h"
-	pchsource("src/prlcraft_pch.cpp")
+	pchsource("prlcraft_pch.cpp")
 
 	files
 	{
