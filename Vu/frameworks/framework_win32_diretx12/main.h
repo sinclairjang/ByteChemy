@@ -5,16 +5,11 @@
 //	[ ] Editor UI Layout: 
 //	[X] Render-to-texture: 
 //	[ ] Entity Component System:
-
-#ifndef _MAIN_WIN32_DX12_H
-#define _MAIN_WIN32_DX12_H
+//  [ ] Scene Graph:
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx12.h>
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <tchar.h>
 
 #ifdef _DEBUG
 #define DX12_ENABLE_DEBUG_LAYER
@@ -59,8 +54,21 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+void ThrowIfFailed(HRESULT hr) noexcept(false);
+
+template<UINT TNameLength>
+void SetDebugObjectName(_In_ ID3D12Resource* resource, _In_z_ const char(&name)[TNameLength]);
+
+// Forward declarations of helper classes
+class RenderTexture;
+class com_exception;
+
 // Main code
-int main(int, char**)
+int WinMain(
+    _In_ HINSTANCE hInstance, 
+    _In_opt_ HINSTANCE hPrevInstance, 
+    _In_ LPSTR lpCmdLine, 
+    _In_ int nShowCmd)
 {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
@@ -152,41 +160,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+       // Draw the scene to texture
 
         // Rendering
         ImGui::Render();
@@ -249,7 +223,6 @@ int main(int, char**)
 }
 
 // Helper functions
-
 bool CreateDeviceD3D(HWND hWnd)
 {
     // Setup swap chain
@@ -484,4 +457,208 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
-#endif // _MAIN_WIN32_DX12_H
+
+ class RenderTexture
+ {
+ public:
+    RenderTexture(DXGI_FORMAT format) noexcept :
+        m_state(D3D12_RESOURCE_STATE_COMMON),
+        m_srvDescriptor{},
+        m_rtvDescriptor{},
+        m_clearColor{},
+        m_format(format),
+        m_width(0),
+        m_height(0)
+    {
+    }
+
+    void SetDevice(_In_ ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
+    {
+        if (device == m_device.Get() && srvDescriptor.ptr == m_srvDescriptor.ptr && rtvDescriptor.ptr == m_rtvDescriptor.ptr)
+            return;
+
+        if (m_device)
+        {
+            ReleaseDevice();
+        }
+
+        {
+            D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = { m_format, D3D12_FORMAT_SUPPORT1_NONE, D3D12_FORMAT_SUPPORT2_NONE };
+            if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(formatSupport))))
+            {
+                throw std::runtime_error("CheckFeatureSupport");
+            }
+
+            UINT required = D3D12_FORMAT_SUPPORT1_TEXTURE2D | D3D12_FORMAT_SUPPORT1_RENDER_TARGET;
+            if ((formatSupport.Support1 & required) != required)
+            {
+#ifdef _DEBUG
+                char buff[128] = {};
+                sprintf_s(buff, "RenderTexture: Device does not support the requested format (%u)!\n", m_format);
+                OutputDebugStringA(buff);
+#endif
+                throw std::runtime_error("RenderTexture");
+            }
+        }
+
+        if (!srvDescriptor.ptr || !rtvDescriptor.ptr)
+        {
+            throw std::runtime_error("Invalid descriptors");
+        }
+
+        m_device = device;
+
+        m_srvDescriptor = srvDescriptor;
+        m_rtvDescriptor = rtvDescriptor;
+    }
+    
+    void SetWindow(const RECT& output)
+    {
+        // Determine the render target size in pixels
+        auto width = size_t(std::max<LONG>(output.right - output.left, 1));
+        auto height = size_t(std::max<LONG>(output.bottom - output.top, 1));
+
+        ResizeResource(width, height);
+    }
+
+    void ResizeResource(size_t width, size_t height)
+    {
+        if (width == m_width && height == m_height)
+            return;
+
+        if (m_width > UINT32_MAX || m_height > UINT32_MAX)
+        {
+            throw std::runtime_error("Invalid size");
+        }
+
+        if (!m_device)
+            return;
+
+        m_width = m_height = 0;
+
+        D3D12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+        D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Tex2D(
+            m_format,
+            static_cast<UINT64>(width), static_cast<UINT>(height),
+            1, 1, 1, 0,
+            D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+
+        D3D12_CLEAR_VALUE clearValue = { m_format, {} };
+        memcpy(clearValue.Color, m_clearColor, sizeof(clearValue.Color));
+
+        m_state = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+        // Create a render target
+        ThrowIfFailed(
+            m_device->CreateCommittedResource(
+                &heapProperties,
+                D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES,
+                &desc,
+                m_state,
+                &clearValue,
+                IID_PPV_ARGS(m_resource.ReleaseAndGetAddressOf()))
+        );
+
+        SetDebugObjectName(m_resource.Get(), "RenderTexture RT");
+
+        // Create RTV
+        m_device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtvDescriptor);
+
+        // Create SRV
+        m_device->CreateShaderResourceView(m_resource.Get(), nullptr, m_srvDescriptor);
+
+        m_width = width;
+        m_height = height;
+    }
+    void ReleaseDevice() noexcept
+    {
+        m_resource.Reset();
+        m_device.Reset();
+
+        m_state = D3D12_RESOURCE_STATE_COMMON;
+        m_width = m_height = 0;
+
+        m_srvDescriptor.ptr = m_rtvDescriptor.ptr = 0;
+    }
+    void TransitionTo(_In_ ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES afterState)
+    {
+        D3D12_RESOURCE_BARRIER barrier = {};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = m_resource.Get();
+        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+        barrier.Transition.StateBefore = m_state;
+        barrier.Transition.StateAfter = afterState;
+
+        commandList->ResourceBarrier(1, &barrier);
+
+        m_state = afterState;
+    }
+
+    void BeginScene(_In_ ID3D12GraphicsCommandList* commandList)
+    {
+        TransitionTo(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    }
+    void EndScene(_In_ ID3D12GraphicsCommandList* commandList)
+    {
+        TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    }
+    void SetClearColor(DirectX::FXMVECTOR color)
+    {
+        DirectX::XMStoreFloat4(reinterpret_cast<DirectX::XMFLOAT4*>(m_clearColor), color);
+    }
+
+    ID3D12Resource* GetResource() const noexcept { return m_resource.Get(); }
+    D3D12_RESOURCE_STATES GetCurrentState() const noexcept { return m_state; }
+    DXGI_FORMAT GetFormat() const noexcept { return m_format; }
+
+private:
+    Microsoft::WRL::ComPtr<ID3D12Device>	m_device;
+    Microsoft::WRL::ComPtr<ID3D12Resource>	m_resource;
+    D3D12_RESOURCE_STATES					m_state;
+    D3D12_CPU_DESCRIPTOR_HANDLE				m_srvDescriptor;
+    D3D12_CPU_DESCRIPTOR_HANDLE				m_rtvDescriptor;
+    float									m_clearColor[4];
+    DXGI_FORMAT								m_format;
+    size_t									m_width;
+    size_t									m_height;
+};
+
+// Helper class for COM excepttions
+class com_exception : public std::exception
+{
+public:
+    com_exception(HRESULT hr) noexcept : result(hr) {}
+
+    const char* what() const noexcept override
+    {
+        static char s_str[64] = {};
+        sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+        return s_str;
+    }
+
+    HRESULT get_result() const noexcept { return result; }
+
+private:
+    HRESULT result;
+};
+
+// Helper utility converts D3D API failures into exception
+void ThrowIfFailed(HRESULT hr) noexcept(false)
+{
+    if (FAILED(hr))
+    {
+        throw com_exception(hr);
+    }
+}
+
+template<UINT TNameLength>
+void SetDebugObjectName(_In_ ID3D12Resource* resource, _In_z_ const char(&name)[TNameLength])
+{
+#if defined(_DEBUG) || defined(PROFILE)
+    HRESULT nameSet = resource->SetPrivateData(WKPDID_D3DDebugObjectName, TNameLength - 1, name);
+    if (FAILED(nameSet)) { throw std::runtime_error("Failed to set debug name"); }
+#endif
+}
+

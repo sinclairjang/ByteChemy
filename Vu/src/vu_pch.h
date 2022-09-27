@@ -1,10 +1,10 @@
-#include <prlcraft_config.h>
+#include "vu_config.h"
 
 //-----------------------------------------------------------------------------
 // [SECTION] Platform's Precompiled Headers
 //-----------------------------------------------------------------------------
 
-#ifdef PEARL_BACKENDS_PLATFORMS_WIN32
+#ifdef VU_BACKENDS_PLATFORMS_WIN32
 
 #include <windows.h>
 #include <windowsx.h> // GET_X_LPARAM(), GET_Y_LPARAM()
@@ -17,9 +17,9 @@
 // [SECTION] Renderer's Precompiled Headers
 //-----------------------------------------------------------------------------
 
-#ifdef PEARL_BACKENDS_RENDERERS_DIRECTX_12
+#ifdef VU_BACKENDS_RENDERERS_DIRECTX_12
 
-#include <d3dx12.h>
+#include "frameworks/framework_win32_diretx12/d3dx12.h"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
@@ -41,8 +41,6 @@
 //-----------------------------------------------------------------------------
 
 #define WIN32_LEAN_AND_MEAN
-
-#include "prlcraft_internal.h"
 
 #include <iostream>
 #include <stdio.h>

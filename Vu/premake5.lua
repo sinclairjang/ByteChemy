@@ -1,4 +1,4 @@
-project "PearlCraft"
+project "Vu"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++latest"
@@ -7,8 +7,8 @@ project "PearlCraft"
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "prlcraft_pch.h"
-	pchsource("prlcraft_pch.cpp")
+	pchheader "vu_pch.h"
+	pchsource("src/vu_pch.cpp")
 
 	files
 	{
@@ -33,15 +33,15 @@ project "PearlCraft"
 	}
 
 	filter "system:windows"
-		defines "PEARL_PLATFORM_WINDOWS"
+		defines "VU_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "PEARL_DEBUG"
+		defines "VU_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "PEARL_RELEASE"
+		defines "VU_RELEASE"
 		runtime "Release"
 		optimize "on"

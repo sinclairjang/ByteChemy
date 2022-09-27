@@ -1,6 +1,6 @@
-workspace "Pearl"
+workspace "Vu"
 	architecture "x64"
-	startproject "PearlCraft"
+	startproject "Vu"
 
 	configurations
 	{
@@ -14,5 +14,5 @@ group "dependencies"
 	include "vendor/imgui"
 group ""
 
-include "PearlCraft"
+include "Vu"
 include "Game"

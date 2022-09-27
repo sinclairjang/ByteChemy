@@ -29,15 +29,15 @@ project "Game"
 	}
 
 	filter "system:windows"
-		defines "PEARL_PLATFORM_WINDOWS"
+		defines "VU_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "PEARL_DEBUG"
+		defines "VU_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "PEARL_Release"
+		defines "VU_Release"
 		runtime "Release"
 		optimize "on"
