@@ -4,7 +4,11 @@ project "Vu"
 	cppdialect "C++latest"
 	staticruntime "on"
 	
-	libdirs {"../vendor/fbx/lib"}
+	libdirs {
+		"../vendor/fbx/lib",
+		"../vendor/directxtex/lib",
+		
+	}
 
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -29,7 +33,8 @@ project "Vu"
 		"./src",
 		"../vendor/imgui",
 		"../vendor/entt/include",
-		"../vendor/fbx/include"
+		"../vendor/fbx/include",
+		"../vendor/directxtex/include"
 	}
 
 	links
@@ -45,6 +50,7 @@ project "Vu"
 		defines "VU_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		linkoptions { "/ignore:4099" }
 
 	filter "configurations:Release"
 		defines "VU_RELEASE"
