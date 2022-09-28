@@ -1,8 +1,10 @@
 project "Vu"
-	kind "ConsoleApp"
+	kind "WindowedApp"
 	language "C++"
 	cppdialect "C++latest"
 	staticruntime "on"
+	
+	libdirs {"../vendor/fbx/lib"}
 
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -24,7 +26,10 @@ project "Vu"
 	includedirs
 	{
 		".",
-		"../vendor/imgui"
+		"./src",
+		"../vendor/imgui",
+		"../vendor/entt/include",
+		"../vendor/fbx/include"
 	}
 
 	links

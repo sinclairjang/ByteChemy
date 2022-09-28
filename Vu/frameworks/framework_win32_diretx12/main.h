@@ -20,6 +20,8 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 
+#include "core/Scene.h"
+
 struct FrameContext
 {
     ID3D12CommandAllocator* CommandAllocator;
