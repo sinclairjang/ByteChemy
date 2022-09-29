@@ -7,6 +7,9 @@
 #include "vu_config.h"
 
 #pragma warning(disable : 4099)
+#pragma warning(disable : 26812)
+#pragma warning(disable : 26498)
+#pragma warning(disable : 26451)
 
 // This will provide various backends support for the editor later on.
 #if defined(VU_BACKENDS_PLATFORMS_WIN32) && defined(VU_BACKENDS_RENDERERS_DIRECTX_12)

@@ -2,12 +2,10 @@
 // This is largely based on (as-is) https://github.com/ocornut/imgui/blob/docking/backends/examples/example_win32_directx12/main.cpp (as of Jun 15, 2022).
 
 // Implemented features:
-//	[ ] Editor UI Layout: 
-//	[X] Render-to-texture: 
-//	[ ] Entity Component System:
-//  [ ] Scene Graph:
-
-
+//	[ ] Editor UI Layout
+//	[X] Render-to-texture
+//	[ ] Entity Component System
+//  [ ] Scene Graph
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
@@ -59,15 +57,6 @@ void WaitForLastSubmittedFrame();
 FrameContext* WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-void ThrowIfFailed(HRESULT hr) noexcept(false);
-
-template<UINT TNameLength>
-void SetDebugObjectName(_In_ ID3D12Resource* resource, _In_z_ const char(&name)[TNameLength]);
-
-// Forward declarations of helper classes
-class RenderTexture;
-class com_exception;
-
 // WinMain code
 //int WinMain(
 //    _In_ HINSTANCE hInstance, 
@@ -83,7 +72,10 @@ int main(int, char**)
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
     ::RegisterClassEx(&wc);
     HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX12 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
-
+    
+   
+    
+    
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
     {
@@ -127,24 +119,12 @@ int main(int, char**)
         g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    io.Fonts->AddFontDefault();
 
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 
     // Main loop
     bool done = false;
@@ -434,10 +414,6 @@ FrameContext* WaitForNextFrameResources()
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Win32 message handler
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
@@ -466,207 +442,4 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
- class RenderTexture
- {
- public:
-    RenderTexture(DXGI_FORMAT format) noexcept :
-        m_state(D3D12_RESOURCE_STATE_COMMON),
-        m_srvDescriptor{},
-        m_rtvDescriptor{},
-        m_clearColor{},
-        m_format(format),
-        m_width(0),
-        m_height(0)
-    {
-    }
-
-    void SetDevice(_In_ ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
-    {
-        if (device == m_device.Get() && srvDescriptor.ptr == m_srvDescriptor.ptr && rtvDescriptor.ptr == m_rtvDescriptor.ptr)
-            return;
-
-        if (m_device)
-        {
-            ReleaseDevice();
-        }
-
-        {
-            D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport = { m_format, D3D12_FORMAT_SUPPORT1_NONE, D3D12_FORMAT_SUPPORT2_NONE };
-            if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(formatSupport))))
-            {
-                throw std::runtime_error("CheckFeatureSupport");
-            }
-
-            UINT required = D3D12_FORMAT_SUPPORT1_TEXTURE2D | D3D12_FORMAT_SUPPORT1_RENDER_TARGET;
-            if ((formatSupport.Support1 & required) != required)
-            {
-#ifdef _DEBUG
-                char buff[128] = {};
-                sprintf_s(buff, "RenderTexture: Device does not support the requested format (%u)!\n", m_format);
-                OutputDebugStringA(buff);
-#endif
-                throw std::runtime_error("RenderTexture");
-            }
-        }
-
-        if (!srvDescriptor.ptr || !rtvDescriptor.ptr)
-        {
-            throw std::runtime_error("Invalid descriptors");
-        }
-
-        m_device = device;
-
-        m_srvDescriptor = srvDescriptor;
-        m_rtvDescriptor = rtvDescriptor;
-    }
-    
-    void SetWindow(const RECT& output)
-    {
-        // Determine the render target size in pixels
-        auto width = size_t(std::max<LONG>(output.right - output.left, 1));
-        auto height = size_t(std::max<LONG>(output.bottom - output.top, 1));
-
-        ResizeResource(width, height);
-    }
-
-    void ResizeResource(size_t width, size_t height)
-    {
-        if (width == m_width && height == m_height)
-            return;
-
-        if (m_width > UINT32_MAX || m_height > UINT32_MAX)
-        {
-            throw std::runtime_error("Invalid size");
-        }
-
-        if (!m_device)
-            return;
-
-        m_width = m_height = 0;
-
-        D3D12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-
-        D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Tex2D(
-            m_format,
-            static_cast<UINT64>(width), static_cast<UINT>(height),
-            1, 1, 1, 0,
-            D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
-
-        D3D12_CLEAR_VALUE clearValue = { m_format, {} };
-        memcpy(clearValue.Color, m_clearColor, sizeof(clearValue.Color));
-
-        m_state = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-        // Create a render target
-        ThrowIfFailed(
-            m_device->CreateCommittedResource(
-                &heapProperties,
-                D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES,
-                &desc,
-                m_state,
-                &clearValue,
-                IID_PPV_ARGS(m_resource.ReleaseAndGetAddressOf()))
-        );
-
-        SetDebugObjectName(m_resource.Get(), "RenderTexture RT");
-
-        // Create RTV
-        m_device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtvDescriptor);
-
-        // Create SRV
-        m_device->CreateShaderResourceView(m_resource.Get(), nullptr, m_srvDescriptor);
-
-        m_width = width;
-        m_height = height;
-    }
-    void ReleaseDevice() noexcept
-    {
-        m_resource.Reset();
-        m_device.Reset();
-
-        m_state = D3D12_RESOURCE_STATE_COMMON;
-        m_width = m_height = 0;
-
-        m_srvDescriptor.ptr = m_rtvDescriptor.ptr = 0;
-    }
-    void TransitionTo(_In_ ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES afterState)
-    {
-        D3D12_RESOURCE_BARRIER barrier = {};
-        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier.Transition.pResource = m_resource.Get();
-        barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-        barrier.Transition.StateBefore = m_state;
-        barrier.Transition.StateAfter = afterState;
-
-        commandList->ResourceBarrier(1, &barrier);
-
-        m_state = afterState;
-    }
-
-    void BeginScene(_In_ ID3D12GraphicsCommandList* commandList)
-    {
-        TransitionTo(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-    }
-    void EndScene(_In_ ID3D12GraphicsCommandList* commandList)
-    {
-        TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-    }
-    void SetClearColor(DirectX::FXMVECTOR color)
-    {
-        DirectX::XMStoreFloat4(reinterpret_cast<DirectX::XMFLOAT4*>(m_clearColor), color);
-    }
-
-    ID3D12Resource* GetResource() const noexcept { return m_resource.Get(); }
-    D3D12_RESOURCE_STATES GetCurrentState() const noexcept { return m_state; }
-    DXGI_FORMAT GetFormat() const noexcept { return m_format; }
-
-private:
-    Microsoft::WRL::ComPtr<ID3D12Device>	m_device;
-    Microsoft::WRL::ComPtr<ID3D12Resource>	m_resource;
-    D3D12_RESOURCE_STATES					m_state;
-    D3D12_CPU_DESCRIPTOR_HANDLE				m_srvDescriptor;
-    D3D12_CPU_DESCRIPTOR_HANDLE				m_rtvDescriptor;
-    float									m_clearColor[4];
-    DXGI_FORMAT								m_format;
-    size_t									m_width;
-    size_t									m_height;
-};
-
-// Helper class for COM excepttions
-class com_exception : public std::exception
-{
-public:
-    com_exception(HRESULT hr) noexcept : result(hr) {}
-
-    const char* what() const noexcept override
-    {
-        static char s_str[64] = {};
-        sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
-        return s_str;
-    }
-
-    HRESULT get_result() const noexcept { return result; }
-
-private:
-    HRESULT result;
-};
-
-// Helper utility converts D3D API failures into exception
-void ThrowIfFailed(HRESULT hr) noexcept(false)
-{
-    if (FAILED(hr))
-    {
-        throw com_exception(hr);
-    }
-}
-
-template<UINT TNameLength>
-void SetDebugObjectName(_In_ ID3D12Resource* resource, _In_z_ const char(&name)[TNameLength])
-{
-#if defined(_DEBUG) || defined(PROFILE)
-    HRESULT nameSet = resource->SetPrivateData(WKPDID_D3DDebugObjectName, TNameLength - 1, name);
-    if (FAILED(nameSet)) { throw std::runtime_error("Failed to set debug name"); }
-#endif
-}
-
+ 
