@@ -1,3 +1,6 @@
 [submodule "vendor/imgui"]
 	path = vendor/imgui
 	url = https://github.com/sinclairjang/imgui.git
+[submodule "vendor/spdlog"]
+	path = vendor/spdlog
+	url = https://github.com/gabime/spdlog

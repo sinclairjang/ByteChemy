@@ -23,6 +23,7 @@
 #endif
 
 #include "core/Scene.h"
+#include "utils/Log.h"
 
 struct FrameContext
 {
@@ -67,12 +68,15 @@ void SetDebugObjectName(_In_ ID3D12Resource* resource, _In_z_ const char(&name)[
 class RenderTexture;
 class com_exception;
 
+// WinMain code
+//int WinMain(
+//    _In_ HINSTANCE hInstance, 
+//    _In_opt_ HINSTANCE hPrevInstance, 
+//    _In_ LPSTR lpCmdLine, 
+//    _In_ int nShowCmd)
+
 // Main code
-int WinMain(
-    _In_ HINSTANCE hInstance, 
-    _In_opt_ HINSTANCE hPrevInstance, 
-    _In_ LPSTR lpCmdLine, 
-    _In_ int nShowCmd)
+int main(int, char**)
 {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();

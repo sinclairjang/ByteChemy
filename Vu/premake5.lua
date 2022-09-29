@@ -1,5 +1,5 @@
 project "Vu"
-	kind "WindowedApp"
+	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++latest"
 	staticruntime "on"
@@ -34,7 +34,8 @@ project "Vu"
 		"../vendor/imgui",
 		"../vendor/entt/include",
 		"../vendor/fbx/include",
-		"../vendor/directxtex/include"
+		"../vendor/directxtex/include",
+		"../vendor/spdlog/include"
 	}
 
 	links
