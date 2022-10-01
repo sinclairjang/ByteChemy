@@ -4,10 +4,10 @@ project "Vu"
 	cppdialect "C++latest"
 	staticruntime "on"
 	
-	libdirs {
+	libdirs 
+	{
 		"../vendor/fbx/lib",
 		"../vendor/directxtex/lib",
-		
 	}
 
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -46,12 +46,13 @@ project "Vu"
 	filter "system:windows"
 		defines "VU_PLATFORM_WINDOWS"
 		systemversion "latest"
+		buildoptions {"/permissive"}
 
 	filter "configurations:Debug"
 		defines "VU_DEBUG"
 		runtime "Debug"
 		symbols "on"
-		linkoptions { "/ignore:4099" }
+		linkoptions {"/ignore:4099"}
 
 	filter "configurations:Release"
 		defines "VU_RELEASE"

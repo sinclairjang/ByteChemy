@@ -19,7 +19,7 @@
 
 #ifdef VU_BACKENDS_RENDERERS_DIRECTX_12
 
-#include "frameworks/framework_win32_diretx12/d3dx12.h"
+#include "frameworks/framework_win32_diretx12/utils/d3dx12.h"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
