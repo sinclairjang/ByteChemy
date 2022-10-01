@@ -13,8 +13,8 @@ project "Vu"
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "vu_pch.h"
-	pchsource("src/vu_pch.cpp")
+	pchheader "Vu_pch.h"
+	pchsource("src/Vu_pch.cpp")
 
 	files
 	{

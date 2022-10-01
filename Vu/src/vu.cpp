@@ -12,5 +12,7 @@
 
 // This will provide various backends support for the editor later on.
 #if defined(VU_BACKENDS_PLATFORMS_WIN32) && defined(VU_BACKENDS_RENDERERS_DIRECTX_12)
-#include "frameworks/framework_win32_diretx12/main.h"
+
+	#include "backends/frameworks/dx12_on_win32/main.h"
+
 #endif
