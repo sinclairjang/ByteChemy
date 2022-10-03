@@ -19,7 +19,7 @@
 
 #ifdef VU_BACKENDS_RENDERERS_DIRECTX_12
 	
-	#include "backends/renderers/directx12/d3dx12.h"
+	#include "backends/renderers/directx12/utils/d3dx12.h"
 	#include <d3d12.h>
 	#include <dxgi1_4.h>
 	#include <d3dcompiler.h>
@@ -51,10 +51,10 @@
 #include <set>
 #include <assert.h>
 
-#include "fbxsdk.h"
+#include <fbxsdk.h>
 
-#include "DirectXTex.h"
-#include "DirectXTex.inl"
+#include <DirectXTex.h>
+#include <DirectXTex.inl>
 
 #ifdef _DEBUG
 
@@ -75,6 +75,36 @@
 #endif
 
 #define VU_ASSERT(_EXPR)            assert(_EXPR) 
+
+struct VuVec2
+{
+	float x, y;
+	constexpr VuVec2() : x(0.0f), y(0.0f) {}
+	constexpr VuVec2(float _x, float _y) : x(_x), y(_y) {}
+	float operator[] (size_t idx) const { VU_ASSERT(idx <= 1); return (&x)[idx]; }
+	float& operator[] (size_t idx) { VU_ASSERT(idx <= 1); return (&x)[idx]; }
+
+#ifdef VU_VEC2_CLASS_EXTRA
+
+	VU_VEC2_CLASS_EXTRA
+
+#endif
+};
+
+struct VuVec3
+{
+	float x, y, z;
+	constexpr VuVec3() : x(0.0f), y(0.0f), z(0.0f) {}
+	constexpr VuVec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	float operator[] (size_t idx) const { VU_ASSERT(idx <= 2); return (&x)[idx]; }
+	float& operator[] (size_t idx) { VU_ASSERT(idx <= 2); return (&x)[idx]; }
+
+#ifdef VU_VEC3_CLASS_EXTRA
+
+	VU_VEC3_CLASS_EXTRA
+
+#endif
+};
 
 struct VuVec4
 {

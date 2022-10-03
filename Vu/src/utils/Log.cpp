@@ -1,6 +1,7 @@
 #include "Vu_pch.h"
+
 #include "Log.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include "vendor/spdlog/include/spdlog/sinks/stdout_color_sinks.h"
 
 std::shared_ptr<spdlog::logger> Log::_logger;
 

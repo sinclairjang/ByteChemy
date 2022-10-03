@@ -11,7 +11,7 @@ workspace "Vu"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "dependencies"
-	include "vendor/imgui"
+	include "Vu/vendor/imgui"
 group ""
 
 include "Vu"

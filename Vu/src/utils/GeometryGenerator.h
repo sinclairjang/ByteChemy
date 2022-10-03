@@ -3,7 +3,7 @@
 class GeometryGenerator
 {
 public:
-	struct Vertex;
+	struct Vertex; 
 	struct MeshData;
 
 	MeshData CreateCube();
@@ -28,6 +28,6 @@ public:
 
 	MeshData CreateGeoSphere(float radius, UINT32 numSubdivisions);
 
-	MeshData CreateFBXMeshFromFile(const std::wstring& path);
+	MeshData CreateFBXGeometryFromFile(const std::wstring& path);
 };
 

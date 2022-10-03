@@ -6,8 +6,8 @@ project "Vu"
 	
 	libdirs 
 	{
-		"../vendor/fbx/lib",
-		"../vendor/directxtex/lib",
+		"vendor/fbx/lib",
+		"vendor/directxtex/lib",
 	}
 
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -23,19 +23,20 @@ project "Vu"
 		"assets/shaders/**.glsl",
 		"assets/textures/**.png",
 
-		"./**.h",
-		"./**.cpp",
+		"./src/**.h",
+		"./src/**.cpp",
 	}
 
 	includedirs
 	{
 		".",
 		"./src",
-		"../vendor/imgui",
-		"../vendor/entt/include",
-		"../vendor/fbx/include",
-		"../vendor/directxtex/include",
-		"../vendor/spdlog/include"
+		"./vendor/imgui/",
+		"./vendor/directxtex/include",
+		"./vendor/entt/include",
+		"./vendor/fbx/include",
+		"./vendor/spdlog/include"
+
 	}
 
 	links

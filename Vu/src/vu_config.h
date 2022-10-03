@@ -24,6 +24,14 @@
 // This will be inlined as part of VuVecN class declarations.
 #include <DirectXMath.h>						// GLM
 
+#define VU_VEC2_CLASS_EXTRA																\
+	constexpr VuVec2(const DirectX::XMFLOAT2& f) : x(f.x), y(f.y) {}					\
+	operator DirectX::XMFLOAT2() const { return DirectX::XMFLOAT2(x, y); }
+
+#define VU_VEC3_CLASS_EXTRA																\
+	constexpr VuVec3(const DirectX::XMFLOAT3& f) : x(f.x), y(f.y), z(f.z) {}			\
+	operator DirectX::XMFLOAT3() const { return DirectX::XMFLOAT3(x, y, z); }
+
 #define VU_VEC4_CLASS_EXTRA																\
 	constexpr VuVec4(const DirectX::XMFLOAT4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {}	\
 	operator DirectX::XMFLOAT4() const { return DirectX::XMFLOAT4(x, y, z, w); }
