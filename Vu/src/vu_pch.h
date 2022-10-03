@@ -20,6 +20,8 @@
 #ifdef VU_BACKENDS_RENDERERS_DIRECTX_12
 	
 	#include "backends/renderers/directx12/utils/d3dx12.h"
+	#include "backends/renderers/directx12/utils/d3dx12_helperbuf.h"
+
 	#include <d3d12.h>
 	#include <dxgi1_4.h>
 	#include <d3dcompiler.h>
@@ -119,4 +121,53 @@ struct VuVec4
 	VU_VEC4_CLASS_EXTRA
 
 #endif
+};
+
+struct Vertex
+{
+	Vertex() {}
+	Vertex(
+		const VuVec3& p,
+		const VuVec3& n,
+		const VuVec3& t,
+		const VuVec2& uv) :
+		Position(p),
+		Normal(n),
+		TangentU(t),
+		TexC(uv) {}
+	Vertex(
+		float px, float py, float pz,
+		float nx, float ny, float nz,
+		float tx, float ty, float tz,
+		float u, float v) :
+		Position(px, py, pz),
+		Normal(nx, ny, nz),
+		TangentU(tx, ty, tz),
+		TexC(u, v) {}
+
+	VuVec3 Position;
+	VuVec3 Normal;
+	VuVec3 TangentU;
+	VuVec2 TexC;
+};
+
+struct MeshData
+{
+	std::vector<Vertex> Vertices;
+	std::vector<UINT32> Indices32;
+
+	std::vector<UINT16>& GetIndices16()
+	{
+		if (m_Indices16.empty())
+		{
+			m_Indices16.resize(Indices32.size());
+			for (size_t i = 0; i < m_Indices16.size(); ++i)
+			{
+				m_Indices16[i] = static_cast<UINT16>(Indices32[i]);
+			}
+		}
+
+	}
+private:
+	std::vector<UINT16> m_Indices16;
 };

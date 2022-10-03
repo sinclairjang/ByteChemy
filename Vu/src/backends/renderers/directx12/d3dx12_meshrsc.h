@@ -1,10 +1,14 @@
 #pragma once
 
-#include "utils/GeometryGenerator.h"
-
 struct MeshResource
 {
-	struct SubmeshID;
+	struct MeshResource::SubmeshID
+	{
+		UINT IndexCount = 0;
+		UINT StartIndexLocation = 0;
+		UINT BaseVertexLocation = 0;
+	};
+
 	std::string tag;
 
 	Microsoft::WRL::ComPtr<ID3DBlob> VertexBufferCPU = nullptr;
@@ -31,7 +35,7 @@ struct MeshResource
 
 class MeshResourceManager
 {
-	static void Bind(MeshResource meshResource, GeometryGenerator::MeshData meshData);
+	static void Bind(MeshResource meshResource, MeshData meshData);
 
 private:
 	static std::unordered_map<std::string, std::unique_ptr<MeshResource>> m_meshResources;

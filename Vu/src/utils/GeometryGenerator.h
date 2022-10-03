@@ -3,31 +3,27 @@
 class GeometryGenerator
 {
 public:
-	struct Vertex; 
-	struct MeshData;
+	static MeshData CreateCube();
 
-	MeshData CreateCube();
+	static MeshData CreateGrid(float width, float depth, UINT32 m, UINT32 n);
 
-	MeshData CreateGrid(float width, float depth, UINT32 m, UINT32 n);
-
-	MeshData CreateCylinder(
+	static MeshData CreateCylinder(
 		float bottomRadius, float topRadius,
 		float height, UINT32 sliceCount, UINT32 stackCount);
 
-		void BuildCylinderTopCap(
-			float bottomRadius, float topRadius, float height,
-			UINT32 sliceCount, UINT32 stackCount, MeshData& meshData);
-		
-		void BuildCylinderBottomCap(
-			float bottomRadius, float topRadius, float height,
-			UINT32 sliceCount, UINT32 stackCount, MeshData& meshData);
-	
-	MeshData CreateSphere(
+	static void BuildCylinderTopCap(
+		float bottomRadius, float topRadius, float height,
+		UINT32 sliceCount, UINT32 stackCount, MeshData& meshData);
+
+	static void BuildCylinderBottomCap(
+		float bottomRadius, float topRadius, float height,
+		UINT32 sliceCount, UINT32 stackCount, MeshData& meshData);
+
+	static MeshData CreateSphere(
 		float bottomRadius, float topRadius,
 		float height, UINT32 sliceCount, UINT32 stackCount);
 
-	MeshData CreateGeoSphere(float radius, UINT32 numSubdivisions);
+	static MeshData CreateGeoSphere(float radius, UINT32 numSubdivisions);
 
-	MeshData CreateFBXGeometryFromFile(const std::wstring& path);
+	static MeshData CreateFBXGeometryFromFile(const std::wstring& path);
 };
-
