@@ -4,10 +4,11 @@
 
 class Scene
 {
-public:
-	Scene();
-	~Scene();
+	Entity CreateEntity();
+
+	void OnUpdate();
+
 private:
-	entt::registry _registry;
+	entt::registry m_Registry;
 };
 
