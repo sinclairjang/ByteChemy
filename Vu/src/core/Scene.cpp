@@ -1,11 +1,16 @@
 #include "vu_pch.h"
 #include "Scene.h"
 
-Scene::Scene()
+Entity Scene::CreateEntity(const std::string& name = std::string())
 {
-	entt::entity entity = _registry.create();
+	Entity entity = { m_Registry.create(), std::make_shared<Scene>(*this)};
+	entity.AddComponent<TransformComponent>();
+	auto& tag = entity.AddComponent<TagComponent>();
+	tag.Tag = name.empty() ? "Entity" : name;
+	
+	return entity;
 }
 
-Scene::~Scene()
+void Scene::OnUpdate()
 {
 }

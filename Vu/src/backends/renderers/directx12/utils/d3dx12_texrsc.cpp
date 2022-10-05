@@ -1,7 +1,7 @@
 #include "Vu_pch.h"
 #include "d3dx12_texrsc.h"
 
-#include "utils/d3dx12_error.h"
+#include "d3dx12_error.h"
 
 void RenderTexture::SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
 {

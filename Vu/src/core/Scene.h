@@ -1,10 +1,13 @@
 #pragma once
 
-#include "entt.hpp"
+#include "Entity.h"
 
 class Scene
 {
-	Entity CreateEntity();
+	friend Entity;
+
+public:
+	Entity CreateEntity(const std::string& name = std::string());
 
 	void OnUpdate();
 

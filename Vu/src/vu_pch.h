@@ -54,7 +54,7 @@
 #include <assert.h>
 
 #include <fbxsdk.h>
-
+#include <entt.hpp>
 #include <DirectXTex.h>
 #include <DirectXTex.inl>
 
@@ -227,3 +227,9 @@ struct MeshData
 private:
 	std::vector<UINT16> m_Indices16;
 };
+
+template <typename To, typename From>
+To container_cast(From&& from)
+{
+	return To(std::begin(from), std::end(from));
+}
