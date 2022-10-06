@@ -1,4 +1,4 @@
-project "Vu"
+project "Formula"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++latest"
@@ -13,8 +13,22 @@ project "Vu"
 	targetdir("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
-	pchheader "Vu_pch.h"
-	pchsource("src/Vu_pch.cpp")
+	pchheader "fm_pch.h"
+	pchsource("src/fm_pch.cpp")
+
+	disablewarnings 
+	{
+		"4099",
+		"6285",
+		"6387",
+		"26437",
+		"26451",
+		"26498",
+		"26812",
+		"26495",
+		"26800",
+
+	}
 
 	files
 	{
@@ -45,17 +59,17 @@ project "Vu"
 	}
 
 	filter "system:windows"
-		defines "VU_PLATFORM_WINDOWS"
+		defines "FM_PLATFORM_WINDOWS"
 		systemversion "latest"
 		buildoptions {"/permissive"}
 
 	filter "configurations:Debug"
-		defines "VU_DEBUG"
+		defines "FM_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		linkoptions {"/ignore:4099"}
 
 	filter "configurations:Release"
-		defines "VU_RELEASE"
+		defines "FM_RELEASE"
 		runtime "Release"
 		optimize "on"

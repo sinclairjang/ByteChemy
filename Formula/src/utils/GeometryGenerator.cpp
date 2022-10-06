@@ -1,12 +1,12 @@
-#include "Vu_pch.h"
+#include "fm_pch.h"
 #include "GeometryGenerator.h"
 
-// Unit testing of implicit casting between VuVecN and DirectXMath math types
+// Unit testing of implicit casting between FMVecN and DirectXMath math types
 /*
 void ImplicitCastingTest()
 {
 	DirectX::XMFLOAT4 xmf4(0.0f, 0.0f, 0.0f, 0.0f);
-	VuVec4 vv4(xmf4);
+	FMVec4 vv4(xmf4);
 	vv4[0] = 0.f;
 	xmf4 = vv4;
 }
@@ -38,9 +38,9 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		{
 			float x = -halfWidth + j * dx;
 
-			meshData.Vertices[(i * n) + j].Position = VuVec3(x, 0.0f, z);
-			meshData.Vertices[(i * n) + j].Normal	= VuVec3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[(i * n) + j].TangentU = VuVec3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[(i * n) + j].Position = FMVec3(x, 0.0f, z);
+			meshData.Vertices[(i * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[(i * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
 			
 			meshData.Vertices[(i * n) + j].TexC.x = j * du;
 			meshData.Vertices[(i * n) + j].TexC.y = i * dv;

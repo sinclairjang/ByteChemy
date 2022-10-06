@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Scene.h"
 #include "Component.h"
+
+class Scene;
 
 class Entity
 {
@@ -13,8 +14,8 @@ public:
 	template<typename T, typename... Args>
 	T& AddComponent(Args&&... args)
 	{
-		VU_ASSERT(!HasComponent<T>(), "Entity already has component!");
-		T& component = m_Scene.get()->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+		FM_ASSERT(!HasComponent<T>());
+		T& component = m_Scene.lock().get()->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
 
 		return component;
 	}
@@ -22,22 +23,22 @@ public:
 	template<typename T>
 	T& GetComponent()
 	{
-		VU_ASSERT(HasComponent<T>(), "Entity does not have component!");
+		FM_ASSERT(HasComponent<T>());
 		
-		return m_Scene.get()->m_Registry.get<T>(m_EntityHandle);
+		return m_Scene.lock().get()->m_Registry.get<T>(m_EntityHandle);
 	}
 
 	template<typename T>
 	bool HasComponent()
 	{
-		return m_Scene.get()->m_Registry.any_of<T>(m_EntityHandle);
+		return m_Scene.lock().get()->m_Registry.any_of<T>(m_EntityHandle);
 	}
 
 	template<typename T>
 	void RemoveComponent()
 	{
-		VU_ASSERT(HasComponent<T>(), "Entity does not have component!");
-		m_Scene.get()->m_Registry.remove<T>(m_EntityHandle);
+		FM_ASSERT(HasComponent<T>());
+		m_Scene.lock().get()->m_Registry.remove<T>(m_EntityHandle);
 	}
 
 	operator bool() const { return m_EntityHandle != entt::null; }

@@ -1,5 +1,8 @@
-#include "Vu_pch.h"
+#include "fm_pch.h"
 #include "ServiceLocator.h"
+#include "backends/renderers/directx12/DX12Renderer.h"
+
+Renderer* ServiceLocator::m_Renderer;
 
 Renderer* ServiceLocator::getRenderer() { return m_Renderer; }
 

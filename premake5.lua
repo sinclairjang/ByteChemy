@@ -1,6 +1,6 @@
-workspace "Vu"
+workspace "Element5"
 	architecture "x64"
-	startproject "Vu"
+	startproject "Formula"
 
 	configurations
 	{
@@ -11,8 +11,8 @@ workspace "Vu"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "dependencies"
-	include "Vu/vendor/imgui"
+	include "Formula/vendor/imgui"
 group ""
 
-include "Vu"
+include "Formula"
 include "Game"

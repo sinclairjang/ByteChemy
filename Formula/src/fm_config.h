@@ -1,43 +1,45 @@
-//---- Select your backends for Vu(game engine editor application)
+#pragma once
+
+//---- Select your backends for FM(game engine editor application)
 // Default Setting on Windows: 
 //	- Platform: Win32
 //	- Renderer: DirectX12
-#ifdef VU_PLATFORM_WINDOWS						
+#ifdef FM_PLATFORM_WINDOWS						
 
-	#define VU_BACKENDS_PLATFORMS_WIN32			// VU_BACKENDS_PLATFORMS_GLFW
-	#define VU_BACKENDS_RENDERERS_DIRECTX_12	// VU_BACKENDS_RENDERERS_DIRECTX_10 | VU_BACKENDS_RENDERERS_DIRECTX_11
+	#define FM_BACKENDS_PLATFORMS_WIN32			// FM_BACKENDS_PLATFORMS_GLFW
+	#define FM_BACKENDS_RENDERERS_DIRECTX_12	// FM_BACKENDS_RENDERERS_DIRECTX_10 | FM_BACKENDS_RENDERERS_DIRECTX_11
 
 // Default Setting on Mac: 
 //	- Platform: 
 //	- Renderer: 
-#elif VU_PLATFORM_MAC
+#elif FM_PLATFORM_MAC
 
 // Default Setting on Linux: 
 //	- Platform: 
 //	- Renderer:
-#elif VU_PLATFORM_LINUX
+#elif FM_PLATFORM_LINUX
 
 #endif
 
 
-//---- Define constructor and implicit cast operators to convert back-and-forth between your preferred math types and VuVecN
-// This will be inlined as part of VuVecN class declarations.
+//---- Define constructor and implicit cast operators to convert back-and-forth between your preferred math types and FMVecN
+// This will be inlined as part of FMVecN class declarations.
 #include <DirectXMath.h>						// GLM
 
-#define VU_VEC2_CLASS_EXTRA																\
-	constexpr VuVec2(const DirectX::XMFLOAT2& f) : x(f.x), y(f.y) {}					\
+#define FM_VEC2_CLASS_EXTRA																\
+	constexpr FMVec2(const DirectX::XMFLOAT2& f) : x(f.x), y(f.y) {}					\
 	operator DirectX::XMFLOAT2() const { return DirectX::XMFLOAT2(x, y); }
 
-#define VU_VEC3_CLASS_EXTRA																\
-	constexpr VuVec3(const DirectX::XMFLOAT3& f) : x(f.x), y(f.y), z(f.z) {}			\
+#define FM_VEC3_CLASS_EXTRA																\
+	constexpr FMVec3(const DirectX::XMFLOAT3& f) : x(f.x), y(f.y), z(f.z) {}			\
 	operator DirectX::XMFLOAT3() const { return DirectX::XMFLOAT3(x, y, z); }
 
-#define VU_VEC4_CLASS_EXTRA																\
-	constexpr VuVec4(const DirectX::XMFLOAT4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {}	\
+#define FM_VEC4_CLASS_EXTRA																\
+	constexpr FMVec4(const DirectX::XMFLOAT4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {}	\
 	operator DirectX::XMFLOAT4() const { return DirectX::XMFLOAT4(x, y, z, w); }
 
-#define VU_MAT4_CLASS_EXTRA																						\
-	constexpr VuMat4(const DirectX::XMFLOAT4X4& f)																\
+#define FM_MAT4_CLASS_EXTRA																						\
+	constexpr FMMat4(const DirectX::XMFLOAT4X4& f)																\
 	{																											\
 		m[0][0] = f.m[0][0]; m[0][1] = f.m[0][1]; m[0][2] = f.m[0][2]; m[0][3] = f.m[0][3];						\
 		m[1][0] = f.m[1][0]; m[1][1] = f.m[1][1]; m[1][2] = f.m[1][2]; m[1][3] = f.m[1][3];						\

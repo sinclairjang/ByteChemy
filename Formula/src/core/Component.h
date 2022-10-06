@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vu_pch.h"
+#include "fm_pch.h"
 
 struct TagComponent
 {
@@ -14,13 +14,14 @@ struct TagComponent
 
 struct TransformComponent
 {
-	VuMat4 Transform{ 1.0f };
+	
+	FMMat4 Transform{ 1.0f };
 
-	operator VuMat4& () { return Transform; }
+	operator FMMat4& () { return Transform; }
 
 	TransformComponent() = default;
 	TransformComponent(const TransformComponent&) = default;
-	TransformComponent(const VuMat4& transform)
+	TransformComponent(const FMMat4& transform)
 		: Transform(transform) {}
 };
 
