@@ -14,7 +14,6 @@ struct TagComponent
 
 struct TransformComponent
 {
-	
 	FMMat4 Transform{ 1.0f };
 
 	operator FMMat4& () { return Transform; }
@@ -27,5 +26,13 @@ struct TransformComponent
 
 struct MeshComponent
 {
+	MeshData meshData;
 
+	MeshComponent() = default;
+	MeshComponent(const MeshComponent& other) = default;
+	MeshComponent(MeshData&& other)
+	{
+		meshData.Vertices = std::move(other.Vertices);
+		meshData.Indices32 = std::move(other.Indices32);
+	}
 };

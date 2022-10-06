@@ -12,9 +12,12 @@ void ImplicitCastingTest()
 }
 */
 
-MeshData
+MeshData&
 GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 {
+	using VtxSize_t = std::vector<Vertex, std::allocator<Vertex>>::size_type;
+	using IdxSize_t = std::vector<UINT32, std::allocator<uint32_t>>::size_type;
+
 	MeshData meshData;
 
 	UINT32 vertexCount = m * n;
@@ -38,12 +41,12 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		{
 			float x = -halfWidth + j * dx;
 
-			meshData.Vertices[(i * n) + j].Position = FMVec3(x, 0.0f, z);
-			meshData.Vertices[(i * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[(i * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].Position = FMVec3(x, 0.0f, z);
+			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
 			
-			meshData.Vertices[(i * n) + j].TexC.x = j * du;
-			meshData.Vertices[(i * n) + j].TexC.y = i * dv;
+			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TexC.x = j * du;
+			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TexC.y = i * dv;
 		}
 	}
 
@@ -57,7 +60,7 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		for (UINT32 j = 0; j < n - 1; ++j)
 		{
 			meshData.Indices32[k]		= (i * n) + j;
-			meshData.Indices32[k + 1]	= (i * n) + j + 1;
+			meshData.Indices32[static_cast<IdxSize_t>(k) + 1]	= (i * n) + j + 1;
 			
 			k += 2;
 		}
@@ -69,7 +72,7 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		for (UINT32 j = 0; j < n; ++j)
 		{
 			meshData.Indices32[k] = (i * n) + j;
-			meshData.Indices32[k + 1] = ((i + 1) * n) + j;
+			meshData.Indices32[static_cast<IdxSize_t>(k) + 1] = ((i + 1) * n) + j;
 
 			k += 2;
 		}
