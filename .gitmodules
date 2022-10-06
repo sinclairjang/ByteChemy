@@ -1,6 +1,6 @@
 [submodule "Vu/vendor/imgui"]
-	path = Vu/vendor/imgui
+	path = Formula/vendor/imgui
 	url = https://github.com/sinclairjang/imgui.git
 [submodule "Vu/vendor/spdlog"]
-	path = Vu/vendor/spdlog
+	path = Formula/vendor/spdlog
 	url = https://github.com/gabime/spdlog

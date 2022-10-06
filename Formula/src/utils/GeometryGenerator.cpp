@@ -63,7 +63,8 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		}
 	}
 
-	for (UINT32 i = 0; i < m - 1; ++i)
+	for (UINT32
+		i = 0; i < m - 1; ++i)
 	{
 		for (UINT32 j = 0; j < n; ++j)
 		{

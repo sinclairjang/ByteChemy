@@ -23,3 +23,8 @@ struct TransformComponent
 	TransformComponent(const VuMat4& transform)
 		: Transform(transform) {}
 };
+
+struct MeshComponent
+{
+
+};
