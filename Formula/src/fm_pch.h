@@ -36,6 +36,7 @@
 	#pragma comment(lib, "dxgi")
 	#pragma comment(lib, "d3dcompiler")
 
+	using namespace Microsoft::WRL;
 #endif
 
 //-----------------------------------------------------------------------------

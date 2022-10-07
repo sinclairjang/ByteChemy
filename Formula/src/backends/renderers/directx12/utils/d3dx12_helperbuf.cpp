@@ -3,14 +3,14 @@
 #include "d3dx12_helperbuf.h"
 #include "d3dx12_error.h"
 
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
+ComPtr<ID3D12Resource> CreateDefaultBuffer(
     ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
     const void* initData,
     UINT64 byteSize,
-    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer)
+    ComPtr<ID3D12Resource>& uploadBuffer)
 {
-    Microsoft::WRL::ComPtr<ID3D12Resource> defaultBuffer;
+    ComPtr<ID3D12Resource> defaultBuffer;
 
     // Create the actual default buffer
     ThrowIfFailed(device->CreateCommittedResource(

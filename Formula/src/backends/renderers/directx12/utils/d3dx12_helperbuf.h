@@ -1,11 +1,11 @@
 #pragma once
 
-Microsoft::WRL::ComPtr<ID3D12Resource>
+ComPtr<ID3D12Resource>
 CreateDefaultBuffer(ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
     const void* initData,
     UINT64 byteSize,
-    Microsoft::WRL::ComPtr<ID3D12Resource>& uploadBuffer);
+    ComPtr<ID3D12Resource>& uploadBuffer);
 
 
 template<typename T>
@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_UploadBuffer;
+    ComPtr<ID3D12Resource> m_UploadBuffer;
     BYTE* m_MappedData = nullptr;
 
     UINT64 m_ElementByteSize = 0;

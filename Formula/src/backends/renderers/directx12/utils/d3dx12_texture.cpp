@@ -1,5 +1,5 @@
 #include "fm_pch.h"
-#include "d3dx12_texrsc.h"
+#include "d3dx12_texture.h"
 
 #include "d3dx12_error.h"
 
