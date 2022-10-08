@@ -1,11 +1,7 @@
-cbuffer ViewProjTransform : register(b0)
-{
-	float4x4 gViewProj;
-}
 
-cbuffer WorldTransform : register(b1)
+cbuffer Transform : register(b0)
 {
-	float4x4 gWorld;
+	float4x4 gWorldViewProj;
 }
 
 struct VertexIn
@@ -24,10 +20,8 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
-	float4x4 wvp = mul(gWorld, gViewProj);
-
 	VertexOut vout;
-	vout.Pos = mul(float4(vin.Pos, 1.0f), wvp);
+	vout.Pos = mul(float4(vin.Pos, 1.0f), gWorldViewProj);
 	vout.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	return vout;

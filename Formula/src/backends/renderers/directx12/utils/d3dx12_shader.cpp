@@ -1,16 +1,16 @@
 #include "fm_pch.h"
 #include "d3dx12_shader.h"
 
-Shader::Shader(ID3D12Device* device, const std::wstring& path, ShaderSpec spec)
+Shader::Shader(ComPtr<ID3D12Device> device, const std::wstring& path, ShaderSpec shaderSpec)
 {
-	CreateGraphicsShader(device, path, spec);
+	CreateGraphicsShader(path, shaderSpec);
 }
 
 Shader::~Shader()
 {
 }
 
-void Shader::CreateGraphicsShader(ID3D12Device* device, const std::wstring& path, ShaderSpec spec)
+void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec spec)
 {
 	m_ShaderSpec = spec;
 

@@ -5,7 +5,7 @@ class GeometryGenerator
 public:
 	static MeshData CreateCube();
 
-	static MeshData CreateGrid(float width, float depth, UINT32 m, UINT32 n);
+	static MeshData& CreateGrid(float width, float depth, UINT32 m, UINT32 n);
 
 	static MeshData CreateCylinder(
 		float bottomRadius, float topRadius,

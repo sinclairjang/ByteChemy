@@ -58,14 +58,15 @@ struct ShaderSpec
 class Shader
 {
 public:
-	Shader(ID3D12Device* device, const std::wstring& path, ShaderSpec spec = ShaderSpec());
+	Shader(ComPtr<ID3D12Device> device, const std::wstring& path, ShaderSpec shaderSpec = ShaderSpec());
 	~Shader();
 
 	Shader(const Shader& other) = delete;
 	Shader& operator=(const Shader& other) = delete;
 
-	void CreateGraphicsShader(ID3D12Device* device, const std::wstring& path, ShaderSpec spec = ShaderSpec());
+	void CreateGraphicsShader(const std::wstring& path, ShaderSpec spec = ShaderSpec());
 	
+	void Modify();
 private:
 	void CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version, 
 		ComPtr<ID3DBlob>& blob, D3D12_SHADER_BYTECODE& shaderByteCode);
@@ -76,6 +77,8 @@ private:
 	void CreatePixelShader(const std::wstring& path, const std::string& name, const std::string& version);
 
 private:
+	ComPtr<ID3D12Device> m_Device;
+	
 	ShaderSpec m_ShaderSpec;
 	ComPtr<ID3D12PipelineState> m_PipelineState;
 
