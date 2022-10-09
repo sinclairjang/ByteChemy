@@ -1,5 +1,5 @@
 #include "fm_pch.h"
-#include "d3dx12_shader.h"
+#include "d3dx12_shadergen.h"
 
 #include "d3dx12_error.h"
 #include "d3dx12_rootsig.h"
@@ -149,6 +149,58 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 	}
 
 	ThrowIfFailed(m_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(m_PipelineState.GetAddressOf())));
+}
+
+void Shader::CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version,
+	ComPtr<ID3DBlob>& blob, D3D12_SHADER_BYTECODE& shaderByteCode)
+{
+	UINT compileFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	HRESULT hr = S_OK;
+
+	ComPtr<ID3DBlob> byteCode = nullptr;
+	ComPtr<ID3DBlob> errors;
+	hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		name.c_str(), version.c_str(), compileFlags, 0,
+		blob.GetAddressOf(), m_ErrorBlob.GetAddressOf());
+
+	// Output errros to debug window
+	if (errors != nullptr)
+	{
+		OutputDebugStringA((char*)errors->GetBufferPointer());
+	}
+
+	ThrowIfFailed(hr);
+
+	shaderByteCode = { blob->GetBufferPointer(), blob->GetBufferSize() };
+}
+
+void Shader::CreateVertexShader(const std::wstring& path, const std::string& name, const std::string& version)
+{
+	CreateShaderFromFile(path, name, version, m_VSBlob, m_GraphicsPipelineStateDesc.VS);
+}
+
+void Shader::CreateHullShader(const std::wstring& path, const std::string& name, const std::string& version)
+{
+	CreateShaderFromFile(path, name, version, m_HSBlob, m_GraphicsPipelineStateDesc.HS);
+}
+
+void Shader::CreateDomainShader(const std::wstring& path, const std::string& name, const std::string& version)
+{
+	CreateShaderFromFile(path, name, version, m_DSBlob, m_GraphicsPipelineStateDesc.DS);
+}
+
+void Shader::CreateGeometryShader(const std::wstring& path, const std::string& name, const std::string& version)
+{
+	CreateShaderFromFile(path, name, version, m_GSBlob, m_GraphicsPipelineStateDesc.GS);
+}
+
+void Shader::CreatePixelShader(const std::wstring& path, const std::string& name, const std::string& version)
+{
+	CreateShaderFromFile(path, name, version, m_PSBlob, m_GraphicsPipelineStateDesc.PS);
 }
 
 D3D12_PRIMITIVE_TOPOLOGY_TYPE Shader::GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology)

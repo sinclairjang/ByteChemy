@@ -1,5 +1,5 @@
 #include "fm_pch.h"
-#include "d3dx12_texture.h"
+#include "d3dx12_scenebuf.h"
 
 #include "d3dx12_error.h"
 
@@ -142,3 +142,4 @@ void RenderTexture::EndScene(ID3D12GraphicsCommandList* commandList)
 {
     TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
+

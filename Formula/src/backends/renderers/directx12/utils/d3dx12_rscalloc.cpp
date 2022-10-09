@@ -1,6 +1,6 @@
 #include "fm_pch.h"
 
-#include "d3dx12_helperbuf.h"
+#include "d3dx12_rscalloc.h"
 #include "d3dx12_error.h"
 
 ComPtr<ID3D12Resource> CreateDefaultBuffer(

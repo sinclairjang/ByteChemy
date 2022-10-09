@@ -30,7 +30,6 @@
 	#include <DirectXPackedVector.h>
 	#include <DirectXColors.h>
 	#include <wrl.h>
-	#include "backends/renderers/directx12/utils/d3dx12_helperbuf.h"
 
 	#pragma comment(lib, "d3d12")
 	#pragma comment(lib, "dxgi")

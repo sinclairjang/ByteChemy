@@ -63,3 +63,4 @@ private:
     UINT64 m_ElementByteSize = 0;
     bool m_IsConstantBuffer = false;
 };
+
