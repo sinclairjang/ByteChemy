@@ -81,6 +81,8 @@
 
 #define FM_ASSERT(_EXPR)            assert(_EXPR) 
 
+#define FM_ASSERTM(exp, msg) assert(((void)msg, exp))
+
 struct FMVec2
 {
 	float x, y;

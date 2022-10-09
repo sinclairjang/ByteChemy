@@ -1,21 +1,48 @@
 #include "fm_pch.h"
 #include "d3dx12_rootsig.h"
 
-RootSignature::RootSignature(ComPtr<ID3D12Device> device, std::vector<DescLayout> rootParams)
-{
-	// Build root parameteres
-	std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameter;
-	slotRootParameter.resize(rootParams.size());
+#include "d3dx12_error.h"
 
-	for (UINT32 i = 0; i < slotRootParameter.size(); ++i)
-	{
-		SetRootParameter(slotRootParameter[i], rootParams[i]);
-	}
-	
-	// Create root signature
-	CreateGraphicsRootSignature(std::move(slotRootParameter));
+RootSignature::RootSignature(ComPtr<ID3D12Device> device)
+	: m_Device(device)
+{
 }
 
+void RootSignature::CreateGraphicsRootSignature(std::vector<DescLayout> rootParams)
+{
+	// Build root parameteres
+	std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameters;
+	slotRootParameters.resize(rootParams.size());
+
+	for (UINT32 i = 0; i < slotRootParameters.size(); ++i)
+	{
+		SetRootParameter(slotRootParameters[i], rootParams[i]);
+	}
+	
+	auto staticSamplers = GetStaticSamplers();
+
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameters.data(),
+		(UINT)staticSamplers.size(), staticSamplers.data(),
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+	ComPtr<ID3DBlob> serializedRootSig = nullptr;
+	ComPtr<ID3DBlob> errorBlob = nullptr;
+	HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+		serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
+
+	if (errorBlob != nullptr)
+	{
+		::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+	}
+
+	ThrowIfFailed(hr);
+
+	ThrowIfFailed(m_Device->CreateRootSignature(
+		0,
+		serializedRootSig->GetBufferPointer(),
+		serializedRootSig->GetBufferSize(),
+		IID_PPV_ARGS(m_GraphicsRootSignature.GetAddressOf())));
+}
 
 void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const DescLayout& rootParam)
 {
@@ -96,14 +123,9 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 
 	if (rootParam.descLayoutType == DescLayoutType::CONSTANT)
 	{
-		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;
+		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;		// == 1
 
 		slotRootParameter.InitAsConstants(1, m_CBVOffset);
 		m_CBVOffset += numOfDescs;
 	}
-}
-
-void RootSignature::CreateGraphicsRootSignature(const std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameters)
-{
-
 }

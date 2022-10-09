@@ -51,22 +51,18 @@ struct ShaderSpec
 	RASTERIZER_TYPE rasterizerType = RASTERIZER_TYPE::CULL_BACK;
 	DEPTH_STENCIL_COMPARISON_FUNC_TYPE dsCompFuncType = DEPTH_STENCIL_COMPARISON_FUNC_TYPE::LESS;
 	BLEND_TYPE blendType = BLEND_TYPE::DEFAULT;
-	D3D_PRIMITIVE_TOPOLOGY primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	D3D_PRIMITIVE_TOPOLOGY primTopologyType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	MainFuncName mainFuncName = MainFuncName();
 };
 
 class Shader
 {
 public:
-	Shader(ComPtr<ID3D12Device> device, const std::wstring& path, ShaderSpec shaderSpec = ShaderSpec());
+	Shader(ComPtr<ID3D12Device> device, std::shared_ptr<RootSignature> rootSig);
 	~Shader();
-
-	Shader(const Shader& other) = delete;
-	Shader& operator=(const Shader& other) = delete;
 
 	void CreateGraphicsShader(const std::wstring& path, ShaderSpec spec = ShaderSpec());
 	
-	void Modify();
 private:
 	void CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version, 
 		ComPtr<ID3DBlob>& blob, D3D12_SHADER_BYTECODE& shaderByteCode);
@@ -76,9 +72,12 @@ private:
 	void CreateGeometryShader(const std::wstring& path, const std::string& name, const std::string& version);
 	void CreatePixelShader(const std::wstring& path, const std::string& name, const std::string& version);
 
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology);
+
 private:
 	ComPtr<ID3D12Device> m_Device;
-	
+	std::shared_ptr<RootSignature> m_GraphicsRootSignature;
+
 	ShaderSpec m_ShaderSpec;
 	ComPtr<ID3D12PipelineState> m_PipelineState;
 

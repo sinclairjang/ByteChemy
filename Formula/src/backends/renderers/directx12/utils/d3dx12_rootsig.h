@@ -32,15 +32,18 @@ struct DescLayout
 class RootSignature
 {
 public:
-	RootSignature(ComPtr<ID3D12Device> device, std::vector<DescLayout> rootParams);
+	RootSignature(ComPtr<ID3D12Device> device);
+
+	inline ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() { return m_GraphicsRootSignature; }		
 
 private:
+	void CreateGraphicsRootSignature(std::vector<DescLayout> rootParams);
 	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const DescLayout& rootParam);
-	void CreateGraphicsRootSignature(const std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameters);
 
 private:
 	ComPtr<ID3D12Device> m_Device;
-	
+	ComPtr<ID3D12RootSignature> m_GraphicsRootSignature;
+
 	UINT32 m_CBVOffset = 0;
 	UINT32 m_SRVOffset = 0;
 	UINT32 m_UAVOffset = 0;
