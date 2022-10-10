@@ -1,7 +1,11 @@
 #pragma once
 
+//-----------------------------------------------------------------------------
+// Resource Acquisition Is Initialization
+//-----------------------------------------------------------------------------
+
 ComPtr<ID3D12Resource>
-CreateDefaultBuffer(ID3D12Device* device,
+DefaultBufAlloc(ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
     const void* initData,
     UINT64 byteSize,
@@ -9,10 +13,10 @@ CreateDefaultBuffer(ID3D12Device* device,
 
 
 template<typename T>
-class UploadBuffer
+class UploadBufAlloc
 {
 public:
-    UploadBuffer(ID3D12Device* device, UINT elementCount, bool isConstantBuffer)
+    UploadBufAlloc(ID3D12Device* device, UINT elementCount, bool isConstantBuffer)
         : m_IsConstantBuffer(isConstantBuffer)
     {
         m_ElementByteSize = sizeof(T);
@@ -33,10 +37,10 @@ public:
         ThrowIfFailed(m_UploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_MappedData)));
     }
 
-    UploadBuffer(const UploadBuffer& rhs) = delete;
-    UploadBuffer* operator=(const UploadBuffer& rhs) = delete;
+    UploadBufAlloc(const UploadBuffer& rhs) = delete;
+    UploadBufAlloc* operator=(const UploadBuffer& rhs) = delete;
 
-    ~UploadBuffer()
+    ~UploadBufAlloc()
     {
         if (m_UploadBuffer != nullptr)
         {
@@ -57,10 +61,28 @@ public:
     }
 
 private:
-    ComPtr<ID3D12Resource> m_UploadBuffer;
-    BYTE* m_MappedData = nullptr;
+    ComPtr<ID3D12Resource>      m_UploadBuffer;
+    BYTE*                       m_MappedData = nullptr;
 
-    UINT64 m_ElementByteSize = 0;
-    bool m_IsConstantBuffer = false;
+    UINT64                      m_ElementByteSize = 0;
+    bool                        m_IsConstantBuffer = false;
 };
 
+class ImageTexAlloc
+{
+public:
+    ImageTexAlloc(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+    ~ImageTexAlloc();
+
+    void CreateImageTexFromFile(const std::wstring& path);
+
+private:
+    ComPtr<ID3D12Device>                m_Device;
+    ComPtr<ID3D12GraphicsCommandList>   m_CmdList;
+
+    DirectX::ScratchImage           m_Image;
+    D3D12_RESOURCE_DESC             m_RSCDesc;
+    ComPtr<ID3D12Resource>          m_Tex2D;
+    ComPtr<ID3D12DescriptorHeap>    m_SRVHeap;
+    D3D12_CPU_DESCRIPTOR_HANDLE     m_SRVCpuHandle;
+};

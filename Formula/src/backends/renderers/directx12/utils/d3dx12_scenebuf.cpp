@@ -1,7 +1,20 @@
+
 #include "fm_pch.h"
 #include "d3dx12_scenebuf.h"
 
 #include "d3dx12_error.h"
+
+
+RenderTexture::RenderTexture(DXGI_FORMAT format) noexcept :
+    m_State(D3D12_RESOURCE_STATE_COMMON),
+    m_SrvDescriptor{},
+    m_RtvDescriptor{},
+    m_ClearColor{},
+    m_Format(format),
+    m_Width(0),
+    m_Height(0)
+{
+}
 
 void RenderTexture::SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
 {

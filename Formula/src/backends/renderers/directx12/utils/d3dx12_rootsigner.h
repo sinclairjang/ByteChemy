@@ -41,7 +41,7 @@ private:
 	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const DescLayout& rootParam);
 
 private:
-	ComPtr<ID3D12Device> m_Device;
+	ComPtr<ID3D12Device>		m_Device;
 	ComPtr<ID3D12RootSignature> m_GraphicsRootSignature;
 
 	UINT32 m_CBVOffset = 0;

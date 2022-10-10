@@ -2,15 +2,18 @@
 
 #include "d3dx12_rscalloc.h"
 #include "d3dx12_error.h"
+#include "d3dx12_sync.h"
 
-ComPtr<ID3D12Resource> CreateDefaultBuffer(
+ComPtr<ID3D12Resource> DefaultBufAlloc(
     ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList,
     const void* initData,
-    UINT64 byteSize,
-    ComPtr<ID3D12Resource>& uploadBuffer)
+    UINT64 byteSize)
 {
+    WaitSync waitSync;
+    ComPtr<ID3D12Resource> uploadBuffer;
     ComPtr<ID3D12Resource> defaultBuffer;
+    
+    auto cmdList = waitSync.Begin();
 
     // Create the actual default buffer
     ThrowIfFailed(device->CreateCommittedResource(
@@ -55,5 +58,45 @@ ComPtr<ID3D12Resource> CreateDefaultBuffer(
             D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_GENERIC_READ));
 
+    waitSync.Flush();
+    
+    // Dangling issue has been taken care of by WaitSync 
+    FM_ASSERT(cmdList == nullptr);
+
     return defaultBuffer;
+}
+
+ImageTexAlloc::ImageTexAlloc(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) :
+    m_Device(device), m_CmdList(cmdList)
+{
+}
+
+ImageTexAlloc::~ImageTexAlloc()
+{
+}
+
+void ImageTexAlloc::CreateImageTexFromFile(const std::wstring& path)
+{
+    namespace fs = std::filesystem;
+
+    std::wstring ext = fs::path(path).extension();
+
+
+    if (ext == L".dds" || ext == L".DDS")
+        DirectX::LoadFromDDSFile(path.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, m_Image);
+    else if (ext == L".tga" || ext == L".TGA")
+        DirectX::LoadFromTGAFile(path.c_str(), nullptr, m_Image);
+    else  // bmp, png, giff, tiff, jpeg
+        DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, m_Image);
+
+    HRESULT hr = DirectX::CreateTexture(m_Device.Get(), m_Image.GetMetadata(), m_Tex2D.GetAddressOf());
+
+    if (FAILED(hr))
+        FM_ASSERT(nullptr);
+
+    m_RSCDesc = m_Tex2D->GetDesc();
+
+    std::vector<D3D12_SUBRESOURCE_DATA> subResources;
+
+    hr = DirectX::PrepareUpload()
 }

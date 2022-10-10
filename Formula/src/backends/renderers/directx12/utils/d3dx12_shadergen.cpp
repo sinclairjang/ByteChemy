@@ -2,9 +2,9 @@
 #include "d3dx12_shadergen.h"
 
 #include "d3dx12_error.h"
-#include "d3dx12_rootsig.h"
+#include "d3dx12_rootsigner.h"
 
-Shader::Shader(ComPtr<ID3D12Device> device, std::shared_ptr<RootSignature> rootSig)
+Shader::Shader(ID3D12Device* device, RootSignature& rootSig)
 	: m_Device(device), m_GraphicsRootSignature(rootSig)
 {
 }
@@ -44,7 +44,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 	};
 
 	m_GraphicsPipelineStateDesc.InputLayout = { elemDesc, _countof(elemDesc) };
-	m_GraphicsPipelineStateDesc.pRootSignature = m_GraphicsRootSignature->GetGraphicsRootSignature().Get();
+	m_GraphicsPipelineStateDesc.pRootSignature = m_GraphicsRootSignature.GetGraphicsRootSignature().Get();
 	m_GraphicsPipelineStateDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
@@ -62,13 +62,13 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 		m_GraphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		break;
 	case SHADER_TYPE::DEFERRED:
-		FM_ASSERTM(0, "Not supported yet!");
 	case SHADER_TYPE::LIGHTING:
-		FM_ASSERTM(0, "Not supported yet!");
 	case SHADER_TYPE::PARTICLE:
-		FM_ASSERTM(0, "Not supported yet!");
 	case SHADER_TYPE::SHADOW:
 		FM_ASSERTM(0, "Not supported yet!");
+		break;
+	default:
+		break;
 	}
 
 	switch (m_ShaderSpec.rasterizerType)

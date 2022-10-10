@@ -54,6 +54,7 @@
 #include <map>
 #include <set>
 #include <assert.h>
+#include <filesystem>
 
 #include <fbxsdk.h>
 #include <entt.hpp>

@@ -55,10 +55,12 @@ struct ShaderSpec
 	MainFuncName mainFuncName = MainFuncName();
 };
 
+class RootSignature;
+
 class Shader
 {
 public:
-	Shader(ComPtr<ID3D12Device> device, std::shared_ptr<RootSignature> rootSig);
+	Shader(ID3D12Device* device, RootSignature& rootSig);
 	~Shader();
 
 	void CreateGraphicsShader(const std::wstring& path, ShaderSpec spec = ShaderSpec());
@@ -76,7 +78,7 @@ private:
 
 private:
 	ComPtr<ID3D12Device> m_Device;
-	std::shared_ptr<RootSignature> m_GraphicsRootSignature;
+	RootSignature m_GraphicsRootSignature;
 
 	ShaderSpec m_ShaderSpec;
 	ComPtr<ID3D12PipelineState> m_PipelineState;
