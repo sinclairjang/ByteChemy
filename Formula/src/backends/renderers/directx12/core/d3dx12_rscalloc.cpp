@@ -9,10 +9,10 @@ ComPtr<ID3D12Resource> DefaultBufAlloc(
     const void* initData,
     UINT64 byteSize)
 {
-    WaitSync waitSync;
     ComPtr<ID3D12Resource> uploadBuffer;
     ComPtr<ID3D12Resource> defaultBuffer;
     
+    WaitSync waitSync(device);
     auto cmdList = waitSync.Begin();
 
     // Create the actual default buffer
@@ -60,14 +60,12 @@ ComPtr<ID3D12Resource> DefaultBufAlloc(
 
     waitSync.Flush();
     
-    // Dangling issue has been taken care of by WaitSync 
-    FM_ASSERT(cmdList == nullptr);
-
+    // !Safety: Upon return, WaitSync will release the COM object of ID3D12CommandAlloc type that cmdList hold reference to. 
     return defaultBuffer;
 }
 
 ImageTexAlloc::ImageTexAlloc(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) :
-    m_Device(device), m_CmdList(cmdList)
+    m_Device(device)
 {
 }
 
@@ -89,14 +87,72 @@ void ImageTexAlloc::CreateImageTexFromFile(const std::wstring& path)
     else  // bmp, png, giff, tiff, jpeg
         DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, m_Image);
 
-    HRESULT hr = DirectX::CreateTexture(m_Device.Get(), m_Image.GetMetadata(), m_Tex2D.GetAddressOf());
-
-    if (FAILED(hr))
-        FM_ASSERT(nullptr);
+    ThrowIfFailed(DirectX::CreateTexture(
+        m_Device.Get(),
+        m_Image.GetMetadata(),
+        m_Tex2D.GetAddressOf()));
 
     m_RSCDesc = m_Tex2D->GetDesc();
 
     std::vector<D3D12_SUBRESOURCE_DATA> subResources;
 
-    hr = DirectX::PrepareUpload()
+    ThrowIfFailed(DirectX::PrepareUpload(
+        m_Device.Get(),
+        m_Image.GetImages(),
+        m_Image.GetImageCount(),
+        m_Image.GetMetadata(),
+        subResources));
+
+    const UINT64 bufSize = ::GetRequiredIntermediateSize(
+        m_Tex2D.Get(),
+        0,
+        static_cast<UINT>(subResources.size()));
+
+    D3D12_HEAP_PROPERTIES heapProperty = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    D3D12_RESOURCE_DESC rscDesc = CD3DX12_RESOURCE_DESC::Buffer(bufSize);
+
+    ComPtr<ID3D12Resource> texUploadBuf;
+    
+    WaitSync waitSync(m_Device.Get());
+    auto cmdList = waitSync.Begin();
+
+    ThrowIfFailed(m_Device->CreateCommittedResource(
+        &heapProperty,
+        D3D12_HEAP_FLAG_NONE,
+        &rscDesc,
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(texUploadBuf.GetAddressOf())));
+
+    ::UpdateSubresources(
+        cmdList,
+        m_Tex2D.Get(),
+        texUploadBuf.Get(),
+        0, 0,
+        static_cast<UINT>(subResources.size()),
+        subResources.data());
+
+    waitSync.Flush();
+
+    D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+    srvHeapDesc.NumDescriptors = 1;
+    srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    ThrowIfFailed(m_Device->CreateDescriptorHeap(
+        &srvHeapDesc,
+        IID_PPV_ARGS(m_SRVHeap.GetAddressOf())
+    ));
+
+    m_SRVCpuHandle = m_SRVHeap->GetCPUDescriptorHandleForHeapStart();
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = m_Image.GetMetadata().format;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Texture2D.MipLevels = 1;
+    m_Device->CreateShaderResourceView(
+        m_Tex2D.Get(),
+        &srvDesc,
+        m_SRVCpuHandle
+    );
 }

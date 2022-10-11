@@ -21,7 +21,7 @@
 
 #ifdef FM_BACKENDS_RENDERERS_DIRECTX_12
 	
-	#include "backends/renderers/directx12/utils/d3dx12.h"
+	#include "backends/renderers/directx12/core/d3dx12.h"
 
 	#include <d3d12.h>
 	#include <dxgi1_4.h>

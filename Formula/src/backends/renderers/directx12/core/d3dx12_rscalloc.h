@@ -74,11 +74,13 @@ public:
     ImageTexAlloc(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
     ~ImageTexAlloc();
 
+    ImageTexAlloc(const ImageTexAlloc& rhs) = delete;
+    ImageTexAlloc* operator=(const ImageTexAlloc& rhs) = delete;
+
     void CreateImageTexFromFile(const std::wstring& path);
 
 private:
     ComPtr<ID3D12Device>                m_Device;
-    ComPtr<ID3D12GraphicsCommandList>   m_CmdList;
 
     DirectX::ScratchImage           m_Image;
     D3D12_RESOURCE_DESC             m_RSCDesc;
