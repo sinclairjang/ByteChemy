@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fm_pch.h"
+#include "Scene.h"
 
 struct TagComponent
 {
@@ -20,19 +21,43 @@ struct TransformComponent
 
 	TransformComponent() = default;
 	TransformComponent(const TransformComponent&) = default;
-	TransformComponent(const FMMat4& transform)
-		: Transform(transform) {}
+	TransformComponent(const FMMat4& transform) : 
+		Transform(transform) {}
 };
 
-struct MeshComponent
+struct MeshFilterComponent
 {
-	MeshData meshData;
+	MeshData Mesh;
+	std::string ModelName; // TODO: to be replaced and handled by GUID system
 
-	MeshComponent() = default;
-	MeshComponent(const MeshComponent& other) = default;
-	MeshComponent(MeshData&& other)
+	MeshFilterComponent() = delete;
+	MeshFilterComponent(const MeshFilterComponent& other) = delete;
+	MeshFilterComponent(MeshData&& other, std::string name = "Untitled Model") :
+		ModelName(name)
+	
 	{
-		meshData.Vertices = std::move(other.Vertices);
-		meshData.Indices32 = std::move(other.Indices32);
+		Mesh.Vertices = std::move(other.Vertices);
+		Mesh.Indices32 = std::move(other.Indices32);
 	}
+};
+
+struct MeshRendererComponent
+{
+
+};
+
+struct ShaderComponent
+{
+
+};
+
+struct UnlitMatericalComponent
+{
+	FMVec4 MainColor;
+
+	UnlitMatericalComponent() = default;
+	UnlitMatericalComponent(const UnlitMatericalComponent&) = default;
+	UnlitMatericalComponent(const FMVec4 & color)
+		: MainColor(color) {}
+
 };

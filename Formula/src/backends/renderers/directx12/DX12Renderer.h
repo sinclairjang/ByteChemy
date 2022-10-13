@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/Renderer.h"
+#include "renderer/Renderer.h"
 
 class DX12Renderer : Renderer
 {
 	virtual ~DX12Renderer() override;
-	virtual void AllocateResource() override;
+	virtual void AllocateGPUResource() override;
 };
 

@@ -11,6 +11,11 @@ Entity Scene::CreateEntity(const std::string& name)
 	return entity;
 }
 
+void Scene::OnCreate()
+{
+	m_Registry.on_construct<MeshFilterComponent>().connect<[](){}>();
+}
+
 void Scene::OnUpdate()
 {
 }

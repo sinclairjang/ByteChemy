@@ -4,19 +4,19 @@
 // Resource Acquisition Is Initialization
 //-----------------------------------------------------------------------------
 
+
 ComPtr<ID3D12Resource>
-DefaultBufAlloc(ID3D12Device* device,
+DefaultBufAllocator(ID3D12Device* device,
     ID3D12GraphicsCommandList* cmdList,
     const void* initData,
     UINT64 byteSize,
     ComPtr<ID3D12Resource>& uploadBuffer);
 
-
 template<typename T>
-class UploadBufAlloc
+class UploadBufAllocator
 {
 public:
-    UploadBufAlloc(ID3D12Device* device, UINT elementCount, bool isConstantBuffer)
+    UploadBufAllocator(ID3D12Device* device, UINT elementCount, bool isConstantBuffer)
         : m_IsConstantBuffer(isConstantBuffer)
     {
         m_ElementByteSize = sizeof(T);
@@ -32,13 +32,13 @@ public:
             &CD3DX12_RESOURCE_DESC::Buffer(m_ElementByteSize * elementCount),
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(mm_UploadBuffer.GetAddressOf())));
+            IID_PPV_ARGS(m_UploadBuffer.GetAddressOf())));
 
         ThrowIfFailed(m_UploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_MappedData)));
     }
 
-    UploadBufAlloc(const UploadBuffer& rhs) = delete;
-    UploadBufAlloc* operator=(const UploadBuffer& rhs) = delete;
+    UploadBufAllocator(const UploadBuffer& rhs) = delete;
+    UploadBufAllocator* operator=(const UploadBuffer& rhs) = delete;
 
     ~UploadBufAlloc()
     {
@@ -68,16 +68,16 @@ private:
     bool                        m_IsConstantBuffer = false;
 };
 
-class ImageTexAlloc
+class ImageTextureAllocator
 {
 public:
-    ImageTexAlloc(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-    ~ImageTexAlloc();
+    ImageTextureAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+    ~ImageTextureAllocator();
 
-    ImageTexAlloc(const ImageTexAlloc& rhs) = delete;
-    ImageTexAlloc* operator=(const ImageTexAlloc& rhs) = delete;
+    ImageTextureAllocator(const ImageTextureAllocator& rhs) = delete;
+    ImageTextureAllocator* operator=(const ImageTextureAllocator& rhs) = delete;
 
-    void CreateImageTexFromFile(const std::wstring& path);
+    void CreateImageTextureFromFile(const std::wstring& path);
 
 private:
     ComPtr<ID3D12Device>                m_Device;

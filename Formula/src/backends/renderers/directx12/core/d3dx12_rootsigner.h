@@ -3,30 +3,54 @@
 std::array<CD3DX12_STATIC_SAMPLER_DESC, 6>
 GetStaticSamplers();
 
-enum class DescLayoutType : UINT8
+enum class LeafParametersLayout : UINT8
 {
 	TABLE,
 	DESCRIPTOR,
 	CONSTANT,
 };
 
-enum class DescType : UINT8
+enum class LeafParameterType : UINT8
 {
 	CBV,
 	SRV,
 	UAV,
+	BIT32,
 };
 
-struct DescLayoutSpec
+struct LeafParameterArray
 {
-	DescType descType;
-	UINT32 numOfDescs;
+	LeafParameterType Type;
+	UINT32 NumLeafParameters;
 };
 
-struct DescLayout
+// Naming Convention:
+//	(e.g.) RootSignature RS_TC2S1_DC1_DS1_K4
+//
+// This corresponds to the following data structure.
+//
+// Layout:  
+// { 
+//	 Layout Size : 4,
+//
+//		Type : Table
+//			CBV : 2 (b0)
+//			SRV : 1 (t0)
+// 
+//		Type : Descriptor
+//			CBV : 1 (b2)
+// 
+//		Type : Descriptor
+//			SRV : 1 (t1)
+// 
+//		Type : Constant
+//			32-BIT : 4 (b3)
+// }
+
+struct RootParmeter
 {
-	DescLayoutType descLayoutType;
-	std::vector<DescLayoutSpec> descLayoutSpec;
+	LeafParametersLayout Layout;
+	std::vector<LeafParameterArray> Arrangement;
 };
 
 class RootSignature

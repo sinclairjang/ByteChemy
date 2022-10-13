@@ -123,10 +123,10 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 
 	if (rootParam.descLayoutType == DescLayoutType::CONSTANT)
 	{
-		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;		// == 1
+		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;		
 
-		slotRootParameter.InitAsConstants(1, m_CBVOffset);
-		m_CBVOffset += numOfDescs;
+		slotRootParameter.InitAsConstants(numOfDescs, m_CBVOffset);
+		m_CBVOffset += 1;
 	}
 }
 

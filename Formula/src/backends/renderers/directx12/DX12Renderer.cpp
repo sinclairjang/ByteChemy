@@ -1,6 +1,11 @@
 #include "fm_pch.h"
 #include "DX12Renderer.h"
 
-void DX12Renderer::AllocateResource()
+DX12Renderer::~DX12Renderer()
 {
+}
+
+void DX12Renderer::AllocateGPUResource()
+{
+
 }

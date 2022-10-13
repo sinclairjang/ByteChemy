@@ -2,7 +2,9 @@
 class Renderer
 {
 public:
-	virtual ~Renderer();
-	virtual void AllocateResource();
+	virtual ~Renderer() = 0;
+	virtual void AllocateGPUResource() = 0;
+	virtual void CompileShaderProgram(const std::wstring path) = 0;
 };
+
 
