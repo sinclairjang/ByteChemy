@@ -1,11 +1,16 @@
 // Unlit Shader
 
-cbuffer Transform : register(b0)
+cbuffer WorldPos : register(b0)
 {
-	float4x4 gWorldViewProj;
+	float4x4 gWorld;
 }
 
-cbuffer Color : register(b1)
+cbuffer CameraView : register(b1)
+{
+	float4x4 gViewProj;
+}
+
+cbuffer Color : register(b2)
 {
 	float4 color;
 }
@@ -22,8 +27,10 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
+	wvp = mul(gWorld, gViewProj);
+
 	VertexOut vout;
-	vout.Pos = mul(float4(vin.Pos, 1.0f), gWorldViewProj);
+	vout.Pos = mul(float4(vin.Pos, 1.0f), wvp);
 	
 	return vout;
 }

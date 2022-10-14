@@ -56,7 +56,7 @@ public:
 		return !(*this == other);
 	}
 
-	const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
+	const std::wstring& GetName() { return GetComponent<TagComponent>().Tag; }
 
 private:
 	entt::entity m_EntityHandle{ entt::null };

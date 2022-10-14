@@ -233,8 +233,48 @@ private:
 	std::vector<UINT16> m_Indices16;
 };
 
+// Example of implicit casting between FMVecN and DirectXMath math types (or any other math library of your choice for that matter)
+//	void ImplicitMathTypeCastUsage()
+//	{
+//		// From DirectXMath to FMMath
+//		DirectX::XMFLOAT4 xm4(0.0f, 0.0f, 0.0f, 0.0f);
+//		FMVec4 fm4(xm4);
+//	
+//		// From FMMath to DirectXMath
+//		DirectX::XMFLOAT4 another_xm4(fm4);
+// 
+//		// Container Type Cast
+//		std::vector<DirectX::XMFLOAT4> xmv;
+//		std::vector<FMVec4> fmv = container_cast<std::vector<FMVec4>>(xmv);
+//
+//		// The other direction is analogous.
+//	}
 template <typename To, typename From>
 To container_cast(From&& from)
 {
 	return To(std::begin(from), std::end(from));
+}
+
+
+
+std::wstring s2ws(const std::string& s)
+{
+	UINT32 len;
+	UINT32 sLength = static_cast<UINT32>(s.length()) + 1;
+	len = ::MultiByteToWideChar(CP_ACP, 0, s.c_str(), sLength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	::MultiByteToWideChar(CP_ACP, 0, s.c_str(), sLength, buf, len);
+	std::wstring ret(buf);
+	delete[] buf;
+	return ret;
+}
+
+std::string ws2s(const std::wstring& s)
+{
+	UINT32 len;
+	UINT32 sLength = static_cast<UINT32>(s.length()) + 1;
+	len = ::WideCharToMultiByte(CP_ACP, 0, s.c_str(), sLength, 0, 0, 0, 0);
+	std::string r(len, '\0');
+	::WideCharToMultiByte(CP_ACP, 0, s.c_str(), sLength, &r[0], len, 0, 0);
+	return r;
 }

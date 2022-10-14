@@ -2,14 +2,15 @@
 
 #include "fm_pch.h"
 #include "Scene.h"
+#include "core/GeometryGenerator.h"
 
 struct TagComponent
 {
-	std::string Tag;
+	std::wstring Tag;
 
 	TagComponent() = default;
 	TagComponent(const TagComponent&) = default;
-	TagComponent(const std::string& tag)
+	TagComponent(const std::wstring& tag)
 		: Tag(tag) {}
 };
 
@@ -27,19 +28,30 @@ struct TransformComponent
 
 struct MeshFilterComponent
 {
-	MeshData Mesh;
-	std::string ModelName; // TODO: to be replaced and handled by GUID system
+	using VertexCount = UINT32;
+	using IndexCount = UINT32;
+	using MeshInfo = std::pair<VertexCount, IndexCount>;
 
+	std::wstring ModelName; // TODO: to be replaced and handled by GUID system
+	
+	MeshData Mesh;
+	MeshInfo meshInfo;
+	
 	MeshFilterComponent() = delete;
 	MeshFilterComponent(const MeshFilterComponent& other) = delete;
-	MeshFilterComponent(MeshData&& other, std::string name = "Untitled Model") :
+	MeshFilterComponent(MeshData&& other, std::wstring name = s2ws("Untitled Model")) :
 		ModelName(name)
-	
 	{
-		Mesh.Vertices = std::move(other.Vertices);
-		Mesh.Indices32 = std::move(other.Indices32);
+		Mesh.Vertices	 = std::move(other.Vertices);
+		Mesh.Indices32	 = std::move(other.Indices32);
+
+		meshInfo.first	 = Mesh.Vertices.size();
+		meshInfo.second	 = Mesh.Indices32.size();
 	}
 };
+
+// Usage
+//MeshFilterComponent meshFilter(std::move(GeometryGenerator::CreateGrid(10, 10, 100, 100)), "Grid" );
 
 struct MeshRendererComponent
 {

@@ -4,10 +4,8 @@
 #include "d3dx12_error.h"
 #include "d3dx12_sync.h"
 
-ComPtr<ID3D12Resource> DefaultBufferAllocator(
-    ID3D12Device* device,
-    const void* initData,
-    UINT64 byteSize)
+ComPtr<ID3D12Resource> 
+DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSize)
 {
     ComPtr<ID3D12Resource> uploadBuffer;
     ComPtr<ID3D12Resource> defaultBuffer;

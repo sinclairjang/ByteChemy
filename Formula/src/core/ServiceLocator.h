@@ -1,15 +1,18 @@
 #pragma once
 
-class Renderer;
+#include "renderer/Renderer.h"
 
+template <typename T>
 class ServiceLocator
 {
 public:
-	static Renderer* getRenderer();
+	inline static T* GetService() { return m_Service;  }
 
-	static void Provide(Renderer* renderer);
+	static void Provide(T* service)
+	{
+		m_Service = service;
+	}
 
 private:
-	static Renderer* m_Renderer;
+	static T* m_Service;
 };
-

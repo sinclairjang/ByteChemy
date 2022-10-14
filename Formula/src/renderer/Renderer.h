@@ -2,8 +2,8 @@
 class Renderer
 {
 public:
-	virtual ~Renderer() = 0;
-	virtual void AllocateGPUResource() = 0;
+	virtual ~Renderer() {}
+	virtual void AllocateGPUResource(const void* initData) = 0;
 	virtual void CompileShaderProgram(const std::wstring path) = 0;
 };
 

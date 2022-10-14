@@ -2,9 +2,15 @@
 
 #include "renderer/Renderer.h"
 
-class DX12Renderer : Renderer
+// Import
+ID3D12Device* g_pd3dDevice;
+
+class DirectX12Renderer : public Renderer
 {
-	virtual ~DX12Renderer() override;
-	virtual void AllocateGPUResource() override;
+public:	
+	virtual void AllocateGPUResource(const void* initData = nullptr) override;
+	virtual void CompileShaderProgram(const std::wstring path) override;
 };
 
+// Export
+DirectX12Renderer DX12Renderer;

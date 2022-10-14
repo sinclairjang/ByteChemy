@@ -1,17 +1,6 @@
 #include "fm_pch.h"
 #include "GeometryGenerator.h"
 
-// Unit testing of implicit casting between FMVecN and DirectXMath math types
-/*
-void ImplicitCastingTest()
-{
-	DirectX::XMFLOAT4 xmf4(0.0f, 0.0f, 0.0f, 0.0f);
-	FMVec4 vv4(xmf4);
-	vv4[0] = 0.f;
-	xmf4 = vv4;
-}
-*/
-
 MeshData&
 GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 {
@@ -41,12 +30,12 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		{
 			float x = -halfWidth + j * dx;
 
-			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].Position = FMVec3(x, 0.0f, z);
-			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[(i * n) + j].Position = FMVec3(x, 0.0f, z);
+			meshData.Vertices[(i * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[(i * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
 			
-			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TexC.x = j * du;
-			meshData.Vertices[(static_cast<VtxSize_t>(i) * n) + j].TexC.y = i * dv;
+			meshData.Vertices[(i * n) + j].TexC.x = j * du;
+			meshData.Vertices[(i * n) + j].TexC.y = i * dv;
 		}
 	}
 
@@ -60,19 +49,18 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		for (UINT32 j = 0; j < n - 1; ++j)
 		{
 			meshData.Indices32[k]		= (i * n) + j;
-			meshData.Indices32[static_cast<IdxSize_t>(k) + 1]	= (i * n) + j + 1;
+			meshData.Indices32[k + 1]	= (i * n) + j + 1;
 			
 			k += 2;
 		}
 	}
 
-	for (UINT32
-		i = 0; i < m - 1; ++i)
+	for (UINT32 i = 0; i < m - 1; ++i)
 	{
 		for (UINT32 j = 0; j < n; ++j)
 		{
 			meshData.Indices32[k] = (i * n) + j;
-			meshData.Indices32[static_cast<IdxSize_t>(k) + 1] = ((i + 1) * n) + j;
+			meshData.Indices32[k + 1] = ((i + 1) * n) + j;
 
 			k += 2;
 		}

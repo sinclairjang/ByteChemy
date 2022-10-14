@@ -19,7 +19,7 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 
-#include "core/Scene.h"
+#include "scene/Scene.h"
 #include "utils/Log.h"
 
 struct FrameContext

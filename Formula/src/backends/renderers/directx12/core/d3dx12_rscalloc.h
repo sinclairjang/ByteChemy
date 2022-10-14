@@ -6,11 +6,7 @@
 
 
 ComPtr<ID3D12Resource>
-DefaultBufAllocator(ID3D12Device* device,
-    ID3D12GraphicsCommandList* cmdList,
-    const void* initData,
-    UINT64 byteSize,
-    ComPtr<ID3D12Resource>& uploadBuffer);
+DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSize);
 
 template<typename T>
 class UploadBufAllocator
