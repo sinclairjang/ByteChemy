@@ -4,21 +4,12 @@
 #include "Component.h"
 #include "core/ServiceLocator.h"
 #include "core/GeometryGenerator.h"
-#include "backends/renderers/directx12/DX12Renderer.h"
-
-// Import
-//extern DirectX12Renderer DX12Renderer;
-
-//void DX12RendererUsage()
-//{
-//	ServiceLocator<Renderer>::Provide(&DX12Renderer);
-//	Renderer* renderer = ServiceLocator<Renderer>::GetService();
-//	renderer->...;
-//}
+#include "backends/renderers/directx12/DX12Renderer.h"		// #include "backends/renderers/Vulkan/VKRenderer.h"
 
 Scene::Scene()
 {
 	m_SceneEntity = m_Registry.create();
+	m_Registry.emplace<GraphicsComponent>(m_SceneEntity);
 }
 
 Entity Scene::CreateEntity(const std::string& name)
@@ -30,7 +21,24 @@ Entity Scene::CreateEntity(const std::string& name)
 	return entity;
 }
 
-void Scene::LoadMeshAsset(Renderer* renderer, const std::string& path)
+void Scene::SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI)
+{
+	if (graphicsAPI == GraphicsService::GrpahicsAPI::DirectX12)
+	{
+		ServiceLocator<Renderer>::Provide(&DX12Renderer);
+		m_Renderer = ServiceLocator<Renderer>::GetService();
+
+		auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
+		graphic.GraphicsAPI = s2ws("DirectX12");
+	}
+
+	else
+	{
+		FM_ASSERTM(0, "Requested Graphics API is not yet supported.");
+	}
+}
+
+void Scene::LoadMeshAsset(const std::string& path)
 {
 	auto& gridMesh = m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGrid(10, 10, 100, 100)), "Grid");
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateCube(...)), "Cube");
@@ -39,10 +47,15 @@ void Scene::LoadMeshAsset(Renderer* renderer, const std::string& path)
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGeoSphere(...)), "GeoSphere");
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateFBXGeometryFromFile(...)), "FBXMesh");
 
-	renderer->AllocateGPUResource(&gridMesh.Mesh);
+	SafelyCopyablePointer<void> meshHandle;
+	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, &gridMesh.Mesh, meshHandle);
+
+	auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
+	graphic.MeshHandle = std::static_pointer_cast<void>(meshHandle);
+	
 }
 
-void Scene::LoadShaderAsset(Renderer* renderer, const std::string& path)
+void Scene::LoadShaderAsset(const std::string& path)
 {
 
 }

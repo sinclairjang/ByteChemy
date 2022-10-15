@@ -24,33 +24,37 @@ struct LeafParameterArray
 	UINT32 NumLeafParameters;
 };
 
-// Naming Convention:
-//	(e.g.) RootSignature RS_TC2S1_DC1_DS1_K4
-//
-// This corresponds to the following data structure.
-//
-// Layout:  
-// { 
-//	 Layout Size : 4,
-//
-//		Type : Table
-//			CBV : 2 (b0)
-//			SRV : 1 (t0)
-// 
-//		Type : Descriptor
-//			CBV : 1 (b2)
-// 
-//		Type : Descriptor
-//			SRV : 1 (t1)
-// 
-//		Type : Constant
-//			32-BIT : 4 (b3)
-// }
+/*
+ Naming Convention:
+	(e.g.) RootSignature RS_TC2S1_DC1_DS1_K4
+
+ This corresponds to the following data structure.
+
+ //TODO: Serialze/Deserialize this layout to support custom shader programming
+ 
+ Layout:  
+ { 
+	 Layout Size : 4,
+
+		Type : Table
+			CBV : 2 (b0)
+			SRV : 1 (t0)
+ 
+		Type : Descriptor
+			CBV : 1 (b2)
+ 
+		Type : Descriptor
+			SRV : 1 (t1)
+ 
+		Type : Constant
+			32-BIT : 4 (b3)
+ } 
+ */
 
 struct RootParmeter
 {
 	LeafParametersLayout Layout;
-	std::vector<LeafParameterArray> Arrangement;
+	std::vector<LeafParameterArray> DescArrays;
 };
 
 class RootSignature
@@ -61,8 +65,8 @@ public:
 	inline ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() { return m_GraphicsRootSignature; }		
 
 private:
-	void CreateGraphicsRootSignature(std::vector<DescLayout> rootParams);
-	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const DescLayout& rootParam);
+	void CreateGraphicsRootSignature(std::vector<RootParmeter> rootParams);
+	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const RootParmeter& rootParam);
 
 private:
 	ComPtr<ID3D12Device>		m_Device;

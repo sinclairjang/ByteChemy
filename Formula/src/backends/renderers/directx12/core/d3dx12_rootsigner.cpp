@@ -8,7 +8,7 @@ RootSignature::RootSignature(ComPtr<ID3D12Device> device)
 {
 }
 
-void RootSignature::CreateGraphicsRootSignature(std::vector<DescLayout> rootParams)
+void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter> rootParams)
 {
 	// Build root parameteres
 	std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameters;
@@ -44,21 +44,21 @@ void RootSignature::CreateGraphicsRootSignature(std::vector<DescLayout> rootPara
 		IID_PPV_ARGS(m_GraphicsRootSignature.GetAddressOf())));
 }
 
-void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const DescLayout& rootParam)
+void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const RootParmeter& rootParam)
 {
-	if (rootParam.descLayoutType == DescLayoutType::TABLE)
+	if (rootParam.Layout == LeafParametersLayout::TABLE)
 	{
 		std::vector<CD3DX12_DESCRIPTOR_RANGE> descTable;
 		
-		UINT descTableSize = rootParam.descLayoutSpec.size();
+		UINT descTableSize = rootParam.DescArrays.size();
 
 		descTable.resize(descTableSize);
 		
 		for (UINT32 i = 0; i < descTable.size(); ++i)
 		{
-			UINT32 numOfDescs = rootParam.descLayoutSpec[i].numOfDescs;
+			UINT32 numOfDescs = rootParam.DescArrays[i].NumLeafParameters;
 			
-			if (rootParam.descLayoutSpec[i].descType == DescType::CBV)
+			if (rootParam.DescArrays[i].Type == LeafParameterType::CBV)
 			{
 				descTable[i].Init(
 					D3D12_DESCRIPTOR_RANGE_TYPE_CBV,
@@ -69,7 +69,7 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 				m_CBVOffset += numOfDescs;
 			}
 
-			else if (rootParam.descLayoutSpec[i].descType == DescType::SRV)
+			else if (rootParam.DescArrays[i].Type == LeafParameterType::SRV)
 			{
 				descTable[i].Init(
 					D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
@@ -98,17 +98,17 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 		);
 	}
 
-	if (rootParam.descLayoutType == DescLayoutType::DESCRIPTOR)
+	if (rootParam.Layout == LeafParametersLayout::DESCRIPTOR)
 	{
-		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;		// == 1
+		UINT32 numOfDescs = rootParam.DescArrays[0].NumLeafParameters;		// == 1
 		
-		if (rootParam.descLayoutSpec[0].descType == DescType::CBV)
+		if (rootParam.DescArrays[0].Type == LeafParameterType::CBV)
 		{
 			slotRootParameter.InitAsConstantBufferView(m_CBVOffset);
 			m_CBVOffset += numOfDescs;
 		}
 
-		else if (rootParam.descLayoutSpec[0].descType == DescType::SRV)
+		else if (rootParam.DescArrays[0].Type == LeafParameterType::SRV)
 		{
 			slotRootParameter.InitAsShaderResourceView(m_SRVOffset);
 			m_SRVOffset += numOfDescs;
@@ -121,9 +121,9 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 		}
 	}
 
-	if (rootParam.descLayoutType == DescLayoutType::CONSTANT)
+	if (rootParam.Layout == LeafParametersLayout::CONSTANT)
 	{
-		UINT32 numOfDescs = rootParam.descLayoutSpec[0].numOfDescs;		
+		UINT32 numOfDescs = rootParam.DescArrays[0].NumLeafParameters;
 
 		slotRootParameter.InitAsConstants(numOfDescs, m_CBVOffset);
 		m_CBVOffset += 1;

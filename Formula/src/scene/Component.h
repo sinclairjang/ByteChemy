@@ -50,15 +50,22 @@ struct MeshFilterComponent
 	}
 };
 
-// Usage
-//MeshFilterComponent meshFilter(std::move(GeometryGenerator::CreateGrid(10, 10, 100, 100)), "Grid" );
+struct GraphicsComponent
+{
+	// Driver Informations
+	std::wstring GraphicsAPI;
+
+	// Render Informations
+	SafelyCopyablePointer<void> MeshHandle;
+	SafelyCopyablePointer<void> GraphicsPipelineHandle;
+};
 
 struct MeshRendererComponent
 {
 
 };
 
-struct ShaderComponent
+struct MaterialComponent
 {
 
 };

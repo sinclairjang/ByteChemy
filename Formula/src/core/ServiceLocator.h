@@ -16,3 +16,4 @@ public:
 private:
 	static T* m_Service;
 };
+

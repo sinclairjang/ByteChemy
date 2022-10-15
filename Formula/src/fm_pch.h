@@ -217,6 +217,8 @@ struct MeshData
 	std::vector<Vertex> Vertices;
 	std::vector<UINT32> Indices32;
 
+	bool isIndices32 = false;
+
 	std::vector<UINT16>& GetIndices16()
 	{
 		if (m_Indices16.empty())
@@ -227,7 +229,7 @@ struct MeshData
 				m_Indices16[i] = static_cast<UINT16>(Indices32[i]);
 			}
 		}
-
+		return m_Indices16;
 	}
 private:
 	std::vector<UINT16> m_Indices16;
@@ -255,7 +257,21 @@ To container_cast(From&& from)
 	return To(std::begin(from), std::end(from));
 }
 
+template <typename T>
+using SafelyMovablePointer = std::unique_ptr<T>;
+template<typename T, typename ...Args>
+constexpr SafelyMovablePointer<T> CreateScope(Args&& ...args)
+{
+	return std::make_unique<T>(std::forward<Args>(args)...);
+}
 
+template <typename T>
+using SafelyCopyablePointer = std::shared_ptr<T>;
+template<typename T, typename ...Args>
+constexpr SafelyCopyablePointer<T> CreateRef(Args&& ...args)
+{
+	return std::make_shared<T>(std::forward<Args>(args)...);
+}
 
 std::wstring s2ws(const std::string& s)
 {
