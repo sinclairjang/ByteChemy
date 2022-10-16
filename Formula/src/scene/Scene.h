@@ -16,8 +16,8 @@ public:
 	
 	void SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI);
 
-	void LoadMeshAsset(const std::string& path = std::string());
-	void LoadShaderAsset(const std::string& path = std::string());
+	void LoadMeshAsset(const std::wstring& path);
+	void LoadShaderAsset(const std::wstring& path);
 	
 	//void OnUpdate(TimeStep ts);
 

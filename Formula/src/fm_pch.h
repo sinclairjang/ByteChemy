@@ -259,7 +259,7 @@ To container_cast(From&& from)
 
 template <typename T>
 using SafelyMovablePointer = std::unique_ptr<T>;
-template<typename T, typename ...Args>
+template <typename T, typename ...Args>
 constexpr SafelyMovablePointer<T> CreateScope(Args&& ...args)
 {
 	return std::make_unique<T>(std::forward<Args>(args)...);
@@ -267,11 +267,14 @@ constexpr SafelyMovablePointer<T> CreateScope(Args&& ...args)
 
 template <typename T>
 using SafelyCopyablePointer = std::shared_ptr<T>;
-template<typename T, typename ...Args>
+template <typename T, typename ...Args>
 constexpr SafelyCopyablePointer<T> CreateRef(Args&& ...args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
+
+template <typename Key, typename T>
+using HashTable = std::unordered_map<Key, T>;
 
 std::wstring s2ws(const std::string& s)
 {

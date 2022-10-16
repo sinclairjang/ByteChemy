@@ -3,7 +3,7 @@
 #include "renderer/Renderer.h"
 
 // Import
-ID3D12Device* g_pd3dDevice;
+extern ID3D12Device* g_pd3dDevice;
 
 struct MeshBufferView
 {
@@ -13,11 +13,16 @@ struct MeshBufferView
 
 class DirectX12Renderer : public Renderer
 {
+	using RootCodeName = std::string;
+
 public:	
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ const void* initData, _Out_ SafelyCopyablePointer<void> outInfo) override;
-	virtual void RequestService(GraphicsService::BindShaderProgram bindWhere, _In_ const void* shaderInfo, _Out_ void* outInfo) override;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ SafelyCopyablePointer<const void> initData, _Out_ SafelyCopyablePointer<void> outInfo) override;
+	virtual void RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path, _Out_ SafelyCopyablePointer<void> outInfo) override;
 	virtual void RequestService(GraphicsService::Draw drawHow, const void* renderInfo) override;
+
+private:
+	HashTable<RootCodeName, RootSignature> m_RootSigTable;
 };
 
 // Export

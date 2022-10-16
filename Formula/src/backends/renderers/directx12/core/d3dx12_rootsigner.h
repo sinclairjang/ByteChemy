@@ -25,10 +25,10 @@ struct LeafParameterArray
 };
 
 /*
- Naming Convention:
-	(e.g.) RootSignature RS_TC2S1_DC1_DS1_K4
+ RootSignature Code Name:
+	(e.g.) ROOT:TC2S1,DC1,DS1,K4
 
- This corresponds to the following data structure.
+ This should correspond to the following data structure.
 
  //TODO: Serialze/Deserialize this layout to support custom shader programming
  
@@ -36,7 +36,7 @@ struct LeafParameterArray
  { 
 	 Layout Size : 4,
 
-		Type : Table
+		Type : Table	
 			CBV : 2 (b0)
 			SRV : 1 (t0)
  
@@ -60,12 +60,13 @@ struct RootParmeter
 class RootSignature
 {
 public:
-	RootSignature(ComPtr<ID3D12Device> device);
+	RootSignature(ID3D12Device* device);
 
+	void CreateGraphicsRootSignature(std::vector<RootParmeter>& rootParams);
+	
 	inline ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() { return m_GraphicsRootSignature; }		
 
 private:
-	void CreateGraphicsRootSignature(std::vector<RootParmeter> rootParams);
 	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const RootParmeter& rootParam);
 
 private:

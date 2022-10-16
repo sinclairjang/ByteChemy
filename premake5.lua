@@ -1,4 +1,4 @@
-workspace "Element5"
+workspace "ByteChemy"
 	architecture "x64"
 	startproject "Formula"
 

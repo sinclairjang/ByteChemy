@@ -55,9 +55,9 @@ struct GraphicsComponent
 	// Driver Informations
 	std::wstring GraphicsAPI;
 
-	// Render Informations
-	SafelyCopyablePointer<void> MeshHandle;
-	SafelyCopyablePointer<void> GraphicsPipelineHandle;
+	// Opaque Render Informations
+	void* MeshHandle;
+	void* GPUGraphicsPipelineHandle;
 };
 
 struct MeshRendererComponent

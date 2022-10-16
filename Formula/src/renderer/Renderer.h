@@ -41,8 +41,8 @@ public:
 	virtual ~Renderer() {}
 
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ const void* initData, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::BindShaderProgram bindWhere, _In_ const void* shaderInfo, _Out_ void* outInfo) = 0;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ SafelyCopyablePointer<const void> initData, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
 	virtual void RequestService(GraphicsService::Draw drawHow, const void* renderInfo) = 0;
 };
 

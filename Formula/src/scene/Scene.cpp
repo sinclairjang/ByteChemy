@@ -38,7 +38,7 @@ void Scene::SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI)
 	}
 }
 
-void Scene::LoadMeshAsset(const std::string& path)
+void Scene::LoadMeshAsset(const std::wstring& path)
 {
 	auto& gridMesh = m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGrid(10, 10, 100, 100)), "Grid");
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateCube(...)), "Cube");
@@ -47,16 +47,20 @@ void Scene::LoadMeshAsset(const std::string& path)
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGeoSphere(...)), "GeoSphere");
 	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateFBXGeometryFromFile(...)), "FBXMesh");
 
-	SafelyCopyablePointer<void> meshHandle;
-	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, &gridMesh.Mesh, meshHandle);
+	SafelyCopyablePointer<const void>	cp_GridMesh(&gridMesh);
+	SafelyCopyablePointer<void>			cp_MeshHandle;
+	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, cp_GridMesh, cp_MeshHandle);
 
 	auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
-	graphic.MeshHandle = std::static_pointer_cast<void>(meshHandle);
-	
+	graphic.MeshHandle = cp_MeshHandle.get();
 }
 
-void Scene::LoadShaderAsset(const std::string& path)
+void Scene::LoadShaderAsset(const std::wstring& path)
 {
+	SafelyCopyablePointer<void> cp_GraphicsPipelineHandle;
+	m_Renderer->RequestService(GraphicsService::BindShaderProgram::GRAPHICS, path, cp_GraphicsPipelineHandle);
 
+	auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
+	graphic.GPUGraphicsPipelineHandle = cp_GraphicsPipelineHandle.get();
 }
 

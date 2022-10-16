@@ -3,12 +3,12 @@
 
 #include "d3dx12_error.h"
 
-RootSignature::RootSignature(ComPtr<ID3D12Device> device)
+RootSignature::RootSignature(ID3D12Device* device)
 	: m_Device(device)
 {
 }
 
-void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter> rootParams)
+void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter>& rootParams)
 {
 	// Build root parameteres
 	std::vector<CD3DX12_ROOT_PARAMETER> slotRootParameters;
