@@ -1,7 +1,7 @@
 #include "fm_pch.h"
 #include "GeometryGenerator.h"
 
-MeshData&
+MeshData
 GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 {
 	using VtxSize_t = std::vector<Vertex, std::allocator<Vertex>>::size_type;

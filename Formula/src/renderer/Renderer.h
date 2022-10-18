@@ -1,5 +1,8 @@
 #pragma once
 
+
+
+// Grahics Device Basic Functionalities
 struct GraphicsService
 {
 public:
@@ -28,7 +31,7 @@ public:
 		COMPUTE,
 	};
 	
-	static enum class Draw : UINT8
+	static enum class Draw
 	{
 		DIRECT,
 		INSTANCED,
@@ -41,9 +44,9 @@ public:
 	virtual ~Renderer() {}
 
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ SafelyCopyablePointer<const void> initData, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::Draw drawHow, const void* renderInfo) = 0;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, _In_ const void* initData, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::BindShaderProgram usage, const std::wstring& path, _Out_ SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::Draw drawMode) = 0;
 };
 
 

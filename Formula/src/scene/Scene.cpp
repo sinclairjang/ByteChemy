@@ -6,14 +6,10 @@
 #include "core/GeometryGenerator.h"
 #include "backends/renderers/directx12/DX12Renderer.h"		// #include "backends/renderers/Vulkan/VKRenderer.h"
 
-Scene::Scene()
-{
-	m_SceneEntity = m_Registry.create();
-	m_Registry.emplace<GraphicsComponent>(m_SceneEntity);
-}
-
 Entity Scene::CreateEntity(const std::string& name)
 {
+	// Invoked on the update path for a new game object
+
 	Entity entity = { m_Registry.create(), std::make_shared<Scene>()};
 	entity.AddComponent<TransformComponent>();
 	auto& tag = entity.AddComponent<TagComponent>();
@@ -28,39 +24,38 @@ void Scene::SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI)
 		ServiceLocator<Renderer>::Provide(&DX12Renderer);
 		m_Renderer = ServiceLocator<Renderer>::GetService();
 
-		auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
-		graphic.GraphicsAPI = s2ws("DirectX12");
+		m_GraphicsAPI = L"DirectX 12";
 	}
 
 	else
 	{
-		FM_ASSERTM(0, "Requested Graphics API is not yet supported.");
+		FM_ASSERTM(0, "Requested Graphics API is not yet supported");
 	}
 }
 
 void Scene::LoadMeshAsset(const std::wstring& path)
 {
-	auto& gridMesh = m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGrid(10, 10, 100, 100)), "Grid");
-	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateCube(...)), "Cube");
-	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateCylinder(...)), "Cylinder");
-	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateSphere(...)), "Sphere");
-	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateGeoSphere(...)), "GeoSphere");
-	//m_Registry.emplace<MeshFilterComponent>(m_SceneEntity, std::move(GeometryGenerator::CreateFBXGeometryFromFile(...)), "FBXMesh");
+	// Invoked on the start path for every mesh objects belonging to the scene
 
-	SafelyCopyablePointer<const void>	cp_GridMesh(&gridMesh);
-	SafelyCopyablePointer<void>			cp_MeshHandle;
-	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, cp_GridMesh, cp_MeshHandle);
+	//TODO: Integrate with the geometry processing pipeline
+	// For the time being, we pilot the program with plane grid object.
+	
+	m_MeshData.push_back(GeometryGenerator::CreateGrid(10, 10, 100, 100));
+	
+	SafelyCopyablePointer<void>	spMeshGPUIndex;
+	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, &m_MeshData[0], spMeshGPUIndex);
 
-	auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
-	graphic.MeshHandle = cp_MeshHandle.get();
+	h_MeshIndex.insert({ L"Grid", spMeshGPUIndex });
 }
 
 void Scene::LoadShaderAsset(const std::wstring& path)
 {
-	SafelyCopyablePointer<void> cp_GraphicsPipelineHandle;
-	m_Renderer->RequestService(GraphicsService::BindShaderProgram::GRAPHICS, path, cp_GraphicsPipelineHandle);
+	// Invoked on the start path for the predefined shader programs
+	//TODO: Invoke on the update path for the custom shader programs
 
-	auto& graphic = m_Registry.get<GraphicsComponent>(m_SceneEntity);
-	graphic.GPUGraphicsPipelineHandle = cp_GraphicsPipelineHandle.get();
+	SafelyCopyablePointer<void> spGraphicsGPUProgramIndex;
+	m_Renderer->RequestService(GraphicsService::BindShaderProgram::GRAPHICS, path, spGraphicsGPUProgramIndex);
+
+	h_ShaderIndex.insert({ path, spGraphicsGPUProgramIndex });
 }
 

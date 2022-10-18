@@ -3,47 +3,47 @@
 
 #include "core/d3dx12_rscalloc.h"
 #include "core/d3dx12_rootsigner.h"
+#include "core/d3dx12_shadergen.h"
 
-void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, SafelyCopyablePointer<const void> initData, SafelyCopyablePointer<void> outInfo)
+void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData, SafelyCopyablePointer<void> outInfo)
 {
 	if (allocWhat == GraphicsService::AllocateGPUMemory::MESH)
 	{
 		FM_ASSERT(initData != nullptr);
 
-		
-		MeshData* mesh = std::static_pointer_cast<MeshData>(initData).get();
+		MeshData* pMesh = (MeshData*)initData;
 		
 		auto vertexByteStride = sizeof(Vertex);
-		auto vertexCount = mesh->Vertices.size();
+		auto vertexCount = pMesh->Vertices.size();
 		auto verticesByteSize = vertexByteStride * vertexCount;
 
-		auto indexCount =  mesh->Indices32.size();
-		auto IndicesByteSize = mesh->isIndices32 ? sizeof(UINT32) * indexCount : sizeof(UINT16) * indexCount;
+		auto indexCount = pMesh->Indices32.size();
+		auto IndicesByteSize = pMesh->isIndices32 ? sizeof(UINT32) * indexCount : sizeof(UINT16) * indexCount;
 
-		ComPtr<ID3D12Resource> verticesResource = DefaultBufferAllocator(g_pd3dDevice, mesh->Vertices.data(), verticesByteSize);
+		ComPtr<ID3D12Resource> verticesResource = DefaultBufferAllocator(g_pd3dDevice, pMesh->Vertices.data(), verticesByteSize);
 
-		MeshBufferView* meshHandle = new MeshBufferView();
-		meshHandle->vbv.BufferLocation = verticesResource->GetGPUVirtualAddress();
-		meshHandle->vbv.StrideInBytes = vertexByteStride;
-		meshHandle->vbv.SizeInBytes = verticesByteSize;
+		MeshBufferView* pMeshHandle = new MeshBufferView();
+		pMeshHandle->vbv.BufferLocation = verticesResource->GetGPUVirtualAddress();
+		pMeshHandle->vbv.StrideInBytes = vertexByteStride;
+		pMeshHandle->vbv.SizeInBytes = verticesByteSize;
 
-		if (mesh->isIndices32)
+		if (pMesh->isIndices32)
 		{
-			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, mesh->Indices32.data(), IndicesByteSize);
-			meshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
-			meshHandle->ibv.Format = DXGI_FORMAT_R32_UINT;
-			meshHandle->ibv.SizeInBytes = IndicesByteSize;
+			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, pMesh->Indices32.data(), IndicesByteSize);
+			pMeshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
+			pMeshHandle->ibv.Format = DXGI_FORMAT_R32_UINT;
+			pMeshHandle->ibv.SizeInBytes = IndicesByteSize;
 		}
 		else
 		{
-			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, mesh->GetIndices16().data(), IndicesByteSize);
-			meshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
-			meshHandle->ibv.Format = DXGI_FORMAT_R16_UINT;
-			meshHandle->ibv.SizeInBytes = IndicesByteSize;
+			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, pMesh->GetIndices16().data(), IndicesByteSize);
+			pMeshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
+			pMeshHandle->ibv.Format = DXGI_FORMAT_R16_UINT;
+			pMeshHandle->ibv.SizeInBytes = IndicesByteSize;
 		}
 
-		SafelyCopyablePointer<void> safeMeshHandle(meshHandle);
-		outInfo = safeMeshHandle;
+		SafelyCopyablePointer<void> spMeshHandle(pMeshHandle);
+		outInfo = spMeshHandle;
 	}
 
 	else if (allocWhat == GraphicsService::AllocateGPUMemory::CONSTANT)
@@ -61,19 +61,19 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 {
 	namespace fs = std::filesystem;
 
-	//TODO: Later we dynamically extract graphics pipeline setup informations from custom format, namely a file with extension '.formula'.
-	// For the time being, we code by hand the graphics render pipeline based on hlsl files.
- 
 	// Cache
-	std::string filename = ws2s(fs::path(path).filename());
-	std::string stem = ws2s(fs::path(path).stem());
-	std::string ext = ws2s(fs::path(path).extension());
+	std::wstring filename = fs::path(path).filename();
+	std::wstring stem = fs::path(path).stem();
+	std::wstring ext = fs::path(path).extension();
 
 	//FM_ASSERTM(ext == "formula", "Requested shader file format is not supported.");
 
 	if (bindHow == GraphicsService::BindShaderProgram::GRAPHICS)
 	{
-		if (filename == "Color.hlsl") 
+		//TODO: Later we procedurally extract resource binding informations from custom format dynamically, namely a file with extension '.formula'.
+		// For the time being, we code by hand the graphics render pipeline based on hlsl files.
+
+		if (filename == L"Color.hlsl") 
 		{
 			if (!m_RootSigTable.contains("ROOT:DC1,DC1,DC1"))
 			{
@@ -90,9 +90,27 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 				m_RootSigTable.insert({ "ROOT:DC1,DC1,DC1", ROOTSIG_DC1_DC1_DC1 });
 			}
 		
+			auto search = m_RootSigTable.find("ROOT:DC1,DC1,DC1");
+			Shader shaderProgram(g_pd3dDevice, search->second);
+			
+			//TODO: Let users interface with the advanced graphic features per API via GUI.
+			// For the time being, we code by hand those features given a shader file.
 
+			auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+			shaderProgram.CreateGraphicsShader(path, pipeSpec);
 
+			SafelyCopyablePointer<void> spGraphicsPipelineHandle(shaderProgram.GetGraphicsPipelineHandle());
+			outInfo = spGraphicsPipelineHandle;
 		}
+		
+		else
+		{
+			FM_ASSERT(0, "Unknown shader file");
+		}
+	}
+	else
+	{
+		FM_ASSERTM(0, "Requested compute shader is not yet supported");
 	}
 
 

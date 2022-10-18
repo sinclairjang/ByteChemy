@@ -1,12 +1,9 @@
 #pragma once
 
-enum class SHADER_TYPE : UINT8
+enum class RENDER_MODE : UINT8
 {
 	DEFERRED,
 	FORWARD,
-	LIGHTING,
-	PARTICLE,
-	SHADOW,
 };
 
 enum class RASTERIZER_TYPE : UINT8
@@ -35,24 +32,56 @@ enum class BLEND_TYPE : UINT8
 	ONE_TO_ONE_BLEND,
 };
 
-struct ShaderSpec
+// Shader Naming Convention
+struct MainFuncNames
 {
+	std::string VS = "VS_Main";
+	std::string HS;
+	std::string DS;
+	std::string GS;
+	std::string PS = "PS_Main";
+};
 
-	struct MainFuncName
+struct GPUPipelineSpecification
+{
+	RENDER_MODE RenderMode = RENDER_MODE::FORWARD;
+	RASTERIZER_TYPE RasterizerType = RASTERIZER_TYPE::CULL_BACK;
+	DEPTH_STENCIL_COMPARISON_FUNC_TYPE DSCompFuncType = DEPTH_STENCIL_COMPARISON_FUNC_TYPE::LESS;
+	BLEND_TYPE BlendType = BLEND_TYPE::DEFAULT;
+	D3D_PRIMITIVE_TOPOLOGY PrimTopologyType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	MainFuncNames ShaderNames = MainFuncNames();
+	
+	GPUPipelineSpecification() = default;
+	GPUPipelineSpecification(const GPUPipelineSpecification& other) = default;
+	
+	GPUPipelineSpecification(
+		RENDER_MODE renderMode,
+		RASTERIZER_TYPE rasterizerType,
+		DEPTH_STENCIL_COMPARISON_FUNC_TYPE dsCompFuncType,
+		BLEND_TYPE blendType,
+		D3D_PRIMITIVE_TOPOLOGY primTopologyType,
+		MainFuncNames shaderNames)
 	{
-		std::string VS = "VS";
-		std::string HS;
-		std::string DS;
-		std::string GS;
-		std::string PS = "PS";
-	};
-
-	SHADER_TYPE shaderType = SHADER_TYPE::FORWARD;
-	RASTERIZER_TYPE rasterizerType = RASTERIZER_TYPE::CULL_BACK;
-	DEPTH_STENCIL_COMPARISON_FUNC_TYPE dsCompFuncType = DEPTH_STENCIL_COMPARISON_FUNC_TYPE::LESS;
-	BLEND_TYPE blendType = BLEND_TYPE::DEFAULT;
-	D3D_PRIMITIVE_TOPOLOGY primTopologyType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	MainFuncName mainFuncName = MainFuncName();
+		RenderMode = renderMode;
+		RasterizerType = rasterizerType;
+		DSCompFuncType = dsCompFuncType;
+		BlendType = blendType;
+		PrimTopologyType = primTopologyType;
+		ShaderNames = shaderNames;
+	}
+	
+	static inline GPUPipelineSpecification Primitive(
+		D3D_PRIMITIVE_TOPOLOGY primTopologyType)
+	{
+		return GPUPipelineSpecification(
+			RENDER_MODE::FORWARD, 
+			RASTERIZER_TYPE::CULL_BACK,
+			DEPTH_STENCIL_COMPARISON_FUNC_TYPE::LESS,
+			BLEND_TYPE::DEFAULT,
+			primTopologyType,
+			MainFuncNames()
+		);
+	}
 };
 
 class RootSignature;
@@ -63,8 +92,10 @@ public:
 	Shader(ID3D12Device* device, RootSignature& rootSig);
 	~Shader();
 
-	void CreateGraphicsShader(const std::wstring& path, ShaderSpec spec = ShaderSpec());
-	
+	void CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec);
+	inline ID3D12PipelineState* GetGraphicsPipelineHandle() { return m_GraphicsPipelineState; }
+	 
+
 private:
 	void CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version, 
 		ComPtr<ID3DBlob>& blob, D3D12_SHADER_BYTECODE& shaderByteCode);
@@ -77,11 +108,11 @@ private:
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology);
 
 private:
-	ComPtr<ID3D12Device> m_Device;
-	RootSignature m_GraphicsRootSignature;
+	ID3D12Device* g_Device;
+	ID3D12PipelineState* m_GraphicsPipelineState;
 
-	ShaderSpec m_ShaderSpec;
-	ComPtr<ID3D12PipelineState> m_PipelineState;
+	RootSignature m_GraphicsRootSignature;
+	GPUPipelineSpecification m_PipelineSpec;
 
 	ComPtr<ID3DBlob> m_VSBlob;
 	ComPtr<ID3DBlob> m_HSBlob;

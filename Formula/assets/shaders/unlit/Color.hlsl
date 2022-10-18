@@ -5,15 +5,17 @@ cbuffer WorldPos : register(b0)
 	float4x4 gWorld;
 }
 
-cbuffer CameraView : register(b1)
+cbuffer Color : register(b1)
+{
+	float4 color;
+}
+
+cbuffer CameraView : register(b2)
 {
 	float4x4 gViewProj;
 }
 
-cbuffer Color : register(b2)
-{
-	float4 color;
-}
+
 
 struct VertexIn
 {
@@ -25,7 +27,7 @@ struct VertexOut
 	float4 Pos					: SV_POSITION;
 };
 
-VertexOut VS(VertexIn vin)
+VertexOut VS_Main(VertexIn vin)
 {
 	wvp = mul(gWorld, gViewProj);
 
@@ -35,7 +37,7 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-float4 PS(VertexOut pin) : SV_Target
+float4 PS_Main(VertexOut pin) : SV_Target
 {
 	return color;
 }

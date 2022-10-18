@@ -5,7 +5,7 @@
 #include "d3dx12_rootsigner.h"
 
 Shader::Shader(ID3D12Device* device, RootSignature& rootSig)
-	: m_Device(device), m_GraphicsRootSignature(rootSig)
+	: g_Device(device), m_GraphicsRootSignature(rootSig)
 {
 }
 
@@ -13,26 +13,26 @@ Shader::~Shader()
 {
 }
 
-void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpec)
+void Shader::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec)
 {
-	m_ShaderSpec = shaderSpec;
+	m_PipelineSpec = pipeSpec;
 
-	CreateVertexShader(path, m_ShaderSpec.mainFuncName.VS, "vs_5_0");
-	CreatePixelShader(path, m_ShaderSpec.mainFuncName.PS, "ps_5_0");
+	CreateVertexShader(path, m_PipelineSpec.ShaderNames.VS, "vs_5_0");
+	CreatePixelShader(path, m_PipelineSpec.ShaderNames.PS, "ps_5_0");
 
-	if (m_ShaderSpec.mainFuncName.HS.empty() == false)
+	if (m_PipelineSpec.ShaderNames.HS.empty() == false)
 	{
-		CreateHullShader(path, m_ShaderSpec.mainFuncName.HS, "hs_5_0");
+		CreateHullShader(path, m_PipelineSpec.ShaderNames.HS, "hs_5_0");
 	}
 
-	if (m_ShaderSpec.mainFuncName.DS.empty() == false)
+	if (m_PipelineSpec.ShaderNames.DS.empty() == false)
 	{
-		CreateDomainShader(path, m_ShaderSpec.mainFuncName.DS, "ds_5_0");
+		CreateDomainShader(path, m_PipelineSpec.ShaderNames.DS, "ds_5_0");
 	}
 
-	if (m_ShaderSpec.mainFuncName.GS.empty() == false)
+	if (m_PipelineSpec.ShaderNames.GS.empty() == false)
 	{
-		CreateGeometryShader(path, m_ShaderSpec.mainFuncName.GS, "gs_5_0");
+		CreateGeometryShader(path, m_PipelineSpec.ShaderNames.GS, "gs_5_0");
 	}
 	
 	D3D12_INPUT_ELEMENT_DESC elemDesc[]
@@ -49,29 +49,26 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 	m_GraphicsPipelineStateDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.SampleMask = UINT_MAX;
-	m_GraphicsPipelineStateDesc.PrimitiveTopologyType = GetPrimTopologyType(m_ShaderSpec.primTopologyType);
+	m_GraphicsPipelineStateDesc.PrimitiveTopologyType = GetPrimTopologyType(m_PipelineSpec.PrimTopologyType);
 	m_GraphicsPipelineStateDesc.NumRenderTargets = 1;
 	m_GraphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	m_GraphicsPipelineStateDesc.SampleDesc.Count = 1;
 	m_GraphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
-	switch (m_ShaderSpec.shaderType)
+	switch (m_PipelineSpec.RenderMode)
 	{
-	case SHADER_TYPE::FORWARD:
+	case RENDER_MODE::FORWARD:
 		m_GraphicsPipelineStateDesc.NumRenderTargets = 1;
 		m_GraphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		break;
-	case SHADER_TYPE::DEFERRED:
-	case SHADER_TYPE::LIGHTING:
-	case SHADER_TYPE::PARTICLE:
-	case SHADER_TYPE::SHADOW:
+	case RENDER_MODE::DEFERRED:
 		FM_ASSERTM(0, "Not supported yet!");
 		break;
 	default:
 		break;
 	}
 
-	switch (m_ShaderSpec.rasterizerType)
+	switch (m_PipelineSpec.RasterizerType)
 	{
 	case RASTERIZER_TYPE::CULL_BACK:
 		m_GraphicsPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
@@ -91,7 +88,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 		break;
 	}
 
-	switch (m_ShaderSpec.dsCompFuncType)
+	switch (m_PipelineSpec.DSCompFuncType)
 	{
 	case DEPTH_STENCIL_COMPARISON_FUNC_TYPE::LESS:
 		m_GraphicsPipelineStateDesc.DepthStencilState.DepthEnable = TRUE;
@@ -126,7 +123,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 
 	D3D12_RENDER_TARGET_BLEND_DESC& rtBlendDesc = m_GraphicsPipelineStateDesc.BlendState.RenderTarget[0];
 
-	switch (m_ShaderSpec.blendType)
+	switch (m_PipelineSpec.BlendType)
 	{
 	case BLEND_TYPE::DEFAULT:
 		rtBlendDesc.BlendEnable = FALSE;
@@ -148,7 +145,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, ShaderSpec shaderSpe
 		break;
 	}
 
-	ThrowIfFailed(m_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(m_PipelineState.GetAddressOf())));
+	ThrowIfFailed(g_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(&m_GraphicsPipelineState)));
 }
 
 void Shader::CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version,

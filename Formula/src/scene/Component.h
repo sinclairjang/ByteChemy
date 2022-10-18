@@ -28,6 +28,9 @@ struct TransformComponent
 
 struct MeshFilterComponent
 {
+	// Input Filter
+	//TODO: Extract input data per shader applied to a mesh object
+	// For the time being, we assume a mesh object is given vertex positions, normals, tangents, uvs and indices.
 	using VertexCount = UINT32;
 	using IndexCount = UINT32;
 	using MeshInfo = std::pair<VertexCount, IndexCount>;
@@ -37,8 +40,13 @@ struct MeshFilterComponent
 	MeshData Mesh;
 	MeshInfo meshInfo;
 	
-	MeshFilterComponent() = delete;
+	MeshFilterComponent() = default;
+	
+	// Opt out costly copy operations
 	MeshFilterComponent(const MeshFilterComponent& other) = delete;
+	MeshFilterComponent&
+		operator=(const MeshFilterComponent&) = default;
+
 	MeshFilterComponent(MeshData&& other, std::wstring name = s2ws("Untitled Model")) :
 		ModelName(name)
 	{
@@ -50,33 +58,27 @@ struct MeshFilterComponent
 	}
 };
 
-struct GraphicsComponent
-{
-	// Driver Informations
-	std::wstring GraphicsAPI;
-
-	// Opaque Render Informations
-	void* MeshHandle;
-	void* GPUGraphicsPipelineHandle;
-};
-
 struct MeshRendererComponent
 {
+	using MeshIndex = std::weak_ptr<void>;
+	
+	MeshIndex MeshID;
 
-};
-
-struct MaterialComponent
-{
-
+	MeshRendererComponent() = default;
+	MeshRendererComponent(const MeshRendererComponent&) = default;
+	MeshRendererComponent(const SafelyCopyablePointer<void>& spMesh) :
+		MeshID(spMesh) {}
 };
 
 struct UnlitMatericalComponent
 {
+	using MaterialIndex = std::weak_ptr<void>; 
+
+	MaterialIndex MaterialID;
 	FMVec4 MainColor;
 
 	UnlitMatericalComponent() = default;
 	UnlitMatericalComponent(const UnlitMatericalComponent&) = default;
-	UnlitMatericalComponent(const FMVec4 & color)
-		: MainColor(color) {}
-
+	UnlitMatericalComponent(const SafelyCopyablePointer<void>& spShader, const FMVec4& color)
+		: MaterialID(spShader), MainColor(color) {}
 };
