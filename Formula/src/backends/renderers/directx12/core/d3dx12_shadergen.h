@@ -1,5 +1,7 @@
 #pragma once
 
+#include "d3dx12_rootsigner.h"
+
 enum class RENDER_MODE : UINT8
 {
 	DEFERRED,
@@ -83,8 +85,6 @@ struct GPUPipelineSpecification
 		);
 	}
 };
-
-class RootSignature;
 
 class Shader
 {

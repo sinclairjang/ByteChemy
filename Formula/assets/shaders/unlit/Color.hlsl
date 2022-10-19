@@ -29,7 +29,7 @@ struct VertexOut
 
 VertexOut VS_Main(VertexIn vin)
 {
-	wvp = mul(gWorld, gViewProj);
+	float4x4 wvp = mul(gWorld, gViewProj);
 
 	VertexOut vout;
 	vout.Pos = mul(float4(vin.Pos, 1.0f), wvp);

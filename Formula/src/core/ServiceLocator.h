@@ -6,7 +6,7 @@ template <typename T>
 class ServiceLocator
 {
 public:
-	inline static T* GetService() { return m_Service;  }
+	inline  static T* GetService() { return m_Service; }
 
 	static void Provide(T* service)
 	{

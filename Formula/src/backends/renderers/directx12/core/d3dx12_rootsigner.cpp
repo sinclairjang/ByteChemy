@@ -4,7 +4,7 @@
 #include "d3dx12_error.h"
 
 RootSignature::RootSignature(ID3D12Device* device)
-	: m_Device(device)
+	: g_Device(device)
 {
 }
 
@@ -37,7 +37,7 @@ void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter>& rootP
 
 	ThrowIfFailed(hr);
 
-	ThrowIfFailed(m_Device->CreateRootSignature(
+	ThrowIfFailed(g_Device->CreateRootSignature(
 		0,
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),
@@ -50,7 +50,7 @@ void RootSignature::SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, 
 	{
 		std::vector<CD3DX12_DESCRIPTOR_RANGE> descTable;
 		
-		UINT descTableSize = rootParam.DescArrays.size();
+		UINT descTableSize = (UINT)rootParam.DescArrays.size();
 
 		descTable.resize(descTableSize);
 		
@@ -147,21 +147,21 @@ GetStaticSamplers()
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
-	CD3DX12_STATIC_SAMPLER_DESC pointWrap(
+	CD3DX12_STATIC_SAMPLER_DESC linearWrap(
 		2,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
 		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
 		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
 		D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 
-	CD3DX12_STATIC_SAMPLER_DESC pointWrap(
+	CD3DX12_STATIC_SAMPLER_DESC linearClamp(
 		3,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
-	CD3DX12_STATIC_SAMPLER_DESC pointWrap(
+	CD3DX12_STATIC_SAMPLER_DESC anistropicWrap(
 		4,
 		D3D12_FILTER_ANISOTROPIC,
 		D3D12_TEXTURE_ADDRESS_MODE_WRAP,
@@ -170,7 +170,7 @@ GetStaticSamplers()
 		0.0f,
 		8);
 
-	CD3DX12_STATIC_SAMPLER_DESC pointWrap(
+	CD3DX12_STATIC_SAMPLER_DESC anistropicClamp(
 		5,
 		D3D12_FILTER_ANISOTROPIC,
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
@@ -178,4 +178,9 @@ GetStaticSamplers()
 		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
 		0.0f,
 		8);
+
+	return {
+		pointWrap, pointClamp,
+		linearWrap, linearClamp,
+		anistropicWrap, anistropicClamp };
 }

@@ -5,6 +5,7 @@
 #include "core/d3dx12_rootsigner.h"
 #include "core/d3dx12_shadergen.h"
 
+
 void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData, SafelyCopyablePointer<void> outInfo)
 {
 	if (allocWhat == GraphicsService::AllocateGPUMemory::MESH)
@@ -24,22 +25,22 @@ void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocW
 
 		MeshBufferView* pMeshHandle = new MeshBufferView();
 		pMeshHandle->vbv.BufferLocation = verticesResource->GetGPUVirtualAddress();
-		pMeshHandle->vbv.StrideInBytes = vertexByteStride;
-		pMeshHandle->vbv.SizeInBytes = verticesByteSize;
+		pMeshHandle->vbv.StrideInBytes = (UINT)vertexByteStride;
+		pMeshHandle->vbv.SizeInBytes = (UINT)verticesByteSize;
 
 		if (pMesh->isIndices32)
 		{
 			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, pMesh->Indices32.data(), IndicesByteSize);
 			pMeshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
 			pMeshHandle->ibv.Format = DXGI_FORMAT_R32_UINT;
-			pMeshHandle->ibv.SizeInBytes = IndicesByteSize;
+			pMeshHandle->ibv.SizeInBytes = (UINT)IndicesByteSize;
 		}
 		else
 		{
 			ComPtr<ID3D12Resource> indicesResource = DefaultBufferAllocator(g_pd3dDevice, pMesh->GetIndices16().data(), IndicesByteSize);
 			pMeshHandle->ibv.BufferLocation = indicesResource->GetGPUVirtualAddress();
 			pMeshHandle->ibv.Format = DXGI_FORMAT_R16_UINT;
-			pMeshHandle->ibv.SizeInBytes = IndicesByteSize;
+			pMeshHandle->ibv.SizeInBytes = (UINT)IndicesByteSize;
 		}
 
 		SafelyCopyablePointer<void> spMeshHandle(pMeshHandle);
@@ -105,13 +106,13 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 		
 		else
 		{
-			FM_ASSERT(0, "Unknown shader file");
+			FM_ASSERTM(0, "Unknown shader file");
 		}
 	}
 	else
 	{
 		FM_ASSERTM(0, "Requested compute shader is not yet supported");
 	}
-
-
 }
+
+DirectX12Renderer DX12Renderer;

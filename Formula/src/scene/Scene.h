@@ -1,28 +1,30 @@
 #pragma once
 
-#include "Entity.h"
+//#include "Entity.h"
+#include "renderer/Renderer.h"
 
-class Renderer;
-class TimeStep;
+class Entity;
+//class TimeStep;
 
 class Scene
 {
-	friend Entity;
+	friend class Entity;
 
-	Scene();
-	~Scene(); //TODO: Ensure an old scene will have been deleted by the time a new instance is deserialized
+	Scene() = default;
+	//~Scene(); //TODO: Ensure an old scene will have been deleted by the time a new instance is deserialized
 
 public:
-	Entity CreateEntity(const std::string& name = std::string());
-
-	void SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI);
+	Entity CreateEntity(const std::string& name);
+		
+	void SetRenderer(const GraphicsService::GrpahicsAPI& graphicsAPI);
 
 	void LoadMeshAsset(const std::wstring& path);
 	void LoadShaderAsset(const std::wstring& path);
 
-	void OnUpdate(TimeStep ts);
+	//void OnUpdate(TimeStep ts);
 
 private:
+
 	entt::registry	m_Registry;
 
 	// Scene Render Informations

@@ -31,8 +31,8 @@ struct MeshFilterComponent
 	// Input Filter
 	//TODO: Extract input data per shader applied to a mesh object
 	// For the time being, we assume a mesh object is given vertex positions, normals, tangents, uvs and indices.
-	using VertexCount = UINT32;
-	using IndexCount = UINT32;
+	using VertexCount = size_t;
+	using IndexCount = size_t;
 	using MeshInfo = std::pair<VertexCount, IndexCount>;
 
 	std::wstring ModelName; // TODO: to be replaced and handled by GUID system

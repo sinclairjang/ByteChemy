@@ -33,10 +33,10 @@ public:
         ThrowIfFailed(m_UploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_MappedData)));
     }
 
-    UploadBufAllocator(const UploadBuffer& rhs) = delete;
-    UploadBufAllocator* operator=(const UploadBuffer& rhs) = delete;
+    UploadBufAllocator(const UploadBufAllocator& rhs) = delete;
+    UploadBufAllocator* operator=(const UploadBufAllocator& rhs) = delete;
 
-    ~UploadBufAlloc()
+    ~UploadBufAllocator()
     {
         if (m_UploadBuffer != nullptr)
         {

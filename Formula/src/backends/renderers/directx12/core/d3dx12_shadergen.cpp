@@ -2,7 +2,6 @@
 #include "d3dx12_shadergen.h"
 
 #include "d3dx12_error.h"
-#include "d3dx12_rootsigner.h"
 
 Shader::Shader(ID3D12Device* device, RootSignature& rootSig)
 	: g_Device(device), m_GraphicsRootSignature(rootSig)

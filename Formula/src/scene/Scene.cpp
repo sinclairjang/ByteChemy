@@ -1,6 +1,7 @@
 #include "fm_pch.h"
 #include "Scene.h"
 
+#include "Entity.h"
 #include "Component.h"
 #include "core/ServiceLocator.h"
 #include "core/GeometryGenerator.h"
@@ -10,14 +11,14 @@ Entity Scene::CreateEntity(const std::string& name)
 {
 	// Invoked on the update path for a new game object
 
-	Entity entity = { m_Registry.create(), std::make_shared<Scene>()};
+	Entity entity = { m_Registry.create(), SafelyCopyablePointer<Scene>(this) };
 	entity.AddComponent<TransformComponent>();
 	auto& tag = entity.AddComponent<TagComponent>();
 	tag.Tag = name.empty() ? L"Entity" : s2ws(name);
 	return entity;
 }
 
-void Scene::SetRenderer(const GraphicsService::GrpahicsAPI graphicsAPI)
+void Scene::SetRenderer(const GraphicsService::GrpahicsAPI& graphicsAPI)
 {
 	if (graphicsAPI == GraphicsService::GrpahicsAPI::DirectX12)
 	{
