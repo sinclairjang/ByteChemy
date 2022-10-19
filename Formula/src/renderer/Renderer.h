@@ -30,11 +30,19 @@ namespace GraphicsService
 		COMPUTE,
 	};
 	
-	enum class Draw
+	enum class SetRenderTarget : UINT8
+	{
+		FRAMEBUFFER,
+		TEXTURE,
+	};
+
+	enum class DispatchDrawCall : UINT8
 	{
 		DIRECT,
 		INSTANCED,
 	};
+
+
 };
 
 
@@ -46,6 +54,7 @@ public:
 	// Graphics API Overloads
 	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData,  SafelyCopyablePointer<void> outInfo) = 0;
 	virtual void RequestService(GraphicsService::BindShaderProgram usage, const std::wstring& path,  SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::SetRenderTarget target, SafelyCopyablePointer<void> outInfo) = 0;
 	//virtual void RequestService(GraphicsService::Draw drawMode) = 0;
 };
 

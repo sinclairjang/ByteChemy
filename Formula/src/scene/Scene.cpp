@@ -7,16 +7,8 @@
 #include "core/GeometryGenerator.h"
 #include "backends/renderers/directx12/DX12Renderer.h"		// #include "backends/renderers/Vulkan/VKRenderer.h"
 
-Entity Scene::CreateEntity(const std::string& name)
-{
-	// Invoked on the update path for a new game object
-
-	Entity entity = { m_Registry.create(), SafelyCopyablePointer<Scene>(this) };
-	entity.AddComponent<TransformComponent>();
-	auto& tag = entity.AddComponent<TagComponent>();
-	tag.Tag = name.empty() ? L"Entity" : s2ws(name);
-	return entity;
-}
+// Import
+extern DirectX12Renderer DX12Renderer;
 
 void Scene::SetRenderer(const GraphicsService::GrpahicsAPI& graphicsAPI)
 {
@@ -60,3 +52,32 @@ void Scene::LoadShaderAsset(const std::wstring& path)
 	h_ShaderIndex.insert({ path, spGraphicsGPUProgramIndex });
 }
 
+void Scene::Begin()
+{
+
+}
+
+//void Scene::Update(TimeStep ts)
+//{
+//}
+
+void Scene::Render()
+{
+
+}
+
+void Scene::End()
+{
+
+}
+
+Entity Scene::CreateEntity(const std::string& name)
+{
+	// Invoked on the update path for a new game object
+
+	Entity entity = { m_Registry.create(), SafelyCopyablePointer<Scene>(this) };
+	entity.AddComponent<TransformComponent>();
+	auto& tag = entity.AddComponent<TagComponent>();
+	tag.Tag = name.empty() ? L"Entity" : s2ws(name);
+	return entity;
+}

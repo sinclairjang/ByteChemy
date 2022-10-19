@@ -32,11 +32,6 @@ project "Formula"
 
 	files
 	{
-		"assets/scenes/**.prl",
-		"assets/shaders/**.hlsl",
-		"assets/shaders/**.glsl",
-		"assets/textures/**.png",
-
 		"./src/**.h",
 		"./src/**.cpp",
 	}

@@ -15,4 +15,4 @@ group "dependencies"
 group ""
 
 include "Formula"
-include "Game"
+include "Product"

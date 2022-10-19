@@ -9,7 +9,7 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 
 	MeshData meshData;
 
-	UINT32 vertexCount = m * n;
+	size_t vertexCount = m * n;
 
 	float halfWidth = 0.5f * width;
 	float halfDepth = 0.5f * depth;
@@ -30,26 +30,27 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		{
 			float x = -halfWidth + j * dx;
 
-			meshData.Vertices[(i * n) + j].Position = FMVec3(x, 0.0f, z);
-			meshData.Vertices[(i * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[(i * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
+			meshData.Vertices[(size_t)(i * n) + j].Position = FMVec3(x, 0.0f, z);
+			meshData.Vertices[(size_t)(i * n) + j].Normal	= FMVec3(0.0f, 1.0f, 0.0f);
+			meshData.Vertices[(size_t)(i * n) + j].TangentU = FMVec3(1.0f, 0.0f, 0.0f);
 			
-			meshData.Vertices[(i * n) + j].TexC.x = j * du;
-			meshData.Vertices[(i * n) + j].TexC.y = i * dv;
+			meshData.Vertices[(size_t)(i * n) + j].TexC.x = j * du;
+			meshData.Vertices[(size_t)(i * n) + j].TexC.y = i * dv;
 		}
 	}
 
-	UINT32 indexCount = m * (2 * (n - 1)) + n * (2 * (m - 1));
+	size_t indexCount = m * (2 * (n - 1)) + n * (2 * (m - 1));
 	
 	meshData.Indices32.resize(indexCount);
-
+	
+	// This is for large meshes with more than 64K vertices, otherwise we fall back to 16-bit indices.
 	UINT32 k = 0;
 	for (UINT32 i = 0; i < m; ++i)
 	{
 		for (UINT32 j = 0; j < n - 1; ++j)
 		{
 			meshData.Indices32[k]		= (i * n) + j;
-			meshData.Indices32[k + 1]	= (i * n) + j + 1;
+			meshData.Indices32[(size_t)k + 1]	= (i * n) + j + 1;
 			
 			k += 2;
 		}
@@ -60,7 +61,7 @@ GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
 		for (UINT32 j = 0; j < n; ++j)
 		{
 			meshData.Indices32[k] = (i * n) + j;
-			meshData.Indices32[k + 1] = ((i + 1) * n) + j;
+			meshData.Indices32[(size_t)k + 1] = ((i + 1) * n) + j;
 
 			k += 2;
 		}

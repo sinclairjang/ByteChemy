@@ -2,8 +2,6 @@
 
 #include "renderer/Renderer.h"
 #include "backends/renderers/directx12/core/d3dx12_rootsigner.h"
-// Import
-extern ID3D12Device* g_pd3dDevice;
 
 struct MeshBufferView
 {
@@ -25,5 +23,3 @@ private:
 	HashTable<RootCodeName, RootSignature> m_RootSigTable;
 };
 
-// Export
-extern DirectX12Renderer DX12Renderer;

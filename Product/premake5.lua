@@ -1,4 +1,4 @@
-project "Game"
+project "Product"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++latest"
@@ -29,15 +29,15 @@ project "Game"
 	}
 
 	filter "system:windows"
-		defines "VU_PLATFORM_WINDOWS"
+		defines "PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "VU_DEBUG"
+		defines "DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "VU_Release"
+		defines "Release"
 		runtime "Release"
 		optimize "on"

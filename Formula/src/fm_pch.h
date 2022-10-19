@@ -251,6 +251,7 @@ private:
 //
 //		// The other direction is analogous.
 //	}
+
 template <typename To, typename From>
 To container_cast(From&& from)
 {

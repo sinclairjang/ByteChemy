@@ -1,10 +1,9 @@
 #pragma once
 
-//#include "Entity.h"
 #include "renderer/Renderer.h"
 
 class Entity;
-//class TimeStep;
+class TimeStep;
 
 class Scene
 {
@@ -14,17 +13,30 @@ class Scene
 	//~Scene(); //TODO: Ensure an old scene will have been deleted by the time a new instance is deserialized
 
 public:
-	Entity CreateEntity(const std::string& name);
-		
+	// Initialize the scene
 	void SetRenderer(const GraphicsService::GrpahicsAPI& graphicsAPI);
-
 	void LoadMeshAsset(const std::wstring& path);
 	void LoadShaderAsset(const std::wstring& path);
+	
+	// Pre-process the scene buffer
+	void Begin();
 
-	//void OnUpdate(TimeStep ts);
+	// Upload resources updated via ImGui
+	void Update(TimeStep ts);
+
+	// Dispatch draw calls
+	void Render();
+	
+	// Post-process the scene buffer
+	void End();
+
+public:
+	// Register the entity to the scene
+	Entity CreateEntity(const std::string& name);
+
+
 
 private:
-
 	entt::registry	m_Registry;
 
 	// Scene Render Informations

@@ -5,6 +5,11 @@
 #include "core/d3dx12_rootsigner.h"
 #include "core/d3dx12_shadergen.h"
 
+// Import
+extern ID3D12Device* g_pd3dDevice;
+
+// Export
+DirectX12Renderer DX12Renderer;
 
 void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData, SafelyCopyablePointer<void> outInfo)
 {
@@ -58,7 +63,7 @@ void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocW
 	}
 }
 
-void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path, _Out_ SafelyCopyablePointer<void> outInfo)
+void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path,  SafelyCopyablePointer<void> outInfo)
 {
 	namespace fs = std::filesystem;
 
@@ -100,7 +105,9 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 			auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 			shaderProgram.CreateGraphicsShader(path, pipeSpec);
 
-			SafelyCopyablePointer<void> spGraphicsPipelineHandle(shaderProgram.GetGraphicsPipelineHandle());
+			SafelyCopyablePointer<void> spGraphicsPipelineHandle(shaderProgram.GetGraphicsPipelineHandle(), 
+				[](ID3D12PipelineState* ps) { ps->Release(); });
+			
 			outInfo = spGraphicsPipelineHandle;
 		}
 		
@@ -114,5 +121,3 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 		FM_ASSERTM(0, "Requested compute shader is not yet supported");
 	}
 }
-
-DirectX12Renderer DX12Renderer;
