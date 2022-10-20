@@ -1,8 +1,6 @@
 #pragma once
 
-
-
-// Grahics Device Basic Functionalities
+// Grahpics Device Basic Functionalities
 namespace GraphicsService
 {
 	enum class GrpahicsAPI : UINT8
@@ -41,10 +39,7 @@ namespace GraphicsService
 		DIRECT,
 		INSTANCED,
 	};
-
-
 };
-
 
 class Renderer
 {
@@ -52,9 +47,9 @@ public:
 	virtual ~Renderer() {}
 
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData,  SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::BindShaderProgram usage, const std::wstring& path,  SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::SetRenderTarget target, SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory type, const void* initData,  SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::BindShaderProgram type, const std::wstring& path,  SafelyCopyablePointer<void> outInfo) = 0;
+	virtual void RequestService(GraphicsService::SetRenderTarget type, const size_t width, const size_t height, SafelyCopyablePointer<void> outInfo) = 0;
 	//virtual void RequestService(GraphicsService::Draw drawMode) = 0;
 };
 

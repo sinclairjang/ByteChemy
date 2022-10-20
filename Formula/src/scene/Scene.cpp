@@ -35,10 +35,10 @@ void Scene::LoadMeshAsset(const std::wstring& path)
 	
 	m_MeshData.push_back(GeometryGenerator::CreateGrid(10, 10, 100, 100));
 	
-	SafelyCopyablePointer<void>	spMeshGPUIndex;
-	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, &m_MeshData[0], spMeshGPUIndex);
+	SafelyCopyablePointer<MeshID> spMesh;
+	m_Renderer->RequestService(GraphicsService::AllocateGPUMemory::MESH, &m_MeshData[0], spMesh);
 
-	h_MeshIndex.insert({ L"Grid", spMeshGPUIndex });
+	h_Mesh.insert({ L"Grid", spMesh });
 }
 
 void Scene::LoadShaderAsset(const std::wstring& path)
@@ -46,15 +46,19 @@ void Scene::LoadShaderAsset(const std::wstring& path)
 	// Invoked on the start path for the predefined shader programs
 	//TODO: Invoke on the update path for the custom shader programs
 
-	SafelyCopyablePointer<void> spGraphicsGPUProgramIndex;
-	m_Renderer->RequestService(GraphicsService::BindShaderProgram::GRAPHICS, path, spGraphicsGPUProgramIndex);
+	SafelyCopyablePointer<ShaderID> spGraphicsShader;
+	m_Renderer->RequestService(GraphicsService::BindShaderProgram::GRAPHICS, path, spGraphicsShader);
 
-	h_ShaderIndex.insert({ path, spGraphicsGPUProgramIndex });
+	h_Shader.insert({ path, spGraphicsShader });
 }
 
-void Scene::Begin()
+void Scene::Begin(const size_t width, const size_t height)
 {
+	SafelyCopyablePointer<SceneBuffer> spSceneView;
 
+	m_Renderer->RequestService(GraphicsService::SetRenderTarget::TEXTURE, width, height, spSceneView);
+
+	h_SceneView.insert({ L"Main View", spSceneView });
 }
 
 //void Scene::Update(TimeStep ts)
@@ -71,13 +75,13 @@ void Scene::End()
 
 }
 
-Entity Scene::CreateEntity(const std::string& name)
+Entity Scene::CreateEntity(const std::wstring& name)
 {
 	// Invoked on the update path for a new game object
 
 	Entity entity = { m_Registry.create(), SafelyCopyablePointer<Scene>(this) };
 	entity.AddComponent<TransformComponent>();
 	auto& tag = entity.AddComponent<TagComponent>();
-	tag.Tag = name.empty() ? L"Entity" : s2ws(name);
+	tag.Tag = name.empty() ? L"Entity" : name;
 	return entity;
 }

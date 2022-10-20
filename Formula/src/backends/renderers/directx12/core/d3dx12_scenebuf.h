@@ -6,7 +6,7 @@ public:
     RenderTexture(DXGI_FORMAT format) noexcept;
 
     void SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor);
-    void SetWindow(const RECT& output);
+    void SetWindow(const size_t width, const size_t height);
     void SetClearColor(DirectX::FXMVECTOR color);
     void ResizeResource(size_t width, size_t height);
 

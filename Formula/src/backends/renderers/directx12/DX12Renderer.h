@@ -15,8 +15,9 @@ class DirectX12Renderer : public Renderer
 
 public:	
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData, SafelyCopyablePointer<void> outInfo) override;
-	virtual void RequestService(GraphicsService::BindShaderProgram usage, const std::wstring& path, SafelyCopyablePointer<void> outInfo) override;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const void* initData, SafelyCopyablePointer<void> meshInfo) override;
+	virtual void RequestService(GraphicsService::BindShaderProgram bindWhat, const std::wstring& path, SafelyCopyablePointer<void> shaderInfo) override;
+	virtual void RequestService(GraphicsService::SetRenderTarget renderWhere, const size_t width, const size_t height, SafelyCopyablePointer<void> rtInfo) override;
 	//virtual void RequestService(GraphicsService::Draw drawMode);
 
 private:

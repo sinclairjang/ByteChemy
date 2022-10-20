@@ -4,6 +4,7 @@
 #include "core/d3dx12_rscalloc.h"
 #include "core/d3dx12_rootsigner.h"
 #include "core/d3dx12_shadergen.h"
+#include "core/d3dx12_scenebuf.h"
 
 // Import
 extern ID3D12Device* g_pd3dDevice;
@@ -57,13 +58,13 @@ void DirectX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocW
 		
 	}
 
-	else
+	else  // == GraphicsService::AllocateGPUMemory::TEXTURE
 	{
 
 	}
 }
 
-void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHow, const std::wstring& path,  SafelyCopyablePointer<void> outInfo)
+void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindWhat, const std::wstring& path,  SafelyCopyablePointer<void> outInfo)
 {
 	namespace fs = std::filesystem;
 
@@ -74,7 +75,7 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 
 	//FM_ASSERTM(ext == "formula", "Requested shader file format is not supported.");
 
-	if (bindHow == GraphicsService::BindShaderProgram::GRAPHICS)
+	if (bindWhat == GraphicsService::BindShaderProgram::GRAPHICS)
 	{
 		//TODO: Later we procedurally extract resource binding informations from custom format dynamically, namely a file with extension '.formula'.
 		// For the time being, we code by hand the graphics render pipeline based on hlsl files.
@@ -104,20 +105,43 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindHo
 
 			auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 			shaderProgram.CreateGraphicsShader(path, pipeSpec);
-
 			SafelyCopyablePointer<void> spGraphicsPipelineHandle(shaderProgram.GetGraphicsPipelineHandle(), 
 				[](ID3D12PipelineState* ps) { ps->Release(); });
 			
 			outInfo = spGraphicsPipelineHandle;
 		}
 		
-		else
+		else  // == GraphicsService::BindShaderProgram::COMPUTE
 		{
 			FM_ASSERTM(0, "Unknown shader file");
 		}
 	}
 	else
 	{
-		FM_ASSERTM(0, "Requested compute shader is not yet supported");
+		FM_ASSERTM(0, "Requested service(Compute Shader) is not yet supported");
+	}
+}
+
+void DirectX12Renderer::RequestService(GraphicsService::SetRenderTarget renderWhere, const size_t width, const size_t height, SafelyCopyablePointer<void> rtInfo)
+{
+	if (renderWhere == GraphicsService::SetRenderTarget::FRAMEBUFFER)
+	{
+		FM_ASSERTM(0, "Requested Service(Frame Buffer) is not yet supported");
+	}
+	else  // == GraphicsService::SetRenderTarget::TEXTURE
+	{
+		SafelyCopyablePointer<RenderTexture> sp_SceneBuffer = CreateRef<RenderTexture>(DXGI_FORMAT_R8G8B8A8_UNORM);
+		
+		DirectX::XMVECTORF32 fColorValue = { 0.96f, 0.97f, 0.97f, 1.f };
+		DirectX::XMVECTOR colorValue = fColorValue;
+		sp_SceneBuffer->SetClearColor(colorValue);
+		
+		D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor;
+		memset(&srvDescriptor, 0, sizeof(srvDescriptor));
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor;
+		memset(&rtvDescriptor, 0, sizeof(rtvDescriptor));
+		sp_SceneBuffer->SetDevice(g_pd3dDevice, srvDescriptor, rtvDescriptor);
+
+
 	}
 }

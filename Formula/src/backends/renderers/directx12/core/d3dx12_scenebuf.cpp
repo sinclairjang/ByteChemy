@@ -56,12 +56,8 @@ void RenderTexture::SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE 
     m_RtvDescriptor = rtvDescriptor;
 }
 
-void RenderTexture::SetWindow(const RECT& output)
+void RenderTexture::SetWindow(const size_t width, const size_t height)
 {
-    // Determine the render target size in pixels
-    auto width = size_t(std::max<LONG>(output.right - output.left, 1));
-    auto height = size_t(std::max<LONG>(output.bottom - output.top, 1));
-
     ResizeResource(width, height);
 }
 
