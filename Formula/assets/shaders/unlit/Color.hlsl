@@ -1,21 +1,15 @@
 // Unlit Shader
 
-cbuffer WorldPos : register(b0)
+cbuffer GlobalProperties : register(b0)
 {
 	float4x4 gWorld;
 }
 
-cbuffer Color : register(b1)
-{
-	float4 color;
-}
-
-cbuffer CameraView : register(b2)
+cbuffer ObjectProperties: register(b1)
 {
 	float4x4 gViewProj;
+	float4 color;
 }
-
-
 
 struct VertexIn
 {

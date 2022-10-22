@@ -62,43 +62,43 @@ DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSi
     return defaultBuffer;
 }
 
-ImageTextureAllocator::ImageTextureAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) :
+ImageTexture::ImageTexture(ID3D12Device* device) :
     m_Device(device)
 {
 }
 
-ImageTextureAllocator::~ImageTextureAllocator()
+ImageTexture::~ImageTexture()
 {
 }
 
-void ImageTextureAllocator::CreateImageTextureFromFile(const std::wstring& path)
+void ImageTexture::CreateImageTextureFromFile(const std::wstring& path)
 {
     namespace fs = std::filesystem;
 
     std::wstring ext = fs::path(path).extension();
 
+    DirectX::ScratchImage scratchImage;
 
     if (ext == L".dds" || ext == L".DDS")
-        DirectX::LoadFromDDSFile(path.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, m_Image);
+        DirectX::LoadFromDDSFile(path.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, scratchImage);
     else if (ext == L".tga" || ext == L".TGA")
-        DirectX::LoadFromTGAFile(path.c_str(), nullptr, m_Image);
+        DirectX::LoadFromTGAFile(path.c_str(), nullptr, scratchImage);
     else  // bmp, png, giff, tiff, jpeg
-        DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, m_Image);
+        DirectX::LoadFromWICFile(path.c_str(), DirectX::WIC_FLAGS_NONE, nullptr, scratchImage);
 
     ThrowIfFailed(DirectX::CreateTexture(
-        m_Device.Get(),
-        m_Image.GetMetadata(),
+        m_Device,
+        scratchImage.GetMetadata(),
         m_Tex2D.GetAddressOf()));
 
-    m_RSCDesc = m_Tex2D->GetDesc();
 
     std::vector<D3D12_SUBRESOURCE_DATA> subResources;
 
     ThrowIfFailed(DirectX::PrepareUpload(
-        m_Device.Get(),
-        m_Image.GetImages(),
-        m_Image.GetImageCount(),
-        m_Image.GetMetadata(),
+        m_Device,
+        scratchImage.GetImages(),
+        scratchImage.GetImageCount(),
+        scratchImage.GetMetadata(),
         subResources));
 
     const UINT64 bufSize = ::GetRequiredIntermediateSize(
@@ -111,7 +111,7 @@ void ImageTextureAllocator::CreateImageTextureFromFile(const std::wstring& path)
 
     ComPtr<ID3D12Resource> texUploadBuf;
     
-    WaitSync waitSync(m_Device.Get());
+    WaitSync waitSync(m_Device);
     auto cmdList = waitSync.Begin();
 
     ThrowIfFailed(m_Device->CreateCommittedResource(
@@ -138,19 +138,19 @@ void ImageTextureAllocator::CreateImageTextureFromFile(const std::wstring& path)
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(m_Device->CreateDescriptorHeap(
         &srvHeapDesc,
-        IID_PPV_ARGS(m_SRVHeap.GetAddressOf())
+        IID_PPV_ARGS(m_SrvHeap.GetAddressOf())
     ));
 
-    m_SRVCpuHandle = m_SRVHeap->GetCPUDescriptorHandleForHeapStart();
+    m_SrvDescriptor = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = m_Image.GetMetadata().format;
+    srvDesc.Format = scratchImage.GetMetadata().format;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDesc.Texture2D.MipLevels = 1;
     m_Device->CreateShaderResourceView(
         m_Tex2D.Get(),
         &srvDesc,
-        m_SRVCpuHandle
+        m_SrvDescriptor
     );
 }

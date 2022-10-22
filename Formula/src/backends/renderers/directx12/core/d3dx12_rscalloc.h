@@ -1,9 +1,5 @@
+
 #pragma once
-
-//-----------------------------------------------------------------------------
-// Resource Acquisition Is Initialization
-//-----------------------------------------------------------------------------
-
 
 ComPtr<ID3D12Resource>
 DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSize);
@@ -57,30 +53,73 @@ public:
     }
 
 private:
-    ComPtr<ID3D12Resource>      m_UploadBuffer;
-    BYTE*                       m_MappedData = nullptr;
+    ComPtr<ID3D12Resource> m_UploadBuffer;
+    BYTE* m_MappedData = nullptr;
 
-    UINT64                      m_ElementByteSize = 0;
-    bool                        m_IsConstantBuffer = false;
+    UINT64 m_ElementByteSize = 0;
+    bool m_IsConstantBuffer = false;
 };
 
-class ImageTextureAllocator
+class ImageTexture
 {
 public:
-    ImageTextureAllocator(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
-    ~ImageTextureAllocator();
+    ImageTexture(ID3D12Device* device);
+    ~ImageTexture();
 
-    ImageTextureAllocator(const ImageTextureAllocator& rhs) = delete;
-    ImageTextureAllocator* operator=(const ImageTextureAllocator& rhs) = delete;
+    ImageTexture(const ImageTexture& rhs) = delete;
+    ImageTexture* operator=(const ImageTexture& rhs) = delete;
 
     void CreateImageTextureFromFile(const std::wstring& path);
 
 private:
-    ComPtr<ID3D12Device>                m_Device;
+    ID3D12Device* m_Device;
+    
+    ComPtr<ID3D12Resource> m_Tex2D;
+    ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
+    D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptor;
+};
 
-    DirectX::ScratchImage           m_Image;
-    D3D12_RESOURCE_DESC             m_RSCDesc;
-    ComPtr<ID3D12Resource>          m_Tex2D;
-    ComPtr<ID3D12DescriptorHeap>    m_SRVHeap;
-    D3D12_CPU_DESCRIPTOR_HANDLE     m_SRVCpuHandle;
+struct SubmeshGeometry
+{
+    UINT IndexCount = 0;
+    UINT StartIndexLocation = 0;
+    INT BaseVertexLocation = 0;
+};
+
+struct MeshGeometry
+{
+    std::string Name;
+
+    ComPtr<ID3DBlob> VertexBufferCPU = nullptr;
+    ComPtr<ID3DBlob> IndexBufferCPU = nullptr;
+
+    ComPtr<ID3D12Resource> VertexBufferGPU = nullptr;
+    ComPtr<ID3D12Resource> IndexBufferGPU = nullptr;
+
+    UINT VertexByteStride = 0;
+    UINT VertexBufferByteSize = 0;
+    DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
+    UINT IndexBufferByteSize = 0;
+
+    std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
+
+    D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const
+    {
+        D3D12_VERTEX_BUFFER_VIEW vbv{};
+        vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
+        vbv.StrideInBytes = VertexByteStride;
+        vbv.SizeInBytes = VertexBufferByteSize;
+
+        return vbv;
+    }
+
+    D3D12_INDEX_BUFFER_VIEW IndexBufferView() const
+    {
+        D3D12_INDEX_BUFFER_VIEW ibv{};
+        ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
+        ibv.Format = IndexFormat;
+        ibv.SizeInBytes = IndexBufferByteSize;
+
+        return ibv;
+    }
 };

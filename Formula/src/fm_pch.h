@@ -214,6 +214,8 @@ struct Vertex
 
 struct MeshData
 {
+	std::string Name;
+
 	std::vector<Vertex> Vertices;
 	std::vector<UINT32> Indices32;
 

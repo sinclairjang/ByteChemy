@@ -1,5 +1,13 @@
 #pragma once
 
+template<typename T>
+static inline void SafeRelease(T*& res)
+{
+    if (res)
+        res->Release();
+    res = NULL;
+}
+
 class RenderTexture
 {
 public:
@@ -21,15 +29,19 @@ public:
     inline DXGI_FORMAT GetFormat() const noexcept { return m_Format; }
 
 private:
-    ComPtr<ID3D12Device>	m_Device;
-    ComPtr<ID3D12Resource>	m_Resource;
-    D3D12_RESOURCE_STATES					m_State;
-    D3D12_CPU_DESCRIPTOR_HANDLE				m_SrvDescriptor;
-    D3D12_CPU_DESCRIPTOR_HANDLE				m_RtvDescriptor;
-    float									m_ClearColor[4];
-    DXGI_FORMAT								m_Format;
-    size_t									m_Width;
-    size_t									m_Height;
+    ID3D12Device* m_Device;
+    
+    ComPtr<ID3D12Resource> m_Resource;
+    D3D12_RESOURCE_STATES m_State;
+    
+    D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptor;
+    D3D12_CPU_DESCRIPTOR_HANDLE m_RtvDescriptor;
+    
+    float m_ClearColor[4];
+    DXGI_FORMAT m_Format;
+    
+    size_t m_Width;
+    size_t m_Height;
 };
 
 

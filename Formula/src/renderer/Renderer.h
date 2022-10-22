@@ -22,7 +22,7 @@ namespace GraphicsService
 		TEXTURE,
 	};
 
-	enum class BindShaderProgram : UINT8
+	enum class CreateGPUProgram : UINT8
 	{
 		GRAPHICS,
 		COMPUTE,
@@ -34,7 +34,7 @@ namespace GraphicsService
 		TEXTURE,
 	};
 
-	enum class DispatchDrawCall : UINT8
+	enum class Render : UINT8
 	{
 		DIRECT,
 		INSTANCED,
@@ -47,10 +47,10 @@ public:
 	virtual ~Renderer() {}
 
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory type, const void* initData,  SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::BindShaderProgram type, const std::wstring& path,  SafelyCopyablePointer<void> outInfo) = 0;
-	virtual void RequestService(GraphicsService::SetRenderTarget type, const size_t width, const size_t height, SafelyCopyablePointer<void> outInfo) = 0;
-	//virtual void RequestService(GraphicsService::Draw drawMode) = 0;
+	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const std::wstring& path, const void* initData,  void* outInfo) = 0;
+	virtual void RequestService(GraphicsService::CreateGPUProgram bindWhat, const std::wstring& path,  void* outInfo) = 0;
+	virtual void RequestService(GraphicsService::SetRenderTarget renderWhere, const size_t width, const size_t height, void* outInfo) = 0;
+	virtual void RequestService(GraphicsService::Render drawHow, void* outInfo) = 0;
 };
 
 

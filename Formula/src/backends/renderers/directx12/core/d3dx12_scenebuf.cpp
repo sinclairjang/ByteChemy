@@ -1,4 +1,3 @@
-
 #include "fm_pch.h"
 #include "d3dx12_scenebuf.h"
 
@@ -18,7 +17,7 @@ RenderTexture::RenderTexture(DXGI_FORMAT format) noexcept :
 
 void RenderTexture::SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
 {
-    if (device == m_Device.Get() && srvDescriptor.ptr == m_SrvDescriptor.ptr && rtvDescriptor.ptr == m_RtvDescriptor.ptr)
+    if (device == m_Device && srvDescriptor.ptr == m_SrvDescriptor.ptr && rtvDescriptor.ptr == m_RtvDescriptor.ptr)
         return;
 
     if (m_Device)
@@ -71,11 +70,6 @@ void RenderTexture::ResizeResource(size_t width, size_t height)
     if (width == m_Width && height == m_Height)
         return;
 
-    if (m_Width > UINT32_MAX || m_Height > UINT32_MAX)
-    {
-        throw std::runtime_error("Invalid size");
-    }
-
     if (!m_Device)
         return;
 
@@ -118,8 +112,8 @@ void RenderTexture::ResizeResource(size_t width, size_t height)
 
 void RenderTexture::ReleaseDevice() noexcept
 {
+    SafeRelease(m_Device);
     m_Resource.Reset();
-    m_Device.Reset();
 
     m_State = D3D12_RESOURCE_STATE_COMMON;
     m_Width = m_Height = 0;

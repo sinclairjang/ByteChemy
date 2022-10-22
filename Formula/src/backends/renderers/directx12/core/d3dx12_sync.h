@@ -10,11 +10,12 @@ public:
 	void Flush();
 
 private:
-	ComPtr<ID3D12Device>				m_Device;
-	ComPtr<ID3D12CommandQueue>			m_CmdQueue;
-	ComPtr<ID3D12CommandAllocator>		m_CmdAlloc;
-	ComPtr<ID3D12GraphicsCommandList>	m_CmdList;
-	ComPtr<ID3D12Fence>					m_Fence;
+	ID3D12Device* m_Device;
+	
+	ComPtr<ID3D12CommandQueue> m_CmdQueue;
+	ComPtr<ID3D12CommandAllocator> m_CmdAlloc;
+	ComPtr<ID3D12GraphicsCommandList> m_CmdList;
+	ComPtr<ID3D12Fence> m_Fence;
 
 	HANDLE	m_Event;
 };

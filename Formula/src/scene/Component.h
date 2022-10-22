@@ -35,7 +35,7 @@ struct MeshFilterComponent
 	using IndexCount = size_t;
 	using MeshInfo = std::pair<VertexCount, IndexCount>;
 
-	std::wstring ModelName; // TODO: to be replaced and handled by GUID system
+	std::string ModelName; // TODO: to be replaced and handled by GUID system
 	
 	MeshData Mesh;
 	MeshInfo meshInfo;
@@ -47,7 +47,7 @@ struct MeshFilterComponent
 	MeshFilterComponent&
 		operator=(const MeshFilterComponent&) = default;
 
-	MeshFilterComponent(MeshData&& other, std::wstring name = s2ws("Untitled Model")) :
+	MeshFilterComponent(MeshData&& other, std::string name = "Unnamed") :
 		ModelName(name)
 	{
 		Mesh.Vertices	 = std::move(other.Vertices);
@@ -60,25 +60,28 @@ struct MeshFilterComponent
 
 struct MeshRendererComponent
 {
-	using MeshIndex = std::weak_ptr<void>;
-	
-	MeshIndex MeshID;
+	// activates mesh render pipeline
+	// shader name = standard (default)
+};
 
-	MeshRendererComponent() = default;
-	MeshRendererComponent(const MeshRendererComponent&) = default;
-	MeshRendererComponent(const SafelyCopyablePointer<void>& spMesh) :
-		MeshID(spMesh) {}
+struct LineRendererComponent
+{
+	// activates line render pipeline
+	// shader name = standard (default)
+};
+
+struct ParticleRendererComponent
+{
+	// activates particle render pipeline
+	// shader name = standard (default)
 };
 
 struct UnlitMatericalComponent
 {
-	using MaterialIndex = std::weak_ptr<void>; 
-
-	MaterialIndex MaterialID;
 	FMVec4 MainColor;
 
 	UnlitMatericalComponent() = default;
 	UnlitMatericalComponent(const UnlitMatericalComponent&) = default;
-	UnlitMatericalComponent(const SafelyCopyablePointer<void>& spShader, const FMVec4& color)
-		: MaterialID(spShader), MainColor(color) {}
+	UnlitMatericalComponent(const FMVec4& color)
+		: MainColor(color) {}
 };
