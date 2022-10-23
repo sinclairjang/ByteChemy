@@ -61,6 +61,7 @@ private:
     BYTE* m_MappedData = nullptr;
 
     UINT64 m_ElementByteSize = 0;
+    UINT64 m_ElementCount = 0;
     bool m_IsConstantBuffer = false;
 };
 

@@ -47,10 +47,12 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+#include <numeric>
 #include <memory>
 #include <list>
 #include <deque>
 #include <vector>
+#include <stack>
 #include <map>
 #include <set>
 #include <assert.h>
@@ -261,20 +263,30 @@ To container_cast(From&& from)
 }
 
 template <typename T>
-using SafelyMovablePointer = std::unique_ptr<T>;
+using Scope = std::unique_ptr<T>;
 template <typename T, typename ...Args>
-constexpr SafelyMovablePointer<T> CreateScope(Args&& ...args)
+constexpr Scope<T> CreateScope(Args&& ...args)
 {
 	return std::make_unique<T>(std::forward<Args>(args)...);
 }
 
 template <typename T>
-using SafelyCopyablePointer = std::shared_ptr<T>;
+using Ref = std::shared_ptr<T>;
 template <typename T, typename ...Args>
-constexpr SafelyCopyablePointer<T> CreateRef(Args&& ...args)
+constexpr Ref<T> CreateRef(Args&& ...args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
+
+template <typename ForwardIt, typename T>
+constexpr void dota(ForwardIt first, ForwardIt last, T value)
+{
+	for (auto pos = first; pos != last+1; ++pos)
+	{
+		*pos = value--;
+	}
+}
+
 
 template <typename Key, typename T>
 using HashTable = std::unordered_map<Key, T>;
