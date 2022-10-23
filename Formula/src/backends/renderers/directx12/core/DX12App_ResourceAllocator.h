@@ -8,7 +8,8 @@ template<typename T>
 class UploadBufAllocator
 {
 public:
-    UploadBufAllocator(ID3D12Device* device, UINT elementCount, bool isConstantBuffer)
+    UploadBufAllocator() = default;
+    UploadBufAllocator(ID3D12Device* device, bool isConstantBuffer)
         : m_IsConstantBuffer(isConstantBuffer)
     {
         m_ElementByteSize = sizeof(T);
@@ -17,22 +18,25 @@ public:
         {
             m_ElementByteSize = ((sizeof(T) + 255) % ~255);
         }
+    }
 
+    UploadBufAllocator(const UploadBufAllocator& rhs) = delete;
+    UploadBufAllocator* operator=(const UploadBufAllocator& rhs) = delete;
+
+    UploadBufAllocator::Map(UINT elementCount)
+    {
         ThrowIfFailed(device->CreateCommittedResource(
             &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
             D3D12_HEAP_FLAG_NONE,
             &CD3DX12_RESOURCE_DESC::Buffer(m_ElementByteSize * elementCount),
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(m_UploadBuffer.GetAddressOf())));
+            IID_PPV_ARGS(m_UploadBuffer.ReleaseAndGetAddressOf())));  //Debug Marker
 
         ThrowIfFailed(m_UploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&m_MappedData)));
     }
 
-    UploadBufAllocator(const UploadBufAllocator& rhs) = delete;
-    UploadBufAllocator* operator=(const UploadBufAllocator& rhs) = delete;
-
-    ~UploadBufAllocator()
+    UploadBufAllocator::SafeRelease()
     {
         if (m_UploadBuffer != nullptr)
         {

@@ -1,11 +1,11 @@
 #include "fm_pch.h"
 #include "DX12Renderer.h"
 
-#include "core/d3dx12_error.h"
-#include "core/d3dx12_rscalloc.h"
-#include "core/d3dx12_rootsigner.h"
-#include "core/d3dx12_shadergen.h"
-#include "core/d3dx12_scenebuf.h"
+#include "core/DX12App_ErrorHandler.h"
+#include "core/DX12App_ResourceAllocator.h"
+#include "core/DX12App_RootSigner.h"
+#include "core/DX12App_ShaderGenerator.h"
+#include "core/DX12App_SceneBuffer.h"
 
 // Import from ImGui main framework
 extern ID3D12Device* g_pd3dDevice;
@@ -88,15 +88,15 @@ void DX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, 
 		std::wstring stem = fs::path(path).stem();
 		std::wstring ext = fs::path(path).extension();
 
-		std::unique_ptr<ImageTexture> imgTexUploader = std::make_unique<ImageTexture>(g_pd3dDevice);
+		std::unique_ptr<ImageTexture> imageTex = std::make_unique<ImageTexture>(g_pd3dDevice);
 
-		imgTexUploader->CreateImageTextureFromFile(path);
+		imageTex->CreateImageTextureFromFile(path);
 
-		m_TexUploader[ws2s(stem)] = std::move(imgTexUploader);
+		m_ImageTex[ws2s(stem)] = std::move(imageTex);
 	}
 }
 
-void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindWhat, const std::wstring& path,  SafelyCopyablePointer<void> outInfo)
+void DX12Renderer::RequestService(GraphicsService::CreateGPUProgram shaderType, const std::wstring& path, void* outInfo)
 {
 	namespace fs = std::filesystem;
 
@@ -107,7 +107,7 @@ void DirectX12Renderer::RequestService(GraphicsService::BindShaderProgram bindWh
 
 	//FM_ASSERTM(ext == "formula", "Requested shader file format is not supported.");
 
-	if (bindWhat == GraphicsService::BindShaderProgram::GRAPHICS)
+	if (shaderType == GraphicsService::CreateGPUProgram::GRAPHICS)
 	{
 		//TODO: Later we procedurally extract resource binding informations from custom format dynamically, namely a file with extension '.formula'.
 		// For the time being, we code by hand the graphics render pipeline based on hlsl files.

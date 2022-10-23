@@ -1,8 +1,8 @@
 #include "fm_pch.h"
 
-#include "d3dx12_rscalloc.h"
-#include "d3dx12_error.h"
-#include "d3dx12_sync.h"
+#include "DX12App_ResourceAllocator.h"
+#include "DX12App_ErrorHandler.h"
+#include "DX12App_Synchronizer.h"
 
 ComPtr<ID3D12Resource> 
 DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSize)
