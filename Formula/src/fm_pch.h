@@ -50,9 +50,10 @@
 #include <numeric>
 #include <memory>
 #include <list>
-#include <deque>
 #include <vector>
+#include <deque>
 #include <stack>
+#include <queue>
 #include <map>
 #include <set>
 #include <assert.h>
@@ -277,16 +278,6 @@ constexpr Ref<T> CreateRef(Args&& ...args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
-
-template <typename ForwardIt, typename T>
-constexpr void dota(ForwardIt first, ForwardIt last, T value)
-{
-	for (auto pos = first; pos != last+1; ++pos)
-	{
-		*pos = value--;
-	}
-}
-
 
 template <typename Key, typename T>
 using HashTable = std::unordered_map<Key, T>;

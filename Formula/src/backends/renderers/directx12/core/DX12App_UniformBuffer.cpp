@@ -1,62 +1,104 @@
 #include "fm_pch.h"
 #include "DX12App_UniformBuffer.h"
 
+#include "utils/Log.h"
+
+UniformManager::UniformManager()
+{
+	for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+	{
+		m_UniformFrameResources[i] = std::make_unique<UniformFrameResource>();
+		
+		m_UniformFrameResources[i]->MainPass.SetNumElements(NUM_FRAMES_IN_FLIGHT);
+		m_UniformFrameResources[i]->MainPass.Map();
+
+		m_UniformFrameResources[i]->UnlitPass.SetNumElements(NUM_FRAMES_IN_FLIGHT);
+		m_UniformFrameResources[i]->UnlitPass.Map();
+	}
+}
+
 UINT64 UniformManager::GetMainPropBufferIdx()
 {
-	if (m_MainPropIdxStack.empty())
+	if (m_MainPropIdxQueue.empty())
 	{
-		const int n = 10;
-		std::deque<UINT64> v(n);
+		std::deque<UINT64> deque(10);
+		std::iota(deque.begin(), deque.end(), m_NumMainProps);
 
-		dota(v.begin(), v.end(), 9);  //DEBUG MARK
+		m_MainPropIdxQueue = std::queue<UINT64>(std::move(deque));  // iter1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], iter2: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19], ...
 
+		m_NumMainProps += 10;
 
-		m_MainPropIdxStack = std::stack<UINT64>(std::move(v));
-
+		ResizeMainPropBuffers(m_NumMainProps);
 	}
-	else
-	{
-		UINT64 mainPropBufIdx = m_MainPropIdxStack.top();
-		m_MainPropIdxStack.pop();
+	
+	UINT64 mainPropBufIdx = m_MainPropIdxQueue.front();
+	m_MainPropIdxQueue.pop();
 
-		return mainPropBufIdx;
-	}
+	return mainPropBufIdx;
+	
 }
 
 UINT64 UniformManager::GetShadingPropBufferIdx(ShadingType type)
 {
-	return UINT64();
+	if (type == ShadingType::UNLIT)
+	{
+		if (m_UnlitPropIdxQueue.empty())
+		{
+			std::deque<UINT64> deque(10);
+			std::iota(deque.begin(), deque.end(), m_NumUnlitProps);
+
+			m_UnlitPropIdxQueue = std::queue<UINT64>(std::move(deque));  // iter1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], iter2: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19], ...
+
+			m_NumUnlitProps += 10;
+
+			ResizeShadingPropBuffers(ShadingType::UNLIT, m_NumUnlitProps);
+		}
+	}
+
+	else
+	{
+		LOG_INFO("Other shading types are not yet supported");
+		return -1;  // Reserved invalid index
+	}
+
+	UINT64 unlitPropBufIdx = m_UnlitPropIdxQueue.front();
+	m_UnlitPropIdxQueue.pop();
+
+	return unlitPropBufIdx;
 }
 
-void UniformManager::CreateMainPropBuffers()
+
+void UniformManager::ResizeMainPropBuffers(UINT64 numMainProps)
 {
+	for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+	{
+		m_UniformFrameResources[i]->MainProps.SafeRelease();
+		
+		m_UniformFrameResources[i]->MainProps.SetNumElements(numMainProps);
+		
+		m_UniformFrameResources[i]->MainProps.Map();
+	}
 }
 
-void UniformManager::CerateMainPassBuffers()
+
+
+void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitProps)
 {
+	if (type == ShadingType::UNLIT)
+	{
+		for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_UniformFrameResources[i]->UnlitProps.SafeRelease();
+
+			m_UniformFrameResources[i]->UnlitProps.SetNumElements(numUnlitProps);
+
+			m_UniformFrameResources[i]->UnlitProps.Map();
+		}
+	}
+
+	else
+	{
+		LOG_INFO("Other shading types are not yet supported");
+	}
 }
 
-void UniformManager::CreateShadingPropBuffers(ShadingType type)
-{
-}
-
-void UniformManager::CreateShadingPassBuffers(ShadingType type)
-{
-}
-
-
-void UniformManager::ResizeMainPropBuffers()
-{
-}
-
-void UniformManager::ResizeMainPassBuffers()
-{
-}
-
-void UniformManager::ResizeShadingPropBuffers(ShadingType type)
-{
-}
-
-void UniformManager::ResizeShadingPassBuffers(ShadingType type)
-{
-}

@@ -28,7 +28,7 @@ struct RenderItem
 	UINT EngineUniformIdx = -1;
 	UINT ShadingUniformIdx = -1;
 
-	//Note: This pointer is valid as long as DX12Renderer object lifetime.
+	//Note: This pointer is stable (i.e. valid as long as DX12Renderer object lifetime).
 	MeshGeometry* meshGeo = nullptr;
 
 	D3D12_PRIMITIVE_TOPOLOGY primType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

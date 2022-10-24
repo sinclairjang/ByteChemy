@@ -4,13 +4,18 @@
 
 using namespace DirectX;
 
+// Import from ImGui main framework
+extern ID3D12Device* g_pd3dDevice;
+
 // Data mirroring ImGui main framework
 static int const NUM_FRAMES_IN_FLIGHT = 3;
 static int const NUM_BACK_BUFFERS = 3;
 
-//	Group uniforms based on	1) update frequencies (e.g. per objects or render pass etc.)
-//							2) render pipelines (e.g. unlit or standard etc.)
+//	Group uniforms based on	1) update frequencies (e.g. per objects or render pass etc)
+//							2) render pipelines (e.g. unlit or standard etc)
 //							3) commonality with respect to shaders (e.g. engine or otherwise)
+
+// This groups of uniforms will be bound to the common memory scheme (i.e. root signature) that defines the set of shader registers to provide consistent interface with the underlying hardware per draw call.
 
 struct EngineObjectProperty		// -> register(b0)
 {
@@ -34,7 +39,10 @@ struct EnginPass					// -> register(b1)
 enum class ShadingType : UINT8
 {
     UNLIT,
-    STANDARD,
+
+    //TODO:
+    //PARTICLE,
+    //STANDARD,
 };
 
 //DEBUG MARKER: should I supply placeholder data?
@@ -51,6 +59,15 @@ struct UnlitShadingProperty		// -> register(b3)
 };
 
 //TODO:
+//struct ParticleShadingPass		// -> register(b2)
+//{
+//
+//};
+//
+//struct ParticleShadingProperties	// -> register(b3)
+//{
+//
+//};
 //struct StandardShadingPass		// -> register(b2)
 //{
 //
@@ -61,45 +78,24 @@ struct UnlitShadingProperty		// -> register(b3)
 //
 //};
 
-
-/*
- // Create and grow vertex/index buffers if needed
-    if (fr->VertexBuffer == NULL || fr->VertexBufferSize < draw_data->TotalVtxCount)
-    {
-        SafeRelease(fr->VertexBuffer);
-        fr->VertexBufferSize = draw_data->TotalVtxCount + 5000;
-        D3D12_HEAP_PROPERTIES props;
-        memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
-        props.Type = D3D12_HEAP_TYPE_UPLOAD;
-        props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-        props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-        D3D12_RESOURCE_DESC desc;
-        memset(&desc, 0, sizeof(D3D12_RESOURCE_DESC));
-        desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Width = fr->VertexBufferSize * sizeof(ImDrawVert);
-        desc.Height = 1;
-        desc.DepthOrArraySize = 1;
-        desc.MipLevels = 1;
-        desc.Format = DXGI_FORMAT_UNKNOWN;
-        desc.SampleDesc.Count = 1;
-        desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-        desc.Flags = D3D12_RESOURCE_FLAG_NONE;
-        if (bd->pd3dDevice->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&fr->VertexBuffer)) < 0)
-            return;
-    }
-*/
-
 // UniformManager is responsible for 1) allocations and resizing of upload buffers upon creations of Entities
 //									 2) managing buffer indices to map Entites to upload buffers
 //									 3) flipping upload buffers upon new frame
 
 
-struct FrameResource
+struct UniformFrameResource
 {
 	//TEMP
-	UploadBufAllocator<EngineObjectProperty> m_MainProps;
-	UploadBufAllocator<EnginPass> m_MainPass;
-	UploadBufAllocator<UnlitShadingProperty> m_UnlitProps;
+    UniformFrameResource() : 
+        MainProps(g_pd3dDevice, true),
+        MainPass(g_pd3dDevice, true),
+        UnlitProps(g_pd3dDevice, true),
+        UnlitPass(g_pd3dDevice, true) {}
+
+	UploadBufAllocator<EngineObjectProperty> MainProps;
+	UploadBufAllocator<EnginPass> MainPass;
+    UploadBufAllocator<UnlitShadingPass> UnlitPass;
+	UploadBufAllocator<UnlitShadingProperty> UnlitProps;
 };
 
 class UniformManager
@@ -107,40 +103,41 @@ class UniformManager
     // Uniform buffer index manager
     //- On Entity being created, it is assigned an index to its object buffer via GetMainPropBufferIdx
     //- On Shader being attached to Entity, It is assigned an index to its property buffer via GetShadingPropBufferIdx
+    
+    //- On Entity being destroyed, it gives the assigned index back to the underlying index queue by push
+    //- On Shader being detached from Entity, it gives the assigned index back to the underlying index queue by push
 
 public:
-    UniformManager() = default;
-
+    // Value-initialize uniform frame resources
+    UniformManager();
+    
     // Create and grow uniform buffers if index stack is empty
     UINT64 GetMainPropBufferIdx();
     UINT64 GetShadingPropBufferIdx(ShadingType type);
 
 private:
-    void CreateMainPropBuffers();
-    void CerateMainPassBuffers();
-    
-    void CreateShadingPropBuffers(ShadingType type);
-    void CreateShadingPassBuffers(ShadingType type);
-
-    void ResizeMainPropBuffers();
-    void ResizeMainPassBuffers();
-    
-    void ResizeShadingPropBuffers(ShadingType type);
-    void ResizeShadingPassBuffers(ShadingType type);
-
-private:
-    static const int NumFrameResources = NUM_FRAMES_IN_FLIGHT;
-    
-	std::vector<std::unique_ptr<FrameResource>> m_FrameResources;
+    void ResizeMainPropBuffers(UINT64 numMainProps);
+    void ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitProps);
+        
+private:    
+	std::unique_ptr<UniformFrameResource> m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
 	
-    FrameResource* m_CurrFrameResource = nullptr;
-	int mCurrFrameResourceIndex = 0;
+    UniformFrameResource* m_CurrUniformFrameResource = nullptr;
+	int mCurrUniformFrameResourceIndex = 0;
     
-    std::stack<UINT64> m_MainPropIdxStack;
-    std::stack<UINT64> m_UnlitPropIdxStack;
+    std::queue<UINT64> m_MainPropIdxQueue;
+    std::queue<UINT64> m_UnlitPropIdxQueue;
    
+    UINT64 m_NumMainProps = 0;
+    UINT64 m_NumUnlitProps = 0;
+    
     //TODO:
-    // std::stack<UINT> m_StandardPropIdxStack;
+    // UINT64 m_NumParticleProps = 0;
+    // UINT64 m_NumStandardProps = 0;
+
+    //TODO:
+    // std::queue<UINT> m_ParticlePropIdxQueue;
+    // std::queue<UINT> m_StandardPropIdxQueue;
 
     ComPtr<ID3D12DescriptorHeap> m_MainPropHeap;
     ComPtr<ID3D12DescriptorHeap> m_MainPassHeap;
@@ -149,6 +146,9 @@ private:
     ComPtr<ID3D12DescriptorHeap> m_UnlitPassHeap;
 
     //TODO:
-    //ComPtr<ID3D12DescriptorHeap> m_StandardPropHeap;
+    //ComPtr<ID3D12DescriptorHeap> m_ParticlePropHeap;
+    //ComPtr<ID3D12DescriptorHeap> m_ParticlePassHeap;
+    
+    //ComPtr<ID3D12DescriptorHeap> m_StandardPassHeap;
     //ComPtr<ID3D12DescriptorHeap> m_StandardPassHeap;
 };
