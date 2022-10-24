@@ -1,9 +1,9 @@
 #include "fm_pch.h"
-#include "d3dx12_shadergen.h"
+#include "DX12App_ShaderGenerator.h"
 
-#include "d3dx12_error.h"
+#include "DX12App_ErrorHandler.h"
 
-Shader::Shader(ID3D12Device* device, RootSignature& rootSig)
+Shader::Shader(ID3D12Device* device, const RootSignature* rootSig)
 	: g_Device(device), m_GraphicsRootSignature(rootSig)
 {
 }
@@ -43,7 +43,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecifica
 	};
 
 	m_GraphicsPipelineStateDesc.InputLayout = { elemDesc, _countof(elemDesc) };
-	m_GraphicsPipelineStateDesc.pRootSignature = m_GraphicsRootSignature.GetGraphicsRootSignature().Get();
+	m_GraphicsPipelineStateDesc.pRootSignature = m_GraphicsRootSignature->GetGraphicsRootSignature().Get();
 	m_GraphicsPipelineStateDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	m_GraphicsPipelineStateDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);

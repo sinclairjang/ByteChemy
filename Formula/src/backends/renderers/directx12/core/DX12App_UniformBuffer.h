@@ -104,14 +104,14 @@ class UniformManager
     //- On Entity being created, it is assigned an index to its object buffer via GetMainPropBufferIdx
     //- On Shader being attached to Entity, It is assigned an index to its property buffer via GetShadingPropBufferIdx
     
-    //- On Entity being destroyed, it gives the assigned index back to the underlying index queue by push
-    //- On Shader being detached from Entity, it gives the assigned index back to the underlying index queue by push
+    //- On Entity being destroyed, it pushes the assigned index back to the underlying index queue
+    //- On Shader being detached from Entity, it pushes the assigned index back to the underlying index queue
 
 public:
     // Value-initialize uniform frame resources
     UniformManager();
     
-    // Create and grow uniform buffers if index stack is empty
+    // Create and grow uniform buffers if index stack is depleted
     UINT64 GetMainPropBufferIdx();
     UINT64 GetShadingPropBufferIdx(ShadingType type);
 
@@ -123,13 +123,19 @@ private:
 	std::unique_ptr<UniformFrameResource> m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
 	
     UniformFrameResource* m_CurrUniformFrameResource = nullptr;
-	int mCurrUniformFrameResourceIndex = 0;
+	int m_CurrUniformFrameResourceIndex = 0;
     
+    int m_MainPropsAlignment = 0;
+    int m_MainPassAlignment = 0;
+
+    int m_UnlitPropsAlignment = 0;
+    int m_UnlitPassAlignment = 0;
+
     std::queue<UINT64> m_MainPropIdxQueue;
     std::queue<UINT64> m_UnlitPropIdxQueue;
    
-    UINT64 m_NumMainProps = 0;
-    UINT64 m_NumUnlitProps = 0;
+    UINT m_NumMainProps = 0;
+    UINT m_NumUnlitProps = 0;
     
     //TODO:
     // UINT64 m_NumParticleProps = 0;
@@ -139,12 +145,13 @@ private:
     // std::queue<UINT> m_ParticlePropIdxQueue;
     // std::queue<UINT> m_StandardPropIdxQueue;
 
-    ComPtr<ID3D12DescriptorHeap> m_MainPropHeap;
+    ComPtr<ID3D12DescriptorHeap> m_MainPropsHeap;
     ComPtr<ID3D12DescriptorHeap> m_MainPassHeap;
 
-    ComPtr<ID3D12DescriptorHeap> m_UnlitPropHeap;
+    ComPtr<ID3D12DescriptorHeap> m_UnlitPropsHeap;
     ComPtr<ID3D12DescriptorHeap> m_UnlitPassHeap;
 
+    SIZE_T m_CbvDescriptorSize = 0;
     //TODO:
     //ComPtr<ID3D12DescriptorHeap> m_ParticlePropHeap;
     //ComPtr<ID3D12DescriptorHeap> m_ParticlePassHeap;

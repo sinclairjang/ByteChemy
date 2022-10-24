@@ -1,6 +1,6 @@
 #pragma once
 
-#include "d3dx12_rootsigner.h"
+#include "DX12App_RootSigner.h"
 
 enum class RENDER_MODE : UINT8
 {
@@ -89,11 +89,11 @@ struct GPUPipelineSpecification
 class Shader
 {
 public:
-	Shader(ID3D12Device* device, RootSignature& rootSig);
+	Shader(ID3D12Device* device, const RootSignature* rootSig);
 	~Shader();
 
 	void CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec);
-	inline ID3D12PipelineState* GetGraphicsPipelineHandle() { return m_GraphicsPipelineState; }
+	inline ComPtr<ID3D12PipelineState> GetGraphicsPipelineHandle() { return m_GraphicsPipelineState; }
 	 
 
 private:
@@ -109,9 +109,9 @@ private:
 
 private:
 	ID3D12Device* g_Device;
-	ID3D12PipelineState* m_GraphicsPipelineState;
+	ComPtr<ID3D12PipelineState> m_GraphicsPipelineState;
 
-	RootSignature m_GraphicsRootSignature;
+	const RootSignature* m_GraphicsRootSignature;
 	GPUPipelineSpecification m_PipelineSpec;
 
 	ComPtr<ID3DBlob> m_VSBlob;

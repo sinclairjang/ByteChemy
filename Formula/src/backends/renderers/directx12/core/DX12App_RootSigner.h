@@ -30,7 +30,7 @@ struct LeafParameterArray
 
  This should correspond to the following data structure.
 
- //TODO: Serialze/Deserialize this layout to support custom shader programming
+ //TODO: Serialze/Deserialize this scheme to enable save/load scene
  
  Layout:  
  { 
@@ -64,7 +64,7 @@ public:
 
 	void CreateGraphicsRootSignature(std::vector<RootParmeter>& rootParams);
 	
-	inline ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() { return m_GraphicsRootSignature; }		
+	inline ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() const { return m_GraphicsRootSignature; }		
 
 private:
 	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const RootParmeter& rootParam);

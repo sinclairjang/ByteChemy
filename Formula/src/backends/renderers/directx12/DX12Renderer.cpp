@@ -112,34 +112,30 @@ void DX12Renderer::RequestService(GraphicsService::CreateGPUProgram shaderType, 
 		//TODO: Later we procedurally extract resource binding informations from custom format dynamically, namely a file with extension '.formula'.
 		// For the time being, we code by hand the graphics render pipeline based on hlsl files.
 
-		if (filename == L"Color.hlsl") 
+		if (filename == L"Color.hlsl")  // Built-in shader
 		{
-			if (!m_RootSigTable.contains("ROOT:DC1,DC1,DC1"))
+			m_RootSignature = CreateScope<RootSignature>(g_pd3dDevice);
+			
+			std::vector<RootParmeter> rootParams
 			{
-				RootSignature ROOTSIG_DC1_DC1_DC1(g_pd3dDevice);
-				std::vector<RootParmeter> rootParams
-				{
-					RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),
-					RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 2) }),
-				};
+				//TEMP
+				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b0)
+				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b1)
+				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b2)
+				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
+			};
 
-				ROOTSIG_DC1_DC1_DC1.CreateGraphicsRootSignature(rootParams);
-
-				m_RootSigTable.insert({ "ROOT:DC1,DC1,DC1", ROOTSIG_DC1_DC1_DC1 });
-			}
+			m_RootSignature->CreateGraphicsRootSignature(rootParams);
 		
-			auto search = m_RootSigTable.find("ROOT:DC1,DC1,DC1");
-			Shader shaderProgram(g_pd3dDevice, search->second);
+			Shader shaderProgram(g_pd3dDevice, m_RootSignature.get());
 			
 			//TODO: Let users interface with the advanced graphic features per API via GUI.
 			// For the time being, we code by hand those features given a shader file.
 
 			auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 			shaderProgram.CreateGraphicsShader(path, pipeSpec);
-			SafelyCopyablePointer<void> spGraphicsPipelineHandle(shaderProgram.GetGraphicsPipelineHandle(), 
-				[](ID3D12PipelineState* ps) { ps->Release(); });
-			
-			outInfo = spGraphicsPipelineHandle;
+
+		
 		}
 		
 		else  // == GraphicsService::BindShaderProgram::COMPUTE

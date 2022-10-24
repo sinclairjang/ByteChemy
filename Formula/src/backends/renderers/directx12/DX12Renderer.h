@@ -20,6 +20,7 @@ struct RenderItem
 	union
 	{
 		std::unique_ptr<UnlitShadingProperty> UnlitProp = nullptr;
+		//std::unique_ptr<ParticleShadingProperty> ParticleProp = nullptr;
 		//std::unique_ptr<StandardShadingProperty> StandardProp = nullptr;
 	};
 
@@ -40,10 +41,6 @@ struct RenderItem
 
 class DX12Renderer : public Renderer
 {
-	// Aliases Suite
-
-
-
 public:	
 	// Graphics API Overloads
 	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const std::wstring& path, const void* initData, void* outInfo) override;
@@ -52,40 +49,47 @@ public:
 	virtual void RequestService(GraphicsService::Render drawHow, void* outInfo) override;
 
 private:
-	// Mesh buffers
-	std::unordered_map<std::string,  std::unique_ptr<MeshGeometry>> m_MeshObjects;
-	
-	// Render objects
-	std::unordered_map<entt::entity, RenderItem> m_RenderObjects;
 
-	// Scene buffers
-	std::unique_ptr<RenderTexture> m_SceneBuffers[NUM_BACK_BUFFERS];
-	
 	ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptors[NUM_BACK_BUFFERS];
-	
+
 	ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_RtvDescriptors[NUM_BACK_BUFFERS];
 
 	ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_DsvDescriptor;
 
+	//----------------- Renderer's Database -----------------//
+	//-------------------------------------------------------//
+	
+	// Mesh buffers
+	HashTable<std::string,  std::unique_ptr<MeshGeometry>> m_MeshObjects;
+	
+	// Render objects
+	HashTable<entt::entity, RenderItem> m_RenderObjects;
+
+	// Scene buffers
+	Scope<RenderTexture> m_SceneBuffers[NUM_BACK_BUFFERS];
+	
 	// Image textures 
-	std::unordered_map<std::string, std::unique_ptr<ImageTexture>> m_ImageTex;
+	HashTable<std::string, std::unique_ptr<ImageTexture>> m_ImageTex;
 
 	// Engine-level built-in property data (e.g. transform, camera, light, etc)
-	std::unordered_map<std::string, ComPtr<ID3D12Resource>> m_EngineProperties;
+	HashTable<std::string, ComPtr<ID3D12Resource>> m_MainProperties;
 
 	// Shader-level built-in property data (e.g. color, emission, etc)
-	std::unordered_map<std::string, ComPtr<ID3D12Resource>> m_ShadingProperties;
+	HashTable<std::string, ComPtr<ID3D12Resource>> m_ShadingProperties;
 
 	// Mesh render pipelines per shader	
-	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> m_MeshRendererPSOs;
+	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_MeshRendererPSOs;
 
 	// Line render pipelines per shader	
-	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> m_LineRendererPSOs;
+	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_LineRendererPSOs;
 	
 	// Particle render pipelines per shader
-	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> m_ParticleRendererPSOs;
+	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_ParticleRendererPSOs;
+	
+	// Underlying shader resouce binding scheme
+	Scope<RootSignature> m_RootSignature;
 };
 

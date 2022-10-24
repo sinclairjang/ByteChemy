@@ -28,6 +28,11 @@ public:
         m_NumElement = numElement;
     }
 
+    int UploadBufAllocator::GetElementByteSize() const
+    {
+        return m_ElementByteSize;
+    }
+
     void UploadBufAllocator::Map()
     {
         if (!m_NumElement)
@@ -71,7 +76,7 @@ private:
     ComPtr<ID3D12Resource> m_UploadBuffer;
     BYTE* m_MappedData = nullptr;
 
-    UINT64 m_ElementByteSize = 0;
+    int m_ElementByteSize = 0;
     UINT64 m_NumElement = 0;
     bool m_IsConstantBuffer = false;
 };
