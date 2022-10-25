@@ -1,14 +1,15 @@
 #pragma once
 
 #include "renderer/Renderer.h"
-#include "backends/renderers/directx12/core/DX12App_RootSigner.h"
-#include "backends/renderers/directx12/core/DX12App_ResourceAllocator.h"
-#include "backends/renderers/directx12/core/DX12App_SceneBuffer.h"
-#include "backends/renderers/directx12/core/DX12App_UniformBuffer.h"
+#include "core/DX12App_UniformBuffer.h"	
 
 // Data mirroring ImGui main framework
 static int const NUM_FRAMES_IN_FLIGHT = 3;
 static int const NUM_BACK_BUFFERS = 3;
+
+// Forward decalarations
+class RenderTexture;
+class RootSignature;
 
 // Backend render data associated with a game object represented by entt::entity
 struct RenderItem
@@ -46,6 +47,7 @@ public:
 	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info) override;
+	virtual void RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) override;
@@ -72,14 +74,15 @@ private:
 	// Scene buffers
 	Scope<RenderTexture> m_SceneBuffers[NUM_BACK_BUFFERS];
 	
+	// Uniform buffers containing 1) Engine-level built-in property data (e.g. transform, camera, light, etc)
+	//							  2) Shader-level built-in property data (e.g. color, emission, etc)
+	Scope<UniformManager> m_UniformBuffers;
+
+	// Underlying shader resouce binding scheme
+	Scope<RootSignature> m_RootSignature;
+
 	// Image textures 
 	HashTable<std::string, std::unique_ptr<ImageTexture>> m_ImageTex;
-
-	// Engine-level built-in property data (e.g. transform, camera, light, etc)
-	HashTable<std::string, ComPtr<ID3D12Resource>> m_MainProperties;
-
-	// Shader-level built-in property data (e.g. color, emission, etc)
-	HashTable<std::string, ComPtr<ID3D12Resource>> m_ShadingProperties;
 
 	// Mesh render pipelines per shader	
 	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_MeshRendererPSOs;
@@ -90,7 +93,6 @@ private:
 	// Particle render pipelines per shader
 	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_ParticleRendererPSOs;
 	
-	// Underlying shader resouce binding scheme
-	Scope<RootSignature> m_RootSignature;
+
 };
 

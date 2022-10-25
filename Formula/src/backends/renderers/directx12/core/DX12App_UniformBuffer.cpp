@@ -123,7 +123,7 @@ UINT64 UniformManager::GetShadingPropBufferIdx(ShadingType type)
 
 	else
 	{
-		LOG_INFO("Other shading types are not yet supported");
+		LOG_INFO("Only ShadingType(UNLIT) is supported for now");
 		return -1;  // Reserved invalid index
 	}
 
@@ -215,7 +215,7 @@ void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitP
 
 	else
 	{
-		LOG_INFO("Other shading types are not yet supported");
+		LOG_INFO("Only ShadingType(UNLIT) is supported for now");
 	}
 }
 

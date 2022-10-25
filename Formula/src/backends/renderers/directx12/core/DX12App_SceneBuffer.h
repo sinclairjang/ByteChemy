@@ -8,6 +8,11 @@ static inline void SafeRelease(T*& res)
     res = NULL;
 }
 
+struct SceneFrameContext
+{
+
+};
+
 class RenderTexture
 {
 public:

@@ -36,6 +36,11 @@ namespace GraphicsService
 		UNIFORM,
 	};
 
+	enum class Update : UINT8
+	{
+		UNIFORM,
+	};
+
 	enum class SetRenderer : UINT8
 	{
 		MESH_RENDERER,
@@ -73,6 +78,7 @@ public:
 	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::Update what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) = 0;

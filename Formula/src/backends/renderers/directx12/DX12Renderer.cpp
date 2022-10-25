@@ -24,11 +24,8 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 		//if (_opt_in_Info != nullptr && _opt_in_Info == PATH);
 		//{
 		//	std::wstring* path = (std::wstring*)_opt_in_Info;
-
-		//	// Cache
-		//	std::wstring filename = fs::path(*path).filename();
-		//	std::wstring stem = fs::path(*path).stem();
-		//	std::wstring ext = fs::path(*path).extension();
+			
+			// ...
 		//}
 
 		m_RootSignature = CreateScope<RootSignature>(g_pd3dDevice);
@@ -65,9 +62,6 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 	{
 		LOG_INFO("Only PreProcess(GRPHICS_PIPELINE) is supported for now");
 	}
-
-
-
 }
 
 void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info)
@@ -148,10 +142,46 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 
 void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info)
 {
+	if (what == GraphicsService::AllocateResource::UNIFORM)
+	{
+		m_UniformBuffers = CreateScope<UniformManager>();
+	}
+	else
+	{
+		LOG_INFO("Only AllocateResource(UNIFORM) is supported for now");
+	}
 }
 
+// ECS's signaled function that listens to both engine/user entity
+void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_Info)
+{
+	if (what == GraphicsService::Update::UNIFORM)
+	{
+		// On Entity being created, it adds Transform and EditorCamera component by design,
+		//which invokes GetMainPassBufferIdx and GetMainPropBufferIdx to assign the appropriate indices to corresponding RenderItem.
+		 
+		// On Entity having Transform component updated, it gets a signal from ECS to update EngineObjectProperty and its corresponding uniform buffer subresource,
+		//whereas EditorCamera is updated by standard input (e.g. keyboard, mouse, etc.) to in turn update EnginePassProperty and its corresponding uniform buffer subresource.
+
+		// On Entity being destroyed, it gets a signal from ECS to push the assigned index back to MainPropIdxQueue.
+
+		// On Entity having Material component added, it gets a singal from ECS to invoke GetShadingPassBufferIdx if any,
+		//and the appropriate GetShadingPropBufferIdx to assign an index to corresponding RenderItem.
+
+		// On Entity having Material component updated, it gets a signal from ECS to update the appropritae Shading property uniform buffer subresource.
+
+		// On Entity having Material component destroyed, it gets a signal from ECS to push the assigned index back to the appropriate Shading property index queue.
+	}
+	else
+	{
+		LOG_INFO("Only Update(UNIFORM) is supported for now");
+	}
+}
+
+// ECS's signaled function
 void DX12Renderer::RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info)
 {
+	// On Entity having Renderer component added, it gets a signal from ECS to provide corresponding PSO.
 }
 
 void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info)
@@ -220,4 +250,5 @@ void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int w
 
 void DX12Renderer::RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info)
 {
+
 }

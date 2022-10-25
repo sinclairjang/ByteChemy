@@ -30,6 +30,7 @@ struct FrameContext
 
 // Export
 ID3D12Device* g_pd3dDevice = NULL;
+ID3D12GraphicsCommandList* g_pd3dCommandList = NULL;
 
 // Data
 static int const                    NUM_FRAMES_IN_FLIGHT = 3;
@@ -40,7 +41,6 @@ static UINT                         g_frameIndex = 0;
 static ID3D12DescriptorHeap* g_pd3dRtvDescHeap = NULL;
 static ID3D12DescriptorHeap* g_pd3dSrvDescHeap = NULL;
 static ID3D12CommandQueue* g_pd3dCommandQueue = NULL;
-static ID3D12GraphicsCommandList* g_pd3dCommandList = NULL;
 static ID3D12Fence* g_fence = NULL;
 static HANDLE                       g_fenceEvent = NULL;
 static UINT64                       g_fenceLastSignaledValue = 0;
