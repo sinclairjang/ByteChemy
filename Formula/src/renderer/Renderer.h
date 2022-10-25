@@ -1,6 +1,8 @@
 #pragma once
 
-// Grahpics Device Basic Functionalities
+//TODO: Let users interface with the advanced graphic features per API via GUI.
+
+// Grahpics API basic functionalities
 namespace GraphicsService
 {
 	enum class GrpahicsAPI : UINT8
@@ -9,35 +11,56 @@ namespace GraphicsService
 		DirectX10,
 		DirectX11,
 		DirectX12,
+		
 		OPENGL2,
 		OPENGL3,
+		
 		VULKAN,
+		
 		METAL,
 	};
+	enum class PreProcess : UINT8
+	{
+		GRAPHICS_PIPELINE,
+	};
 
-	enum class AllocateGPUMemory : UINT8
+	enum class LoadResource : UINT8
 	{
 		MESH,
-		CONSTANT,
+
 		TEXTURE,
 	};
 
-	enum class CreateGPUProgram : UINT8
+	enum class AllocateResource : UINT8
 	{
-		GRAPHICS,
-		COMPUTE,
-	};
-	
-	enum class SetRenderTarget : UINT8
-	{
-		FRAMEBUFFER,
-		TEXTURE,
+		UNIFORM,
 	};
 
-	enum class Render : UINT8
+	enum class SetRenderer : UINT8
 	{
-		DIRECT,
-		INSTANCED,
+		MESH_RENDERER,
+		
+		LINE_RENDERER,
+		
+		PARTICLE_RENDERER,
+	};
+
+	enum class SetViewPort : UINT8
+	{
+		EDITOR,
+		
+		GAME,
+
+		AUX0,
+		AUX1,
+		AUX2,
+		AUX3,
+		AUX4,
+	};
+
+	enum class Enqueue : UINT8
+	{
+		DRAW_CALL,
 	};
 };
 
@@ -47,10 +70,12 @@ public:
 	virtual ~Renderer() {}
 
 	// Graphics API Overloads
-	virtual void RequestService(GraphicsService::AllocateGPUMemory allocWhat, const std::wstring& path, const void* initData,  void* outInfo) = 0;
-	virtual void RequestService(GraphicsService::CreateGPUProgram shaderType, const std::wstring& path,  void* outInfo) = 0;
-	virtual void RequestService(GraphicsService::SetRenderTarget renderWhere, const size_t width, const size_t height, void* outInfo) = 0;
-	virtual void RequestService(GraphicsService::Render drawHow, void* outInfo) = 0;
+	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) = 0;
 };
 
 

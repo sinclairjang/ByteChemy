@@ -86,11 +86,11 @@ struct GPUPipelineSpecification
 	}
 };
 
-class Shader
+class Plumber
 {
 public:
-	Shader(ID3D12Device* device, const RootSignature* rootSig);
-	~Shader();
+	Plumber(ID3D12Device* device, const RootSignature* rootSig);
+	~Plumber();
 
 	void CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec);
 	inline ComPtr<ID3D12PipelineState> GetGraphicsPipelineHandle() { return m_GraphicsPipelineState; }

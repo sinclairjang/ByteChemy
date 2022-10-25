@@ -1,18 +1,18 @@
 #include "fm_pch.h"
-#include "DX12App_ShaderGenerator.h"
+#include "DX12App_PreProcessor.h"
 
 #include "DX12App_ErrorHandler.h"
 
-Shader::Shader(ID3D12Device* device, const RootSignature* rootSig)
+Plumber::Plumber(ID3D12Device* device, const RootSignature* rootSig)
 	: g_Device(device), m_GraphicsRootSignature(rootSig)
 {
 }
 
-Shader::~Shader()
+Plumber::~Plumber()
 {
 }
 
-void Shader::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec)
+void Plumber::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecification pipeSpec)
 {
 	m_PipelineSpec = pipeSpec;
 
@@ -147,7 +147,7 @@ void Shader::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecifica
 	ThrowIfFailed(g_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(&m_GraphicsPipelineState)));
 }
 
-void Shader::CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version,
+void Plumber::CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version,
 	ComPtr<ID3DBlob>& blob, D3D12_SHADER_BYTECODE& shaderByteCode)
 {
 	UINT compileFlags = 0;
@@ -174,32 +174,32 @@ void Shader::CreateShaderFromFile(const std::wstring& path, const std::string& n
 	shaderByteCode = { blob->GetBufferPointer(), blob->GetBufferSize() };
 }
 
-void Shader::CreateVertexShader(const std::wstring& path, const std::string& name, const std::string& version)
+void Plumber::CreateVertexShader(const std::wstring& path, const std::string& name, const std::string& version)
 {
 	CreateShaderFromFile(path, name, version, m_VSBlob, m_GraphicsPipelineStateDesc.VS);
 }
 
-void Shader::CreateHullShader(const std::wstring& path, const std::string& name, const std::string& version)
+void Plumber::CreateHullShader(const std::wstring& path, const std::string& name, const std::string& version)
 {
 	CreateShaderFromFile(path, name, version, m_HSBlob, m_GraphicsPipelineStateDesc.HS);
 }
 
-void Shader::CreateDomainShader(const std::wstring& path, const std::string& name, const std::string& version)
+void Plumber::CreateDomainShader(const std::wstring& path, const std::string& name, const std::string& version)
 {
 	CreateShaderFromFile(path, name, version, m_DSBlob, m_GraphicsPipelineStateDesc.DS);
 }
 
-void Shader::CreateGeometryShader(const std::wstring& path, const std::string& name, const std::string& version)
+void Plumber::CreateGeometryShader(const std::wstring& path, const std::string& name, const std::string& version)
 {
 	CreateShaderFromFile(path, name, version, m_GSBlob, m_GraphicsPipelineStateDesc.GS);
 }
 
-void Shader::CreatePixelShader(const std::wstring& path, const std::string& name, const std::string& version)
+void Plumber::CreatePixelShader(const std::wstring& path, const std::string& name, const std::string& version)
 {
 	CreateShaderFromFile(path, name, version, m_PSBlob, m_GraphicsPipelineStateDesc.PS);
 }
 
-D3D12_PRIMITIVE_TOPOLOGY_TYPE Shader::GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology)
+D3D12_PRIMITIVE_TOPOLOGY_TYPE Plumber::GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology)
 {
 	switch (topology)
 	{
@@ -250,6 +250,5 @@ D3D12_PRIMITIVE_TOPOLOGY_TYPE Shader::GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 	default:
 		return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
-
 	}
 }

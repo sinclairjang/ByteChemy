@@ -4,7 +4,7 @@
 #include "core/DX12App_ErrorHandler.h"
 #include "core/DX12App_ResourceAllocator.h"
 #include "core/DX12App_RootSigner.h"
-#include "core/DX12App_ShaderGenerator.h"
+#include "core/DX12App_PreProcessor.h"
 #include "core/DX12App_SceneBuffer.h"
 
 // Import from ImGui main framework
@@ -13,17 +13,74 @@ extern ID3D12Device* g_pd3dDevice;
 // Export
 DX12Renderer g_dx12Renderer;
 
+namespace fs = std::filesystem;
 
-void DX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, const std::wstring& path, const void* initData, void* outInfo)
+void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info)
 {
-	if (allocWhat == GraphicsService::AllocateGPUMemory::MESH)
+	if (what == GraphicsService::PreProcess::GRAPHICS_PIPELINE)
 	{
-		if (initData != nullptr);
+		//TODO: Add flag to determine the intended behavior
+		// e.g. If _opt_in_Info was meant to be used to represent path, the right way to reflect that is as follows:
+		//if (_opt_in_Info != nullptr && _opt_in_Info == PATH);
+		//{
+		//	std::wstring* path = (std::wstring*)_opt_in_Info;
+
+		//	// Cache
+		//	std::wstring filename = fs::path(*path).filename();
+		//	std::wstring stem = fs::path(*path).stem();
+		//	std::wstring ext = fs::path(*path).extension();
+		//}
+
+		m_RootSignature = CreateScope<RootSignature>(g_pd3dDevice);
+
+		//Note: Every graphics pipeline will share the same shader resource binding scheme to increase the caching performance
+		std::vector<RootParmeter> rootParams
+		{
+			//TEMP
+			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b0)
+			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b1)
+			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b2)
+			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
+		};
+
+		m_RootSignature->CreateGraphicsRootSignature(rootParams);
+
+		Plumber L_Unlit(g_pd3dDevice, m_RootSignature.get());
+		auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		L_Unlit.CreateGraphicsShader(
+			L"..\\..\\..\\..\\assets\\shader\\unlit\\Unlit.hlsl",
+			pipeSpec);
+		m_MeshRendererPSOs.insert({ "MeshRenderer(UnlitShader)", L_Unlit.GetGraphicsPipelineHandle() });
+
+		//Plumber M_Unlit(g_pd3dDevice, m_RootSignature.get());
+		// ...
+
+		//Plumber P_Unlit(g_pd3dDevice, m_RootSignature.get());
+		// ...
+
+		// ...
+	}
+	
+	else
+	{
+		LOG_INFO("Only PreProcess(GRPHICS_PIPELINE) is supported for now");
+	}
+
+
+
+}
+
+void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info)
+{
+	if (what == GraphicsService::LoadResource::MESH)
+	{
+		//TODO: Add flag to determine the intended behavior
+		if (_opt_in_Info != nullptr);
 		{
 			return;
 		}
 
-		MeshData* pMesh = (MeshData*)initData;
+		MeshData* pMesh = (MeshData*)_opt_in_Info;
 
 		auto meshGeo = std::make_unique<MeshGeometry>();
 		meshGeo->Name = pMesh->Name;
@@ -74,15 +131,8 @@ void DX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, 
 		m_MeshObjects[meshGeo->Name] = std::move(meshGeo);
 	}
 
-	else if (allocWhat == GraphicsService::AllocateGPUMemory::CONSTANT)
-	{
-		
-	}
-
 	else  // == GraphicsService::AllocateGPUMemory::TEXTURE
 	{
-		namespace fs = std::filesystem;
-
 		// Cache
 		std::wstring filename = fs::path(path).filename();
 		std::wstring stem = fs::path(path).stem();
@@ -96,66 +146,17 @@ void DX12Renderer::RequestService(GraphicsService::AllocateGPUMemory allocWhat, 
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::CreateGPUProgram shaderType, const std::wstring& path, void* outInfo)
+void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info)
 {
-	namespace fs = std::filesystem;
-
-	// Cache
-	std::wstring filename = fs::path(path).filename();
-	std::wstring stem = fs::path(path).stem();
-	std::wstring ext = fs::path(path).extension();
-
-	//FM_ASSERTM(ext == "formula", "Requested shader file format is not supported.");
-
-	if (shaderType == GraphicsService::CreateGPUProgram::GRAPHICS)
-	{
-		//TODO: Later we procedurally extract resource binding informations from custom format dynamically, namely a file with extension '.formula'.
-		// For the time being, we code by hand the graphics render pipeline based on hlsl files.
-
-		if (filename == L"Color.hlsl")  // Built-in shader
-		{
-			m_RootSignature = CreateScope<RootSignature>(g_pd3dDevice);
-			
-			std::vector<RootParmeter> rootParams
-			{
-				//TEMP
-				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b0)
-				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b1)
-				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b2)
-				RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
-			};
-
-			m_RootSignature->CreateGraphicsRootSignature(rootParams);
-		
-			Shader shaderProgram(g_pd3dDevice, m_RootSignature.get());
-			
-			//TODO: Let users interface with the advanced graphic features per API via GUI.
-			// For the time being, we code by hand those features given a shader file.
-
-			auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-			shaderProgram.CreateGraphicsShader(path, pipeSpec);
-
-		
-		}
-		
-		else  // == GraphicsService::BindShaderProgram::COMPUTE
-		{
-			FM_ASSERTM(0, "Unknown shader file");
-		}
-	}
-	else
-	{
-		FM_ASSERTM(0, "Requested service(Compute Shader) is not yet supported");
-	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::SetRenderTarget renderWhere, const size_t width, const size_t height, void* outInfo)
+void DX12Renderer::RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info)
 {
-	if (renderWhere == GraphicsService::SetRenderTarget::FRAMEBUFFER)
-	{
-		FM_ASSERTM(0, "Requested Service(Frame Buffer) is not yet supported");
-	}
-	else  // == GraphicsService::SetRenderTarget::TEXTURE
+}
+
+void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info)
+{
+	if (what == GraphicsService::SetViewPort::EDITOR)
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
 		dsvHeapDesc.NumDescriptors = 1;
@@ -200,15 +201,23 @@ void DX12Renderer::RequestService(GraphicsService::SetRenderTarget renderWhere, 
 
 			m_RtvDescriptors[i] = rtvHandle;
 			rtvHandle.ptr += rtvDescriptorSize;
-		
+
 			m_SrvDescriptors[i] = srvHandle;
 			srvHandle.ptr += srvDescriptorSize;
 
 			sceneBuf->SetDevice(g_pd3dDevice, m_SrvDescriptors[i], m_RtvDescriptors[i]);
-			
+
 			sceneBuf->ResizeResource(width, height);
 
 			m_SceneBuffers[i] = std::move(sceneBuf);
 		}
 	}
+	else  // == GraphicsService::SetViewPort::GAME, AUXn
+	{
+		LOG_INFO("Only SetViewPort(Editor) is supported for now");
+	}
+}
+
+void DX12Renderer::RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info)
+{
 }

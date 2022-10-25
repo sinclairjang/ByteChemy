@@ -14,14 +14,10 @@ class Scene
 	//~Scene(); 
 
 public:
-	// Initialize the scene
-	void SetRenderer(const GraphicsService::GrpahicsAPI& graphicsAPI);
-	void LoadMeshAsset(const std::string& name);
-	void LoadMeshAssetFromFile(const std::wstring& path);
-	void LoadShaderAssetFromFile(const std::wstring& path);
-	
+	// Scene timeline
+
 	// Pre-process the scene buffer
-	void Begin(const size_t width, const size_t height);
+	void Begin(const int width, const int height);
 
 	// Upload resources updated via ImGui
 	void Update();
@@ -33,13 +29,32 @@ public:
 	void End();
 
 public:
+	// Load scene assets (e.g. mesh, material, shader etc.) 
+
+	// Load built-in assets upon engine initialization 
+	void LoadEngineMeshAssets();
+	void LoadEngineShaderAssets();
+	void LoadEngineTexImageAssets();
+
+	// Load external assets 1) after deserialization
+	//						2) during runtime
+	void LoadMeshAssetFromFile(const std::wstring& path);
+	void LoadShaderAssetFromFile(const std::wstring& path);
+	void LoadTexImageAssetFromFile(const std::wstring& path);
+
+	//TODO: De-/serialize assets to save/load them
+
+public:
 	// Register the entity to the scene
 	Entity CreateEntity(const std::wstring& name);
+
+	// Locate graphics API
+	void SetRenderAPI(const GraphicsService::GrpahicsAPI& graphicsAPI);
 
 private:
 	entt::registry	m_Registry;
 
 	// Scene Render Informations
-	std::weak_ptr<Renderer> m_Renderer;
-	std::wstring	m_GraphicsAPI;
+	std::string m_GraphicsAPI;
+	Renderer* m_Renderer;
 };

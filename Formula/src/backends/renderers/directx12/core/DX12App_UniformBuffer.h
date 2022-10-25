@@ -38,11 +38,9 @@ struct EnginPass					// -> register(b1)
 
 enum class ShadingType : UINT8
 {
+    STANDARD,
     UNLIT,
-
-    //TODO:
-    //PARTICLE,
-    //STANDARD,
+    PARTICLE,
 };
 
 //DEBUG MARKER: should I supply placeholder data?
@@ -121,41 +119,32 @@ private:
         
 private:    
 	std::unique_ptr<UniformFrameResource> m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
-	
     UniformFrameResource* m_CurrUniformFrameResource = nullptr;
 	int m_CurrUniformFrameResourceIndex = 0;
-    
+    SIZE_T m_CbvDescriptorSize = 0;
+
+private:
     int m_MainPropsAlignment = 0;
     int m_MainPassAlignment = 0;
+    // Standard, Particle ...
 
     int m_UnlitPropsAlignment = 0;
     int m_UnlitPassAlignment = 0;
-
+    // Standard, Particle ...
+    
     std::queue<UINT64> m_MainPropIdxQueue;
     std::queue<UINT64> m_UnlitPropIdxQueue;
-   
+    // Standard, Particle ...
+    
     UINT m_NumMainProps = 0;
     UINT m_NumUnlitProps = 0;
-    
-    //TODO:
-    // UINT64 m_NumParticleProps = 0;
-    // UINT64 m_NumStandardProps = 0;
-
-    //TODO:
-    // std::queue<UINT> m_ParticlePropIdxQueue;
-    // std::queue<UINT> m_StandardPropIdxQueue;
+    // Standard, Particle ...
 
     ComPtr<ID3D12DescriptorHeap> m_MainPropsHeap;
     ComPtr<ID3D12DescriptorHeap> m_MainPassHeap;
-
+    // Standard, Particle ...
+    
     ComPtr<ID3D12DescriptorHeap> m_UnlitPropsHeap;
     ComPtr<ID3D12DescriptorHeap> m_UnlitPassHeap;
-
-    SIZE_T m_CbvDescriptorSize = 0;
-    //TODO:
-    //ComPtr<ID3D12DescriptorHeap> m_ParticlePropHeap;
-    //ComPtr<ID3D12DescriptorHeap> m_ParticlePassHeap;
-    
-    //ComPtr<ID3D12DescriptorHeap> m_StandardPassHeap;
-    //ComPtr<ID3D12DescriptorHeap> m_StandardPassHeap;
+    // Standard, Particle ...
 };
