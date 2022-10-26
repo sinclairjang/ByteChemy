@@ -1,6 +1,6 @@
 #include "fm_pch.h"
-#include "d3dx12_sync.h"
-#include "d3dx12_error.h"
+#include "DX12App_Synchronizer.h"
+#include "DX12App_ErrorHandler.h"
 
 WaitSync::WaitSync(ID3D12Device* device) :
 	m_Device(device)
@@ -9,7 +9,7 @@ WaitSync::WaitSync(ID3D12Device* device) :
 		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_Fence.GetAddressOf())
 	));
 
-	m_Event = CreateEvent(0, 0, 0, 0);
+	m_Event = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);  // Auto-reset event object
 	FM_ASSERT(m_Event != NULL);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -36,10 +36,24 @@ WaitSync::~WaitSync()
 	CloseHandle(m_Event);
 }
 
-ID3D12GraphicsCommandList* WaitSync::Begin()
+ComPtr<ID3D12GraphicsCommandList>& WaitSync::Begin()
 {
 	// Delegate the graphics work submissions to the client
-	return m_CmdList.Get();
+	return m_CmdList;
+}
+
+void WaitSync::Mark()
+{
+	++m_CurrentFenceValue;
+
+	ThrowIfFailed(m_CmdQueue->Signal(m_Fence.Get(), m_CurrentFenceValue));
+}
+
+void WaitSync::Wait()
+{
+	ThrowIfFailed(m_Fence->SetEventOnCompletion(m_CurrentFenceValue, m_Event));
+	
+	WaitForSingleObject(m_Event, INFINITE);
 }
 
 void WaitSync::Flush()
@@ -52,3 +66,4 @@ void WaitSync::Flush()
 	m_Fence->SetEventOnCompletion(1, m_Event);
 	WaitForSingleObject(m_Event, INFINITE);
 }
+

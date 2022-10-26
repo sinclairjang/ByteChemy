@@ -15,6 +15,25 @@ DX12Renderer g_dx12Renderer;
 
 namespace fs = std::filesystem;
 
+DX12Renderer::DX12Renderer()
+	:	m_WaitSync(g_pd3dDevice)
+{
+	for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
+	{
+		m_SceneFrameContexts[i] = CreateScope<SceneFrameContext>(g_pd3dDevice);
+	}
+}
+
+DX12Renderer::~DX12Renderer()
+{
+}
+
+void DX12Renderer::RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_Info)
+{
+	m_CurrSceneFrameIndex %= NUM_FRAMES_IN_FLIGHT;
+	m_CurrSceneFrameContext = m_SceneFrameContexts[m_CurrSceneFrameIndex].get();
+}
+
 void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info)
 {
 	if (what == GraphicsService::PreProcess::GRAPHICS_PIPELINE)
@@ -251,4 +270,8 @@ void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int w
 void DX12Renderer::RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info)
 {
 
+}
+
+void DX12Renderer::RequestService(GraphicsService::End what, const void* _opt_in_Info, void* _opt_out_Info)
+{
 }

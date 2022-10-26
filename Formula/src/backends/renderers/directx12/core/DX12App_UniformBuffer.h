@@ -119,8 +119,7 @@ private:
         
 private:    
 	std::unique_ptr<UniformFrameResource> m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
-    UniformFrameResource* m_CurrUniformFrameResource = nullptr;
-	int m_CurrUniformFrameResourceIndex = 0;
+
     SIZE_T m_CbvDescriptorSize = 0;
 
 private:

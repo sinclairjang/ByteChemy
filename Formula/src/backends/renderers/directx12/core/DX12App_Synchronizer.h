@@ -6,7 +6,10 @@ public:
 	WaitSync(ID3D12Device* device);
 	~WaitSync();
 
-	ID3D12GraphicsCommandList* Begin();
+	ComPtr<ID3D12GraphicsCommandList>& Begin();
+	
+	void Mark();
+	void Wait();
 	void Flush();
 
 private:
@@ -17,5 +20,7 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> m_CmdList;
 	ComPtr<ID3D12Fence> m_Fence;
 
-	HANDLE	m_Event;
+	HANDLE	m_Event;  //DEBUG MARK
+
+	UINT64 m_CurrentFenceValue = 0;
 };

@@ -2,6 +2,7 @@
 
 #include "renderer/Renderer.h"
 #include "core/DX12App_UniformBuffer.h"	
+#include "core/DX12App_Synchronizer.h"
 
 // Data mirroring ImGui main framework
 static int const NUM_FRAMES_IN_FLIGHT = 3;
@@ -43,7 +44,12 @@ struct RenderItem
 class DX12Renderer : public Renderer
 {
 public:	
+
+	DX12Renderer();
+	virtual ~DX12Renderer();
+
 	// Graphics API Overloads
+	virtual void RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info) override;
@@ -51,6 +57,7 @@ public:
 	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) override;
+	virtual void RequestService(GraphicsService::End what, const void* _opt_in_Info, void* _opt_out_Info) override;
 
 private:
 	ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
@@ -62,14 +69,21 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_DsvDescriptor;
 
-	//----------------- Renderer's Database -----------------//
-	//-------------------------------------------------------//
+	WaitSync m_WaitSync;
+
+	//----------------- Renderer's Database Heap -----------------//	//TODO: Too many pointers! 
+	//------------------------------------------------------------//	//If there is no good reason, it's better to keep data contiguous for memory performance.
 	
 	// Mesh buffers
 	HashTable<std::string,  std::unique_ptr<MeshGeometry>> m_MeshObjects;
 	
 	// Render objects
 	HashTable<entt::entity, RenderItem> m_RenderObjects;
+
+	// Scene frame contexts
+	Scope<SceneFrameContext> m_SceneFrameContexts[NUM_BACK_BUFFERS];
+	SceneFrameContext* m_CurrSceneFrameContext = nullptr;
+	int m_CurrSceneFrameIndex = 0;
 
 	// Scene buffers
 	Scope<RenderTexture> m_SceneBuffers[NUM_BACK_BUFFERS];
@@ -82,7 +96,7 @@ private:
 	Scope<RootSignature> m_RootSignature;
 
 	// Image textures 
-	HashTable<std::string, std::unique_ptr<ImageTexture>> m_ImageTex;
+	HashTable<std::string, Scope<ImageTexture>> m_ImageTex;
 
 	// Mesh render pipelines per shader	
 	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_MeshRendererPSOs;
@@ -92,7 +106,5 @@ private:
 	
 	// Particle render pipelines per shader
 	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_ParticleRendererPSOs;
-	
-
 };
 

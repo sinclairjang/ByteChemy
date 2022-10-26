@@ -10,7 +10,18 @@ static inline void SafeRelease(T*& res)
 
 struct SceneFrameContext
 {
+    SceneFrameContext(ID3D12Device* device);
 
+    SceneFrameContext(const SceneFrameContext& rhs) = delete;
+    SceneFrameContext& operator=(const SceneFrameContext& rhs) = delete;
+    ~SceneFrameContext();
+
+    ComPtr<ID3D12CommandAllocator> SceneRenderCommandAllocator;
+
+    UINT64 Fence = 0;
+
+private:
+    ID3D12Device* m_Device;
 };
 
 class RenderTexture

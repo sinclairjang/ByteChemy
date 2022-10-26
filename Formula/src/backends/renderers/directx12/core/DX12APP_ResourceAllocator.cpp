@@ -11,7 +11,10 @@ DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSi
     ComPtr<ID3D12Resource> defaultBuffer;
     
     WaitSync waitSync(device);
-    auto cmdList = waitSync.Begin();
+    
+    // !Safety: Upon return, WaitSync will release the COM object of ID3D12CommandAlloc type that cmdList hold reference to.
+    //So cmdList is meant to live only in this scope.
+    ComPtr<ID3D12GraphicsCommandList>& cmdList = waitSync.Begin();
 
     // Create the actual default buffer
     ThrowIfFailed(device->CreateCommittedResource(
@@ -44,7 +47,7 @@ DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSi
             D3D12_RESOURCE_STATE_COMMON,
             D3D12_RESOURCE_STATE_COPY_DEST));
 
-    UpdateSubresources<1>(cmdList,
+    UpdateSubresources<1>(cmdList.Get(),
         defaultBuffer.Get(),
         uploadBuffer.Get(),
         0, 0, 1,
@@ -58,7 +61,6 @@ DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSi
 
     waitSync.Flush();
     
-    // !Safety: Upon return, WaitSync will release the COM object of ID3D12CommandAlloc type that cmdList hold reference to. 
     return defaultBuffer;
 }
 
@@ -123,7 +125,7 @@ void ImageTexture::CreateImageTextureFromFile(const std::wstring& path)
         IID_PPV_ARGS(texUploadBuf.GetAddressOf())));
 
     ::UpdateSubresources(
-        cmdList,
+        cmdList.Get(),
         m_Tex2D.Get(),
         texUploadBuf.Get(),
         0, 0,

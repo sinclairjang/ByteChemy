@@ -2,6 +2,7 @@
 #include "d3dx12_scenebuf.h"
 
 #include "d3dx12_error.h"
+#include "DX12App_SceneBuffer.h"
 
 
 RenderTexture::RenderTexture(DXGI_FORMAT format) noexcept :
@@ -146,3 +147,11 @@ void RenderTexture::EndScene(ID3D12GraphicsCommandList* commandList)
     TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
+SceneFrameContext::SceneFrameContext(ID3D12Device* device)
+    :   m_Device(device)
+{
+}
+
+SceneFrameContext::~SceneFrameContext()
+{
+}
