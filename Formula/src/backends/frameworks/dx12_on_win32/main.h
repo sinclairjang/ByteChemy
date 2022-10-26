@@ -124,6 +124,15 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
 
+    // Load scene
+    Scope<Scene> scene = CreateScope<Scene>();
+
+    scene->SetRenderAPI(GraphicsService::GrpahicsAPI::DirectX12);
+
+    scene->LoadEngineShaderAssets();
+    scene->LoadEngineMeshAssets();
+    scene->LoadEngineTexImageAssets();
+
     // Main loop
     bool done = false;
     while (!done)
@@ -147,7 +156,15 @@ int main(int, char**)
         ImGui::NewFrame();
 
        // Draw the scene to texture
+        ImGui::Begin("Viewport");
+        
+        ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+        scene->Begin( (const int)viewportPanelSize.x, (const int)viewportPanelSize.y );
 
+        D3D12_GPU_DESCRIPTOR_HANDLE* texID = (D3D12_GPU_DESCRIPTOR_HANDLE*)scene->GetTexID();
+        //texID[N];
+        ImGui::End();
+        
         // Rendering
         ImGui::Render();
 

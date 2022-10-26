@@ -26,8 +26,6 @@ struct RenderItem
 		//std::unique_ptr<StandardShadingProperty> StandardProp = nullptr;
 	};
 
-	int NumDirtyFrames = NUM_FRAMES_IN_FLIGHT;
-	
 	UINT EngineUniformIdx = -1;
 	UINT ShadingUniformIdx = -1;
 
@@ -61,13 +59,17 @@ public:
 
 private:
 	ComPtr<ID3D12DescriptorHeap> m_SrvHeap;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptors[NUM_BACK_BUFFERS];
+	D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptorsCPU[NUM_BACK_BUFFERS];
+	D3D12_GPU_DESCRIPTOR_HANDLE m_SrvDescriptorsGPU[NUM_BACK_BUFFERS];
+	UINT m_SrvDescriptorSize;
 
 	ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_RtvDescriptors[NUM_BACK_BUFFERS];
+	UINT m_RtvDescriptorSize;
 
 	ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_DsvDescriptor;
+	UINT m_DsvDescriptorSize;
 
 	WaitSync m_WaitSync;
 

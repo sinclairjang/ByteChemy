@@ -22,19 +22,70 @@ DX12Renderer::DX12Renderer()
 	{
 		m_SceneFrameContexts[i] = CreateScope<SceneFrameContext>(g_pd3dDevice);
 	}
+
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+
+	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
+
+	m_DsvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	m_DsvDescriptor = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
+	srvHeapDesc.NumDescriptors = NUM_BACK_BUFFERS;
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		&srvHeapDesc, IID_PPV_ARGS(m_SrvHeap.GetAddressOf())));
+
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
+	rtvHeapDesc.NumDescriptors = NUM_BACK_BUFFERS;
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rtvHeapDesc.NodeMask = 0;
+
+	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
+
+	m_RtvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	m_SrvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+ 
+	for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+	{
+		m_SceneBuffers[i] = CreateScope<RenderTexture>(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+		DirectX::XMVECTORF32 fColorValue = { 0.96f, 0.97f, 0.97f, 1.f };
+		DirectX::XMVECTOR colorValue = fColorValue;
+		m_SceneBuffers[i]->SetClearColor(colorValue);
+
+		m_RtvDescriptors[i] = rtvHandle;
+		rtvHandle.ptr += m_RtvDescriptorSize;
+
+		m_SrvDescriptorsCPU[i] = srvHandle;
+		srvHandle.ptr += m_SrvDescriptorSize;
+
+		m_SceneBuffers[i]->SetDevice(g_pd3dDevice, m_SrvDescriptorsCPU[i], m_RtvDescriptors[i]);
+	}
 }
 
 DX12Renderer::~DX12Renderer()
 {
 }
 
-void DX12Renderer::RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	m_CurrSceneFrameIndex %= NUM_FRAMES_IN_FLIGHT;
 	m_CurrSceneFrameContext = m_SceneFrameContexts[m_CurrSceneFrameIndex].get();
 }
 
-void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::PreProcess::GRAPHICS_PIPELINE)
 	{
@@ -83,13 +134,14 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::LoadResource::MESH)
 	{
 		//TODO: Add flag to determine the intended behavior
-		if (_opt_in_Info != nullptr);
+		if (_opt_out_info_ != nullptr);
 		{
+			LOG_ERROR("You need to provide mesh to load into GPU memory");
 			return;
 		}
 
@@ -159,7 +211,7 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::AllocateResource::UNIFORM)
 	{
@@ -172,7 +224,7 @@ void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const 
 }
 
 // ECS's signaled function that listens to both engine/user entity
-void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::Update::UNIFORM)
 	{
@@ -198,68 +250,26 @@ void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt
 }
 
 // ECS's signaled function
-void DX12Renderer::RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	// On Entity having Renderer component added, it gets a signal from ECS to provide corresponding PSO.
 }
 
-void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::SetViewPort::EDITOR)
 	{
-		D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-		dsvHeapDesc.NumDescriptors = 1;
-		dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		dsvHeapDesc.NodeMask = 0;
-
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
-			&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
-
-		m_DsvDescriptor = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
-
-		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
-		srvHeapDesc.NumDescriptors = NUM_BACK_BUFFERS;
-		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
-			&srvHeapDesc, IID_PPV_ARGS(m_SrvHeap.GetAddressOf())));
-
-		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
-		rtvHeapDesc.NumDescriptors = NUM_BACK_BUFFERS;
-		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtvHeapDesc.NodeMask = 0;
-
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
-			&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
-
-		SIZE_T rtvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
-
-		SIZE_T srvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandle = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
 
 		for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
 		{
-			auto sceneBuf = std::make_unique<RenderTexture>(DXGI_FORMAT_R8G8B8A8_UNORM);
+			m_SceneBuffers[i]->ResizeResource(width, height);
 
-			DirectX::XMVECTORF32 fColorValue = { 0.96f, 0.97f, 0.97f, 1.f };
-			DirectX::XMVECTOR colorValue = fColorValue;
-			sceneBuf->SetClearColor(colorValue);
-
-			m_RtvDescriptors[i] = rtvHandle;
-			rtvHandle.ptr += rtvDescriptorSize;
-
-			m_SrvDescriptors[i] = srvHandle;
-			srvHandle.ptr += srvDescriptorSize;
-
-			sceneBuf->SetDevice(g_pd3dDevice, m_SrvDescriptors[i], m_RtvDescriptors[i]);
-
-			sceneBuf->ResizeResource(width, height);
-
-			m_SceneBuffers[i] = std::move(sceneBuf);
+			m_SrvDescriptorsGPU[i] = srvHandle;
+			srvHandle.ptr += m_SrvDescriptorSize;
 		}
+
+		_opt_out_info_ = (void*)m_SrvDescriptorsGPU;
 	}
 	else  // == GraphicsService::SetViewPort::GAME, AUXn
 	{
@@ -267,11 +277,11 @@ void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int w
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 
 }
 
-void DX12Renderer::RequestService(GraphicsService::End what, const void* _opt_in_Info, void* _opt_out_Info)
+void DX12Renderer::RequestService(GraphicsService::End what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 }

@@ -1,8 +1,7 @@
 #include "fm_pch.h"
-#include "d3dx12_scenebuf.h"
-
-#include "d3dx12_error.h"
 #include "DX12App_SceneBuffer.h"
+
+#include "DX12App_ErrorHandler.h"
 
 
 RenderTexture::RenderTexture(DXGI_FORMAT format) noexcept :

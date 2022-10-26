@@ -82,6 +82,8 @@
 
 #endif
 
+#define BUILT_IN std::wstring() 
+
 #define FM_ASSERT(_EXPR)            assert(_EXPR) 
 
 #define FM_ASSERTM(exp, msg) assert(((void)msg, exp))
