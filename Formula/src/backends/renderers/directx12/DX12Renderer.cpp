@@ -3,24 +3,29 @@
 
 #include "core/DX12App_ErrorHandler.h"
 #include "core/DX12App_ResourceAllocator.h"
-#include "core/DX12App_RootSigner.h"
 #include "core/DX12App_PreProcessor.h"
-#include "core/DX12App_SceneBuffer.h"
 
 // Import from ImGui main framework
 extern ID3D12Device* g_pd3dDevice;
 
-// Export
-DX12Renderer g_dx12Renderer;
-
 namespace fs = std::filesystem;
 
 DX12Renderer::DX12Renderer()
-	:	m_WaitSync(g_pd3dDevice)
 {
+	Init(g_pd3dDevice);
+}
+
+void DX12Renderer::Init(ID3D12Device* device)
+{
+	m_Device = device;
+
+	m_WaitSync.Init(m_Device);
+	m_RootSignature.Init(m_Device);
+	m_UniformBuffers.Init(m_Device);
+
 	for (int i = 0; i < NUM_FRAMES_IN_FLIGHT; ++i)
 	{
-		m_SceneFrameContexts[i] = CreateScope<SceneFrameContext>(g_pd3dDevice);
+		m_SceneFrameContexts[i].Init(m_Device);
 	}
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
@@ -29,17 +34,17 @@ DX12Renderer::DX12Renderer()
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
 
-	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
 		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
 
-	m_DsvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	m_DsvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	m_DsvDescriptor = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc{};
 	srvHeapDesc.NumDescriptors = NUM_BACK_BUFFERS;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
 		&srvHeapDesc, IID_PPV_ARGS(m_SrvHeap.GetAddressOf())));
 
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
@@ -48,22 +53,22 @@ DX12Renderer::DX12Renderer()
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
 
-	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
 		&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
 
-	m_RtvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	m_RtvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
 
-	m_SrvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_SrvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
- 
+
 	for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
 	{
-		m_SceneBuffers[i] = CreateScope<RenderTexture>(DXGI_FORMAT_R8G8B8A8_UNORM);
+		m_SceneBuffers[i].Init(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 		DirectX::XMVECTORF32 fColorValue = { 0.96f, 0.97f, 0.97f, 1.f };
 		DirectX::XMVECTOR colorValue = fColorValue;
-		m_SceneBuffers[i]->SetClearColor(colorValue);
+		m_SceneBuffers[i].SetClearColor(colorValue);
 
 		m_RtvDescriptors[i] = rtvHandle;
 		rtvHandle.ptr += m_RtvDescriptorSize;
@@ -71,7 +76,7 @@ DX12Renderer::DX12Renderer()
 		m_SrvDescriptorsCPU[i] = srvHandle;
 		srvHandle.ptr += m_SrvDescriptorSize;
 
-		m_SceneBuffers[i]->SetDevice(g_pd3dDevice, m_SrvDescriptorsCPU[i], m_RtvDescriptors[i]);
+		m_SceneBuffers[i].SetDevice(m_Device, m_SrvDescriptorsCPU[i], m_RtvDescriptors[i]);
 	}
 }
 
@@ -82,7 +87,7 @@ DX12Renderer::~DX12Renderer()
 void DX12Renderer::RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	m_CurrSceneFrameIndex %= NUM_FRAMES_IN_FLIGHT;
-	m_CurrSceneFrameContext = m_SceneFrameContexts[m_CurrSceneFrameIndex].get();
+	m_CurrSceneFrameContext = &m_SceneFrameContexts[m_CurrSceneFrameIndex];
 }
 
 void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_info_)
@@ -98,8 +103,6 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 			// ...
 		//}
 
-		m_RootSignature = CreateScope<RootSignature>(g_pd3dDevice);
-
 		//Note: Every graphics pipeline will share the same shader resource binding scheme to increase the caching performance
 		std::vector<RootParmeter> rootParams
 		{
@@ -110,19 +113,19 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
 		};
 
-		m_RootSignature->CreateGraphicsRootSignature(rootParams);
+		m_RootSignature.CreateGraphicsRootSignature(rootParams);
 
-		Plumber L_Unlit(g_pd3dDevice, m_RootSignature.get());
+		Plumber L_Unlit(m_Device, &m_RootSignature);
 		auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		L_Unlit.CreateGraphicsShader(
 			L"..\\..\\..\\..\\assets\\shader\\unlit\\Unlit.hlsl",
 			pipeSpec);
 		m_MeshRendererPSOs.insert({ "MeshRenderer(UnlitShader)", L_Unlit.GetGraphicsPipelineHandle() });
 
-		//Plumber M_Unlit(g_pd3dDevice, m_RootSignature.get());
+		//Plumber M_Unlit(m_Device, m_RootSignature.get());
 		// ...
 
-		//Plumber P_Unlit(g_pd3dDevice, m_RootSignature.get());
+		//Plumber P_Unlit(m_Device, m_RootSignature.get());
 		// ...
 
 		// ...
@@ -139,7 +142,7 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 	if (what == GraphicsService::LoadResource::MESH)
 	{
 		//TODO: Add flag to determine the intended behavior
-		if (_opt_out_info_ != nullptr);
+		if (_opt_out_info_ != nullptr)
 		{
 			LOG_ERROR("You need to provide mesh to load into GPU memory");
 			return;
@@ -158,31 +161,31 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 		subMeshGeo.BaseVertexLocation = 0;
 		subMeshGeo.StartIndexLocation = 0;
 		subMeshGeo.IndexCount = 0;
-
-		auto vertexCount = pMesh->Vertices.size();
+		
+		UINT vertexCount = (UINT)pMesh->Vertices.size();
 		const UINT vbByteSize = sizeof(Vertex) * vertexCount;
 
-		auto indexCount = pMesh->Indices32.size(); // == pMesh->GetIndices16().size()
+		UINT indexCount = (UINT)pMesh->Indices32.size(); // == pMesh->GetIndices16().size()
 		const UINT ibByteSize = pMesh->isIndices32 ? sizeof(UINT32) * indexCount : sizeof(UINT16) * indexCount;
 
 		ThrowIfFailed(D3DCreateBlob(vbByteSize, &meshGeo->VertexBufferCPU));
 		CopyMemory(meshGeo->VertexBufferCPU->GetBufferPointer(), pMesh->Vertices.data(), vbByteSize);
 
-		meshGeo->VertexBufferGPU = DefaultBufferAllocator(g_pd3dDevice, pMesh->Vertices.data(), meshGeo->VertexBufferByteSize);
+		meshGeo->VertexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->Vertices.data(), meshGeo->VertexBufferByteSize);
 
 		if (pMesh->isIndices32)
 		{
 			ThrowIfFailed(D3DCreateBlob(ibByteSize, &meshGeo->IndexBufferCPU));
 			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->Indices32.data(), ibByteSize);
 
-			meshGeo->IndexBufferGPU = DefaultBufferAllocator(g_pd3dDevice, pMesh->Indices32.data(), ibByteSize);
+			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->Indices32.data(), ibByteSize);
 		}
 		else
 		{
 			ThrowIfFailed(D3DCreateBlob(ibByteSize, &meshGeo->IndexBufferCPU));
 			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->GetIndices16().data(), ibByteSize);
 
-			meshGeo->IndexBufferGPU = DefaultBufferAllocator(g_pd3dDevice, pMesh->GetIndices16().data(), ibByteSize);
+			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->GetIndices16().data(), ibByteSize);
 		}
 
 		meshGeo->VertexByteStride = sizeof(Vertex);
@@ -203,7 +206,7 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 		std::wstring stem = fs::path(path).stem();
 		std::wstring ext = fs::path(path).extension();
 
-		std::unique_ptr<ImageTexture> imageTex = std::make_unique<ImageTexture>(g_pd3dDevice);
+		std::unique_ptr<ImageTexture> imageTex = std::make_unique<ImageTexture>(m_Device);
 
 		imageTex->CreateImageTextureFromFile(path);
 
@@ -215,7 +218,7 @@ void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const 
 {
 	if (what == GraphicsService::AllocateResource::UNIFORM)
 	{
-		m_UniformBuffers = CreateScope<UniformManager>();
+
 	}
 	else
 	{
@@ -263,7 +266,7 @@ void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int w
 
 		for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
 		{
-			m_SceneBuffers[i]->ResizeResource(width, height);
+			m_SceneBuffers[i].ResizeResource(width, height);
 
 			m_SrvDescriptorsGPU[i] = srvHandle;
 			srvHandle.ptr += m_SrvDescriptorSize;

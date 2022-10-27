@@ -4,15 +4,16 @@
 #include "DX12App_ErrorHandler.h"
 
 
-RenderTexture::RenderTexture(DXGI_FORMAT format) noexcept :
-    m_State(D3D12_RESOURCE_STATE_COMMON),
+RenderTexture::RenderTexture() :
     m_SrvDescriptor{},
     m_RtvDescriptor{},
-    m_ClearColor{},
-    m_Format(format),
-    m_Width(0),
-    m_Height(0)
+    m_ClearColor{}
 {
+}
+
+void RenderTexture::Init(DXGI_FORMAT format)
+{
+    m_Format = format;
 }
 
 void RenderTexture::SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor)
@@ -146,9 +147,13 @@ void RenderTexture::EndScene(ID3D12GraphicsCommandList* commandList)
     TransitionTo(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
-SceneFrameContext::SceneFrameContext(ID3D12Device* device)
-    :   m_Device(device)
+void SceneFrameContext::Init(ID3D12Device* device)
 {
+    m_Device = device;
+
+    ThrowIfFailed(m_Device->CreateCommandAllocator(
+        D3D12_COMMAND_LIST_TYPE_DIRECT,
+        IID_PPV_ARGS(SceneRenderCommandAllocator.GetAddressOf())));
 }
 
 SceneFrameContext::~SceneFrameContext()

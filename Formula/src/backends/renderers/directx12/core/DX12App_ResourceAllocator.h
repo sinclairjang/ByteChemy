@@ -9,14 +9,17 @@ template<typename T>
 class UploadBufAllocator
 {
 public:
-    UploadBufAllocator(ID3D12Device* device, bool isConstantBuffer)
-        : m_IsConstantBuffer(isConstantBuffer)
+    UploadBufAllocator() = default;
+
+    void Init(ID3D12Device* device, bool isConstantBuffer)
     {
+        m_Device = device;
+
         m_ElementByteSize = sizeof(T);
 
-        if (m_IsConstantBuffer)
+        if (isConstantBuffer)
         {
-            m_ElementByteSize = ((sizeof(T) + 255) % ~255);
+            m_ElementByteSize = ((sizeof(T) + 255) & ~255);
         }
     }
 
@@ -25,7 +28,7 @@ public:
 
     void UploadBufAllocator::SetNumElements(UINT64 numElements)
     {
-        m_NumElement = numElement;
+        m_NumElement = numElements;
     }
 
     int UploadBufAllocator::GetElementByteSize() const
@@ -36,10 +39,13 @@ public:
     void UploadBufAllocator::Map()
     {
         if (!m_NumElement)
-            LOG_INFO("Please specify allocation size")
-            return
+        {
+            LOG_INFO("Please specify allocation size");
+            return;
+        }
+
         
-        ThrowIfFailed(device->CreateCommittedResource(
+        ThrowIfFailed(m_Device->CreateCommittedResource(
             &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
             D3D12_HEAP_FLAG_NONE,
             &CD3DX12_RESOURCE_DESC::Buffer(m_ElementByteSize * m_NumElement),
@@ -73,6 +79,8 @@ public:
     }
 
 private:
+    ID3D12Device* m_Device;
+
     ComPtr<ID3D12Resource> m_UploadBuffer;
     BYTE* m_MappedData = nullptr;
 

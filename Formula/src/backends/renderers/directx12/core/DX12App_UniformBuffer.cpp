@@ -4,83 +4,86 @@
 #include "DX12App_ErrorHandler.h"
 #include "utils/Log.h"
 
-UniformManager::UniformManager()
+void UniformManager::Init(ID3D12Device* device)
 {
+	m_Device = device;
+
+	for (int frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+	{
+		m_UniformFrameResources[frameIndex].Init(m_Device);
+	}
+
+	// Cache
+	m_MainPropsAlignment = m_UniformFrameResources[0].MainProps.GetElementByteSize();
+	m_MainPassAlignment = m_UniformFrameResources[0].MainPass.GetElementByteSize();
+
+	m_UnlitPropsAlignment = m_UniformFrameResources[0].UnlitProps.GetElementByteSize();
+	m_UnlitPassAlignment = m_UniformFrameResources[0].UnlitPass.GetElementByteSize();
+
+	m_CbvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
 		cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
 		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvHeapDesc.NodeMask = 0;
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		ThrowIfFailed(m_Device->CreateDescriptorHeap(
 			&cbvHeapDesc, IID_PPV_ARGS(m_MainPassHeap.GetAddressOf())
 		));
 	}
-	
+
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
 		cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
 		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvHeapDesc.NodeMask = 0;
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		ThrowIfFailed(m_Device->CreateDescriptorHeap(
 			&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPassHeap.GetAddressOf())
 		));
 	}
 
 	for (int frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 	{
-		m_UniformFrameResources[frameIndex] = std::make_unique<UniformFrameResource>();
-		
 		{
-			auto& mainPassBuffer = m_UniformFrameResources[frameIndex]->MainPass;
-			mainPassBuffer.SetNumElements(1);  // Recall: One cbuffer per frame
-			mainPassBuffer.Map();
+			m_UniformFrameResources[frameIndex].MainPass.SetNumElements(1);  // Recall: One cbuffer per frame
+			m_UniformFrameResources[frameIndex].MainPass.Map();
 
-			D3D12_GPU_VIRTUAL_ADDRESS mainPassAddress = mainPassBuffer.Resource()->GetGPUVirtualAddress();
 
-			int heapIndex = frameIndex;
-			SIZE_T cbvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			D3D12_GPU_VIRTUAL_ADDRESS mainPassAddress = m_UniformFrameResources[frameIndex].MainPass.Resource()->GetGPUVirtualAddress();
+
 			auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 				m_MainPassHeap->GetCPUDescriptorHandleForHeapStart());
-			cbvHandle.Offset(heapIndex, cbvDescriptorSize);
+			cbvHandle.Offset(frameIndex, m_CbvDescriptorSize);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
 			cbvDesc.BufferLocation = mainPassAddress;
-			cbvDesc.SizeInBytes = mainPassBuffer.GetElementByteSize();
+			cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].MainPass.GetElementByteSize();
 
-			g_pd3dDevice->CreateConstantBufferView(&cbvDesc, cbvHandle);
+			m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
 		}
 
 		{
-			auto& unlitPassBuffer = m_UniformFrameResources[frameIndex]->UnlitPass;
-			unlitPassBuffer.SetNumElements(1);  // Recall: One cbuffer per frame
-			unlitPassBuffer.Map();
+			m_UniformFrameResources[frameIndex].UnlitPass.SetNumElements(1);  // Recall: One cbuffer per frame
+			m_UniformFrameResources[frameIndex].UnlitPass.Map();
 
-			D3D12_GPU_VIRTUAL_ADDRESS unlitPassAddress = unlitPassBuffer.Resource()->GetGPUVirtualAddress();
+
+			D3D12_GPU_VIRTUAL_ADDRESS unlitPassAddress = m_UniformFrameResources[frameIndex].UnlitPass.Resource()->GetGPUVirtualAddress();
 
 			int heapIndex = frameIndex;
-			SIZE_T cbvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 			auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 				m_UnlitPassHeap->GetCPUDescriptorHandleForHeapStart());
-			cbvHandle.Offset(heapIndex, cbvDescriptorSize);
+			cbvHandle.Offset(heapIndex, m_CbvDescriptorSize);
 
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
 			cbvDesc.BufferLocation = unlitPassAddress;
-			cbvDesc.SizeInBytes = unlitPassBuffer.GetElementByteSize();
+			cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].UnlitPass.GetElementByteSize();
 
-			g_pd3dDevice->CreateConstantBufferView(&cbvDesc, cbvHandle);
+			m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
 		}
 	}
-	
-	// Cache
-	m_MainPropsAlignment = m_UniformFrameResources[0]->MainProps.GetElementByteSize();
-	m_MainPassAlignment = m_UniformFrameResources[0]->MainPass.GetElementByteSize();
-	
-	m_UnlitPropsAlignment = m_UniformFrameResources[0]->UnlitProps.GetElementByteSize();
-	m_UnlitPassAlignment = m_UniformFrameResources[0]->UnlitPass.GetElementByteSize();
-
-	m_CbvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 UINT64 UniformManager::GetMainPropBufferIdx()
@@ -134,7 +137,7 @@ UINT64 UniformManager::GetShadingPropBufferIdx(ShadingType type)
 }
 
 
-void UniformManager::ResizeMainPropBuffers(UINT64 numMainProps)
+void UniformManager::ResizeMainPropBuffers(UINT numMainProps)
 {
 	
 	D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
@@ -142,23 +145,23 @@ void UniformManager::ResizeMainPropBuffers(UINT64 numMainProps)
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
-	ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
 		&cbvHeapDesc, IID_PPV_ARGS(m_MainPropsHeap.GetAddressOf())
 	));
 	
-	for (UINT64 frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+	for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 	{
-		auto& mainPropsBuffer = m_UniformFrameResources[frameIndex]->MainProps;
+		auto& mainPropsBuffer = m_UniformFrameResources[frameIndex].MainProps;
 		mainPropsBuffer.SafeRelease();
 		mainPropsBuffer.SetNumElements(numMainProps);
 		mainPropsBuffer.Map();
 
-		for (UINT64 i = 0; i < m_NumMainProps; ++i)
+		for (UINT i = 0; i < m_NumMainProps; ++i)
 		{
 			D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = mainPropsBuffer.Resource()->GetGPUVirtualAddress();
-			mainPropsAddress += i * m_MainPropsAlignment;
+			mainPropsAddress += (UINT64)i * m_MainPropsAlignment;
 
-			UINT64 heapIndex = frameIndex * m_NumMainProps + i;
+			UINT heapIndex = frameIndex * m_NumMainProps + i;
 			auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 				m_MainPropsHeap->GetCPUDescriptorHandleForHeapStart());
 			cbvHandle.Offset(heapIndex, m_CbvDescriptorSize);
@@ -167,14 +170,14 @@ void UniformManager::ResizeMainPropBuffers(UINT64 numMainProps)
 			cbvDesc.BufferLocation = mainPropsAddress;
 			cbvDesc.SizeInBytes = m_MainPropsAlignment;
 
-			g_pd3dDevice->CreateConstantBufferView(&cbvDesc, cbvHandle);
+			m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
 		}
 	}
 }
 
 
 
-void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitProps)
+void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT numUnlitProps)
 {
 	if (type == ShadingType::UNLIT)
 	{
@@ -183,23 +186,23 @@ void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitP
 		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvHeapDesc.NodeMask = 0;
-		ThrowIfFailed(g_pd3dDevice->CreateDescriptorHeap(
+		ThrowIfFailed(m_Device->CreateDescriptorHeap(
 			&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPropsHeap.GetAddressOf())
 		));
 
-		for (int frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+		for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 		{
-			auto& unlitPropsBuffer = m_UniformFrameResources[frameIndex]->UnlitProps;
+			auto& unlitPropsBuffer = m_UniformFrameResources[frameIndex].UnlitProps;
 			unlitPropsBuffer.SafeRelease();
 			unlitPropsBuffer.SetNumElements(numUnlitProps);
 			unlitPropsBuffer.Map();
 
-			for (UINT64 i = 0; i < m_NumUnlitProps; ++i)
+			for (UINT i = 0; i < m_NumUnlitProps; ++i)
 			{
 				D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = unlitPropsBuffer.Resource()->GetGPUVirtualAddress();
-				mainPropsAddress += i * m_UnlitPropsAlignment;
+				mainPropsAddress += (UINT64)i * m_UnlitPropsAlignment;
 
-				UINT64 heapIndex = frameIndex * m_NumUnlitProps + i;
+				UINT heapIndex = frameIndex * m_NumUnlitProps + i;
 				auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 					m_UnlitPropsHeap->GetCPUDescriptorHandleForHeapStart());
 				cbvHandle.Offset(heapIndex, m_CbvDescriptorSize);
@@ -208,7 +211,7 @@ void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitP
 				cbvDesc.BufferLocation = mainPropsAddress;
 				cbvDesc.SizeInBytes = m_UnlitPropsAlignment;
 
-				g_pd3dDevice->CreateConstantBufferView(&cbvDesc, cbvHandle);
+				m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
 			}
 		}
 	}
@@ -219,3 +222,10 @@ void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitP
 	}
 }
 
+void UniformFrameResource::Init(ID3D12Device* device)
+{
+	MainProps.Init(device, true);
+	MainPass.Init(device, true);
+	UnlitPass.Init(device, true);
+	UnlitProps.Init(device, true);
+}

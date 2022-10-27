@@ -7,16 +7,12 @@
 #include "core/GeometryGenerator.h"
 #include "backends/renderers/directx12/DX12Renderer.h"		// #include "backends/renderers/Vulkan/VKRenderer.h"
 
-
-
-// Import
-extern DX12Renderer g_dx12Renderer;
-
 void Scene::SetRenderAPI(const GraphicsService::GrpahicsAPI& graphicsAPI)
 {
 	if (graphicsAPI == GraphicsService::GrpahicsAPI::DirectX12)
 	{
-		ServiceLocator<Renderer>::Provide(&g_dx12Renderer);
+		Renderer* renderer = new DX12Renderer();
+		ServiceLocator<Renderer>::Provide(renderer);
 		m_Renderer = ServiceLocator<Renderer>::GetService();
 
 		m_GraphicsAPI = "DirectX 12";

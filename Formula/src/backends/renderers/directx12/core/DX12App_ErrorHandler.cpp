@@ -1,5 +1,5 @@
 #include "fm_pch.h"
-#include "d3dx12_error.h"
+#include "DX12App_ErrorHandler.h"
 
 class com_exception : public std::exception
 {

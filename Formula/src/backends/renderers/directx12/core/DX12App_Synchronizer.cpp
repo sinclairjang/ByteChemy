@@ -2,9 +2,16 @@
 #include "DX12App_Synchronizer.h"
 #include "DX12App_ErrorHandler.h"
 
-WaitSync::WaitSync(ID3D12Device* device) :
-	m_Device(device)
+WaitSync::~WaitSync()
 {
+	// Note: The rest of resourcees is automatically managed by ComPtr.
+	CloseHandle(m_Event);
+}
+
+void WaitSync::Init(ID3D12Device* device)
+{
+	m_Device = device;
+
 	ThrowIfFailed(m_Device->CreateFence(
 		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(m_Fence.GetAddressOf())
 	));
@@ -13,14 +20,14 @@ WaitSync::WaitSync(ID3D12Device* device) :
 	FM_ASSERT(m_Event != NULL);
 
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Type		= D3D12_COMMAND_LIST_TYPE_DIRECT;
-	queueDesc.Flags		= D3D12_COMMAND_QUEUE_FLAG_NONE;
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queueDesc.NodeMask = 1;
 
 	ThrowIfFailed(m_Device->CreateCommandQueue(
 		&queueDesc, IID_PPV_ARGS(m_CmdQueue.GetAddressOf())
 	));
-	
+
 	ThrowIfFailed(m_Device->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(m_CmdAlloc.GetAddressOf())
 	));
@@ -28,12 +35,6 @@ WaitSync::WaitSync(ID3D12Device* device) :
 	ThrowIfFailed(m_Device->CreateCommandList(
 		0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_CmdAlloc.Get(), NULL, IID_PPV_ARGS(m_CmdList.GetAddressOf())
 	));
-}
-
-WaitSync::~WaitSync()
-{
-	// Note: The rest of resourcees is automatically managed by ComPtr.
-	CloseHandle(m_Event);
 }
 
 ComPtr<ID3D12GraphicsCommandList>& WaitSync::Begin()

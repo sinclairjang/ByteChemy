@@ -1,11 +1,12 @@
 #include "fm_pch.h"
-#include "d3dx12_rootsigner.h"
+#include "DX12App_RootSigner.h"
 
-#include "d3dx12_error.h"
+#include "DX12App_ErrorHandler.h"
 
-RootSignature::RootSignature(ID3D12Device* device)
-	: g_Device(device)
+
+void RootSignature::Init(ID3D12Device* device)
 {
+	m_Device = device;
 }
 
 void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter>& rootParams)
@@ -37,7 +38,7 @@ void RootSignature::CreateGraphicsRootSignature(std::vector<RootParmeter>& rootP
 
 	ThrowIfFailed(hr);
 
-	ThrowIfFailed(g_Device->CreateRootSignature(
+	ThrowIfFailed(m_Device->CreateRootSignature(
 		0,
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),

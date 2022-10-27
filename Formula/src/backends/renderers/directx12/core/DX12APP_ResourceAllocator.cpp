@@ -10,7 +10,8 @@ DefaultBufferAllocator(ID3D12Device* device, const void* initData, UINT64 byteSi
     ComPtr<ID3D12Resource> uploadBuffer;
     ComPtr<ID3D12Resource> defaultBuffer;
     
-    WaitSync waitSync(device);
+    WaitSync waitSync;
+    waitSync.Init(device);
     
     // !Safety: Upon return, WaitSync will release the COM object of ID3D12CommandAlloc type that cmdList hold reference to.
     //So cmdList is meant to live only in this scope.
@@ -113,8 +114,10 @@ void ImageTexture::CreateImageTextureFromFile(const std::wstring& path)
 
     ComPtr<ID3D12Resource> texUploadBuf;
     
-    WaitSync waitSync(m_Device);
-    auto cmdList = waitSync.Begin();
+    WaitSync waitSync;
+    waitSync.Init(m_Device);
+
+    ComPtr<ID3D12GraphicsCommandList>& cmdList = waitSync.Begin();
 
     ThrowIfFailed(m_Device->CreateCommittedResource(
         &heapProperty,

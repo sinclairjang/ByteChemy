@@ -60,7 +60,9 @@ struct RootParmeter
 class RootSignature
 {
 public:
-	RootSignature(ID3D12Device* device);
+	RootSignature() = default;
+
+	void Init(ID3D12Device* device);
 
 	void CreateGraphicsRootSignature(std::vector<RootParmeter>& rootParams);
 	
@@ -70,7 +72,7 @@ private:
 	void SetRootParameter(CD3DX12_ROOT_PARAMETER& slotRootParameter, const RootParmeter& rootParam);
 
 private:
-	ID3D12Device* g_Device;
+	ID3D12Device* m_Device;
 	ComPtr<ID3D12RootSignature> m_GraphicsRootSignature;
 
 	UINT32 m_CBVOffset = 0;

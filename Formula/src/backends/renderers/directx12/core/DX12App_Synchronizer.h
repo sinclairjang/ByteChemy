@@ -3,8 +3,10 @@
 class WaitSync
 {
 public:
-	WaitSync(ID3D12Device* device);
+	WaitSync() = default;
 	~WaitSync();
+
+	void Init(ID3D12Device* device);
 
 	ComPtr<ID3D12GraphicsCommandList>& Begin();
 	
@@ -12,9 +14,9 @@ public:
 	void Wait();
 	void Flush();
 
-private:
+private:	
 	ID3D12Device* m_Device;
-	
+
 	ComPtr<ID3D12CommandQueue> m_CmdQueue;
 	ComPtr<ID3D12CommandAllocator> m_CmdAlloc;
 	ComPtr<ID3D12GraphicsCommandList> m_CmdList;

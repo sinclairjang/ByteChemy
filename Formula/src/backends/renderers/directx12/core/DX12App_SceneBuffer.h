@@ -10,7 +10,9 @@ static inline void SafeRelease(T*& res)
 
 struct SceneFrameContext
 {
-    SceneFrameContext(ID3D12Device* device);
+    SceneFrameContext() = default;
+
+    void Init(ID3D12Device* device);
 
     SceneFrameContext(const SceneFrameContext& rhs) = delete;
     SceneFrameContext& operator=(const SceneFrameContext& rhs) = delete;
@@ -27,7 +29,9 @@ private:
 class RenderTexture
 {
 public:
-    RenderTexture(DXGI_FORMAT format) noexcept;
+    RenderTexture();
+
+    void Init(DXGI_FORMAT format);
 
     void SetDevice(ID3D12Device* device, D3D12_CPU_DESCRIPTOR_HANDLE srvDescriptor, D3D12_CPU_DESCRIPTOR_HANDLE rtvDescriptor);
     void SetWindow(const size_t width, const size_t height);
@@ -45,19 +49,19 @@ public:
     inline DXGI_FORMAT GetFormat() const noexcept { return m_Format; }
 
 private:
-    ID3D12Device* m_Device;
+    ID3D12Device* m_Device = nullptr;
     
     ComPtr<ID3D12Resource> m_Resource;
-    D3D12_RESOURCE_STATES m_State;
+    D3D12_RESOURCE_STATES m_State = D3D12_RESOURCE_STATE_COMMON;
     
     D3D12_CPU_DESCRIPTOR_HANDLE m_SrvDescriptor;
     D3D12_CPU_DESCRIPTOR_HANDLE m_RtvDescriptor;
     
     float m_ClearColor[4];
-    DXGI_FORMAT m_Format;
+    DXGI_FORMAT m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     
-    size_t m_Width;
-    size_t m_Height;
+    size_t m_Width = 0;
+    size_t m_Height = 0;
 };
 
 

@@ -50,9 +50,16 @@ struct UnlitShadingPass			// -> register(b2)
     XMFLOAT4 _Placeholder;
 };
 
-struct UnlitShadingProperty		// -> register(b3)
+struct ShadingProperty
 {
-	//TEMP
+    virtual ~ShadingProperty() = 0;
+};
+
+struct UnlitShadingProperty : public ShadingProperty		// -> register(b3)
+{
+    virtual ~UnlitShadingProperty() {}
+	
+    //TEMP
 	XMFLOAT4 gColor;
 };
 
@@ -83,12 +90,10 @@ struct UnlitShadingProperty		// -> register(b3)
 
 struct UniformFrameResource
 {
+    UniformFrameResource() = default;
+
 	//TEMP
-    UniformFrameResource() : 
-        MainProps(g_pd3dDevice, true),
-        MainPass(g_pd3dDevice, true),
-        UnlitProps(g_pd3dDevice, true),
-        UnlitPass(g_pd3dDevice, true) {}
+    void Init(ID3D12Device* device);
 
 	UploadBufAllocator<EngineObjectProperty> MainProps;
 	UploadBufAllocator<EnginPass> MainPass;
@@ -107,22 +112,26 @@ class UniformManager
 
 public:
     // Value-initialize uniform frame resources
-    UniformManager();
+    UniformManager() = default;
     
+    void Init(ID3D12Device* device);
+
     // Create and grow uniform buffers if index stack is depleted
     UINT64 GetMainPropBufferIdx();
     UINT64 GetShadingPropBufferIdx(ShadingType type);
 
 private:
-    void ResizeMainPropBuffers(UINT64 numMainProps);
-    void ResizeShadingPropBuffers(ShadingType type, UINT64 numUnlitProps);
+    void ResizeMainPropBuffers(UINT numMainProps);
+    void ResizeShadingPropBuffers(ShadingType type, UINT numUnlitProps);
         
 private:    
-	std::unique_ptr<UniformFrameResource> m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
+	UniformFrameResource m_UniformFrameResources[NUM_FRAMES_IN_FLIGHT];
 
-    SIZE_T m_CbvDescriptorSize = 0;
+    UINT m_CbvDescriptorSize = 0;
 
 private:
+    ID3D12Device* m_Device;
+
     int m_MainPropsAlignment = 0;
     int m_MainPassAlignment = 0;
     // Standard, Particle ...

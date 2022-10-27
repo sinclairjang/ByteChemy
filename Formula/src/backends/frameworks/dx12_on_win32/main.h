@@ -32,9 +32,10 @@ struct FrameContext
 ID3D12Device* g_pd3dDevice = NULL;
 ID3D12GraphicsCommandList* g_pd3dCommandList = NULL;
 
+int const                    NUM_FRAMES_IN_FLIGHT = 3;
+int const                    NUM_BACK_BUFFERS = 3;
+
 // Data
-static int const                    NUM_FRAMES_IN_FLIGHT = 3;
-static int const                    NUM_BACK_BUFFERS = 3;
 static FrameContext                 g_frameContext[NUM_FRAMES_IN_FLIGHT] = {};
 static UINT                         g_frameIndex = 0;
 
@@ -156,14 +157,13 @@ int main(int, char**)
         ImGui::NewFrame();
 
        // Draw the scene to texture
-        ImGui::Begin("Viewport");
+        ImGui::ShowDemoWindow(&show_demo_window);
         
-        ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-        scene->Begin( (const int)viewportPanelSize.x, (const int)viewportPanelSize.y );
+        //ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+        //scene->Begin( (const int)viewportPanelSize.x, (const int)viewportPanelSize.y );
 
-        D3D12_GPU_DESCRIPTOR_HANDLE* texID = (D3D12_GPU_DESCRIPTOR_HANDLE*)scene->GetTexID();
-        //texID[N];
-        ImGui::End();
+        //D3D12_GPU_DESCRIPTOR_HANDLE* texID = (D3D12_GPU_DESCRIPTOR_HANDLE*)scene->GetTexID();
+        //e.g. texID[n];
         
         // Rendering
         ImGui::Render();

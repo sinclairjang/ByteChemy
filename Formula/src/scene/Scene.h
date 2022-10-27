@@ -8,12 +8,12 @@ class Scene
 {
 	friend class Entity;
 
-	Scene() = default;
-	
-	//TODO: Ensure an old scene will have been deleted by the time a new Scene instance is deserialized
-	//~Scene(); 
-
 public:
+	Scene() = default;
+
+	//TODO: Ensure an old scene will have been deleted by the time a new Scene instance is deserialized
+	~Scene() = default;
+
 	// Scene timeline
 
 	// Pre-process the scene buffer
