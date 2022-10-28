@@ -107,18 +107,18 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 		std::vector<RootParmeter> rootParams
 		{
 			//TEMP
-			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b0)
-			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b1)
-			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b2)
-			RootParmeter(LeafParametersLayout::TABLE,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
+			RootParmeter(LeafParametersLayout::DESCRIPTOR,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b0)
+			RootParmeter(LeafParametersLayout::DESCRIPTOR,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b1)
+			RootParmeter(LeafParametersLayout::DESCRIPTOR,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b2)
+			RootParmeter(LeafParametersLayout::DESCRIPTOR,	{ LeafParameterArray(LeafParameterType::CBV, 1) }),  // -> register (b3)
 		};
 
 		m_RootSignature.CreateGraphicsRootSignature(rootParams);
 
 		Plumber L_Unlit(m_Device, &m_RootSignature);
-		auto& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		GPUPipelineSpecification& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		L_Unlit.CreateGraphicsShader(
-			L"..\\..\\..\\..\\assets\\shader\\unlit\\Unlit.hlsl",
+			L"..\\..\\..\\..\\..\\assets\\shader\\unlit\\Unlit.hlsl",
 			pipeSpec);
 		m_MeshRendererPSOs.insert({ "MeshRenderer(UnlitShader)", L_Unlit.GetGraphicsPipelineHandle() });
 

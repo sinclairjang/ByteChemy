@@ -75,6 +75,8 @@ private:
 	ID3D12Device* m_Device;
 	ComPtr<ID3D12RootSignature> m_GraphicsRootSignature;
 
+	std::vector<std::vector< CD3DX12_DESCRIPTOR_RANGE>> m_DescTables;
+
 	UINT32 m_CBVOffset = 0;
 	UINT32 m_SRVOffset = 0;
 	UINT32 m_UAVOffset = 0;
