@@ -4,8 +4,9 @@
 #include "DX12App_ErrorHandler.h"
 
 Plumber::Plumber(ID3D12Device* device, const RootSignature* rootSig)
-	: g_Device(device), m_GraphicsRootSignature(rootSig)
+	: m_Device(device), m_GraphicsRootSignature(rootSig)
 {
+	ZeroMemory(&m_GraphicsPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 }
 
 Plumber::~Plumber()
@@ -144,7 +145,7 @@ void Plumber::CreateGraphicsShader(const std::wstring& path, GPUPipelineSpecific
 		break;
 	}
 
-	ThrowIfFailed(g_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(&m_GraphicsPipelineState)));
+	ThrowIfFailed(m_Device->CreateGraphicsPipelineState(&m_GraphicsPipelineStateDesc, IID_PPV_ARGS(&m_GraphicsPipelineState)));
 }
 
 void Plumber::CreateShaderFromFile(const std::wstring& path, const std::string& name, const std::string& version,
@@ -157,16 +158,14 @@ void Plumber::CreateShaderFromFile(const std::wstring& path, const std::string& 
 
 	HRESULT hr = S_OK;
 
-	ComPtr<ID3DBlob> byteCode = nullptr;
-	ComPtr<ID3DBlob> errors;
 	hr = D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		name.c_str(), version.c_str(), compileFlags, 0,
 		blob.GetAddressOf(), m_ErrorBlob.GetAddressOf());
 
 	// Output errros to debug window
-	if (errors != nullptr)
+	if (m_ErrorBlob != nullptr)
 	{
-		OutputDebugStringA((char*)errors->GetBufferPointer());
+		OutputDebugStringA((char*)m_ErrorBlob->GetBufferPointer());
 	}
 
 	ThrowIfFailed(hr);

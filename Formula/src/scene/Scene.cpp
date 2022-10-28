@@ -40,7 +40,7 @@ void Scene::LoadEngineMeshAssets()
 	//Although, it is not so relevant now as we're setting up the program framework.
 	//Simple geometries such as plane grid is sufficinet for now.
 	
-	MeshData& grid = GeometryGenerator::CreateGrid(10, 10, 100, 100);
+	MeshData& grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
 	void* info = nullptr;
 
 	m_Renderer->RequestService(GraphicsService::LoadResource::MESH, BUILT_IN, &grid, info);
@@ -53,7 +53,7 @@ void Scene::LoadEngineTexImageAssets()
 	void* info = nullptr;
 	m_Renderer->RequestService(
 		GraphicsService::LoadResource::TEXTURE, 
-		L"..\\..\\assets\\texture\\White.jpeg", 
+		L"assets\\texture\\White.jpeg", 
 		nullptr, info);
 
 	//ParseAndProcessResponse(info);
@@ -90,6 +90,11 @@ void Scene::Update()
 
 void Scene::Render()
 {
+}
+
+void Scene::End()
+{
+	delete m_Renderer;
 }
 
 Entity Scene::CreateEntity(const std::wstring& name)

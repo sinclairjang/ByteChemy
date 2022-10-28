@@ -219,6 +219,9 @@ struct Vertex
 
 struct MeshData
 {
+	MeshData(const std::string name)
+		: Name(name) {}
+
 	std::string Name;
 
 	std::vector<Vertex> Vertices;

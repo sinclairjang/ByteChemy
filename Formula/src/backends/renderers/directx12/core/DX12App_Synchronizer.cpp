@@ -22,7 +22,7 @@ void WaitSync::Init(ID3D12Device* device)
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.NodeMask = 1;
+	queueDesc.NodeMask = 0;
 
 	ThrowIfFailed(m_Device->CreateCommandQueue(
 		&queueDesc, IID_PPV_ARGS(m_CmdQueue.GetAddressOf())

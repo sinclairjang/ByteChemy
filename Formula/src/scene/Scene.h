@@ -26,7 +26,7 @@ public:
 	void Render();
 	
 	// Post-process the scene buffer
-	//void End();
+	void End();
 
 public:
 	// Load scene assets (e.g. mesh, material, shader etc.) 

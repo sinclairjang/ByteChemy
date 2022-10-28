@@ -218,6 +218,8 @@ int main(int, char**)
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
+    scene->End();
+
     CleanupDeviceD3D();
     ::DestroyWindow(hwnd);
     ::UnregisterClass(wc.lpszClassName, wc.hInstance);

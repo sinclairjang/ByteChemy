@@ -108,7 +108,7 @@ private:
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE GetPrimTopologyType(D3D_PRIMITIVE_TOPOLOGY topology);
 
 private:
-	ID3D12Device* g_Device;
+	ID3D12Device* m_Device;
 	ComPtr<ID3D12PipelineState> m_GraphicsPipelineState;
 
 	const RootSignature* m_GraphicsRootSignature;

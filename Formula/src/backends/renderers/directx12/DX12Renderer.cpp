@@ -118,7 +118,7 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 		Plumber L_Unlit(m_Device, &m_RootSignature);
 		GPUPipelineSpecification& pipeSpec = GPUPipelineSpecification::Primitive(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		L_Unlit.CreateGraphicsShader(
-			L"..\\..\\..\\..\\..\\assets\\shader\\unlit\\Unlit.hlsl",
+			L"assets\\shader\\unlit\\Unlit.hlsl",
 			pipeSpec);
 		m_MeshRendererPSOs.insert({ "MeshRenderer(UnlitShader)", L_Unlit.GetGraphicsPipelineHandle() });
 
@@ -168,30 +168,32 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 		UINT indexCount = (UINT)pMesh->Indices32.size(); // == pMesh->GetIndices16().size()
 		const UINT ibByteSize = pMesh->isIndices32 ? sizeof(UINT32) * indexCount : sizeof(UINT16) * indexCount;
 
-		ThrowIfFailed(D3DCreateBlob(vbByteSize, &meshGeo->VertexBufferCPU));
+		meshGeo->VertexByteStride = sizeof(Vertex);
+		meshGeo->VertexBufferByteSize = vbByteSize;
+		meshGeo->IndexFormat = pMesh->isIndices32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
+		meshGeo->IndexBufferByteSize = ibByteSize;
+
+		ThrowIfFailed(D3DCreateBlob(meshGeo->VertexBufferByteSize, &meshGeo->VertexBufferCPU));
 		CopyMemory(meshGeo->VertexBufferCPU->GetBufferPointer(), pMesh->Vertices.data(), vbByteSize);
 
 		meshGeo->VertexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->Vertices.data(), meshGeo->VertexBufferByteSize);
 
 		if (pMesh->isIndices32)
 		{
-			ThrowIfFailed(D3DCreateBlob(ibByteSize, &meshGeo->IndexBufferCPU));
-			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->Indices32.data(), ibByteSize);
+			ThrowIfFailed(D3DCreateBlob(meshGeo->IndexBufferByteSize, &meshGeo->IndexBufferCPU));
+			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->Indices32.data(), meshGeo->IndexBufferByteSize);
 
-			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->Indices32.data(), ibByteSize);
+			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->Indices32.data(), meshGeo->IndexBufferByteSize);
 		}
 		else
 		{
-			ThrowIfFailed(D3DCreateBlob(ibByteSize, &meshGeo->IndexBufferCPU));
-			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->GetIndices16().data(), ibByteSize);
+			ThrowIfFailed(D3DCreateBlob(meshGeo->IndexBufferByteSize, &meshGeo->IndexBufferCPU));
+			CopyMemory(meshGeo->IndexBufferCPU->GetBufferPointer(), pMesh->GetIndices16().data(), meshGeo->IndexBufferByteSize);
 
-			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->GetIndices16().data(), ibByteSize);
+			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->GetIndices16().data(), meshGeo->IndexBufferByteSize);
 		}
 
-		meshGeo->VertexByteStride = sizeof(Vertex);
-		meshGeo->VertexBufferByteSize = vbByteSize;
-		meshGeo->IndexFormat = pMesh->isIndices32 ? DXGI_FORMAT_R32_UINT : DXGI_FORMAT_R16_UINT;
-		meshGeo->IndexBufferByteSize = ibByteSize;
+
 
 		//Temp
 		meshGeo->DrawArgs[subMeshName] = subMeshGeo;

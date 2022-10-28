@@ -2,12 +2,12 @@
 #include "GeometryGenerator.h"
 
 MeshData
-GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n)
+GeometryGenerator::CreateGrid(float width, float depth, UINT32 m, UINT32 n, std::string name)
 {
 	using VtxSize_t = std::vector<Vertex, std::allocator<Vertex>>::size_type;
 	using IdxSize_t = std::vector<UINT32, std::allocator<uint32_t>>::size_type;
 
-	MeshData meshData;
+	MeshData meshData(name);
 
 	size_t vertexCount = m * n;
 
