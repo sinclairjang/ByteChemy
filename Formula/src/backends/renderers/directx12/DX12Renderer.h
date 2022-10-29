@@ -40,9 +40,9 @@ public:
 	// Graphics API Overloads
 	virtual void RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) override;
-	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info) override;
-	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_Info) override;
-	virtual void RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_Info) override;
+	virtual void RequestService(GraphicsService::UploadStaticResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_Info) override;
+	virtual void RequestService(GraphicsService::AllocateDynamicResource what, const void* _opt_in_Info, void* _opt_out_Info) override;
+	virtual void RequestService(GraphicsService::UploadDynamicResource what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) override;
 	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) override;
@@ -73,7 +73,7 @@ private:
 	HashTable<std::string,  Scope<MeshGeometry>> m_MeshObjects;
 	
 	// Render objects
-	HashTable<entt::entity, Scope<RenderItem>> m_RenderObjects;
+	HashTable<Entity, Scope<RenderItem>> m_RenderObjects;
 
 	// Scene frame contexts
 	SceneFrameContext m_SceneFrameContexts[NUM_BACK_BUFFERS];

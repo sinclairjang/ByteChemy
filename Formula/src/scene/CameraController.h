@@ -1,5 +1,7 @@
 #pragma once
 
+#include "scene/Scene.h"
+
 enum class CameraMotionType : UINT8
 {
 	STRAFE,
@@ -20,7 +22,7 @@ public:
 	void SetCameraMotion(CameraMotionType motionType, FM_VECTOR_MULTIPLY_ADD_ARGS);
 	
 	// On dirty flag, update view and projection matrix
-	void Update();
+	void Update(const Scene& scene);
 
 private:
 	// Camera coordinate with respect to the world space

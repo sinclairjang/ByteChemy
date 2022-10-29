@@ -57,7 +57,7 @@ struct ShadingProperty
 
 struct UnlitShadingProperty : public ShadingProperty		// -> register(b3)
 {
-    virtual ~UnlitShadingProperty() {}
+    virtual ~UnlitShadingProperty();
 	
     //TEMP
 	XMFLOAT4 gColor;
@@ -115,6 +115,9 @@ public:
     UniformManager() = default;
     
     void Init(ID3D12Device* device);
+
+    void AllocateMainPassBuffers();
+    void AllocateUnlitPassBuffers();
 
     // Create and grow uniform buffers if index stack is depleted
     UINT64 GetMainPropBufferIdx();

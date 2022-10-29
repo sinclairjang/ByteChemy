@@ -28,23 +28,43 @@ namespace GraphicsService
 	enum class PreProcess : UINT8
 	{
 		GRAPHICS_PIPELINE,
+		COMPUTE_PIPELINE,
 	};
 
-	enum class LoadResource : UINT8
+	enum class UploadStaticResource : UINT8
 	{
 		MESH,
-
 		TEXTURE,
+
+		MAIN_PASS,
+		MAIN_PROP,
+
+		UNLIT_PASS,
+		UNLIT_PROP,
 	};
 
-	enum class AllocateResource : UINT8
+	enum class AllocateDynamicResource : UINT8
 	{
-		UNIFORM,
+		MESH,
+		TEXTURE,
+
+		MAIN_PASS,
+		MAIN_PROP,
+
+		UNLIT_PASS,
+		UNLIT_PROP,
 	};
 
-	enum class Update : UINT8
+	enum class UploadDynamicResource : UINT8
 	{
-		UNIFORM,
+		MESH,
+		TEXTURE,
+
+		MAIN_PASS,
+		MAIN_PROP,
+
+		UNLIT_PASS,
+		UNLIT_PROP,
 	};
 
 	enum class SetRenderer : UINT8
@@ -89,9 +109,9 @@ public:
 	// Graphics API Overloads
 	virtual void RequestService(GraphicsService::Begin what, const void* _opt_in_Info, void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::PreProcess what, const void* _opt_in_Info, void* _opt_out_Info) = 0;
-	virtual void RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
-	virtual void RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
-	virtual void RequestService(GraphicsService::Update what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::UploadStaticResource what, const std::wstring& path, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::AllocateDynamicResource what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
+	virtual void RequestService(GraphicsService::UploadDynamicResource what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::SetRenderer what, const void* _opt_in_Info,  void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::SetViewPort what, const int width, const int height, const void* _opt_in_Info, void* _opt_out_Info) = 0;
 	virtual void RequestService(GraphicsService::Enqueue what, const void* _opt_in_Info, void* _opt_out_Info) = 0;

@@ -61,6 +61,18 @@
 #define FM_PERSPECTIVE_TRANSFORM_ARGS float fovY, float aspect, float zn, float zf
 #define FM_VECTOR_MULTIPLY_ADD_ARGS float d
 
+void StoreXMVecAsFMVec3(FMVec3& lv, const DirectX::XMVECTOR& rv)
+{
+	DirectX::XMFLOAT3 _int = (DirectX::XMFLOAT3)lv;
+	DirectX::XMStoreFloat3(&_int, rv);
+	lv = _int;
+}
 
+void StoreXMMatAsFMMat4(FMMat4& lv, const DirectX::XMMATRIX& rv)
+{
+	DirectX::XMFLOAT4X4 _int = (DirectX::XMFLOAT4X4)lv;
+	DirectX::XMStoreFloat4x4(&_int, rv);
+	lv = _int;
+}
 
 #endif 

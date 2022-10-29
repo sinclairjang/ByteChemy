@@ -21,68 +21,72 @@ void UniformManager::Init(ID3D12Device* device)
 	m_UnlitPassAlignment = m_UniformFrameResources[0].UnlitPass.GetElementByteSize();
 
 	m_CbvDescriptorSize = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+}
 
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
-		cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
-		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbvHeapDesc.NodeMask = 0;
-		ThrowIfFailed(m_Device->CreateDescriptorHeap(
-			&cbvHeapDesc, IID_PPV_ARGS(m_MainPassHeap.GetAddressOf())
-		));
-	}
-
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
-		cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
-		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbvHeapDesc.NodeMask = 0;
-		ThrowIfFailed(m_Device->CreateDescriptorHeap(
-			&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPassHeap.GetAddressOf())
-		));
-	}
-
+void UniformManager::AllocateMainPassBuffers()
+{
+	
+	D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
+	cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
+		&cbvHeapDesc, IID_PPV_ARGS(m_MainPassHeap.GetAddressOf())
+	));
+	
 	for (int frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 	{
-		{
-			m_UniformFrameResources[frameIndex].MainPass.SetNumElements(1);  // Recall: One cbuffer per frame
-			m_UniformFrameResources[frameIndex].MainPass.Map();
+		m_UniformFrameResources[frameIndex].MainPass.SetNumElements(1);  // Recall: One cbuffer per frame
+		m_UniformFrameResources[frameIndex].MainPass.Map();
 
 
-			D3D12_GPU_VIRTUAL_ADDRESS mainPassAddress = m_UniformFrameResources[frameIndex].MainPass.Resource()->GetGPUVirtualAddress();
+		D3D12_GPU_VIRTUAL_ADDRESS mainPassAddress = m_UniformFrameResources[frameIndex].MainPass.Resource()->GetGPUVirtualAddress();
 
-			auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				m_MainPassHeap->GetCPUDescriptorHandleForHeapStart());
-			cbvHandle.Offset(frameIndex, m_CbvDescriptorSize);
+		auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			m_MainPassHeap->GetCPUDescriptorHandleForHeapStart());
+		cbvHandle.Offset(frameIndex, m_CbvDescriptorSize);
 
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-			cbvDesc.BufferLocation = mainPassAddress;
-			cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].MainPass.GetElementByteSize();
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+		cbvDesc.BufferLocation = mainPassAddress;
+		cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].MainPass.GetElementByteSize();
 
-			m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
-		}
+		m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
+	}
+	
+}
 
-		{
-			m_UniformFrameResources[frameIndex].UnlitPass.SetNumElements(1);  // Recall: One cbuffer per frame
-			m_UniformFrameResources[frameIndex].UnlitPass.Map();
+void UniformManager::AllocateUnlitPassBuffers()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC	cbvHeapDesc{};
+	cbvHeapDesc.NumDescriptors = NUM_FRAMES_IN_FLIGHT;
+	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	cbvHeapDesc.NodeMask = 0;
+	ThrowIfFailed(m_Device->CreateDescriptorHeap(
+		&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPassHeap.GetAddressOf())
+	));
+	
+	for (int frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
+	{
+
+		m_UniformFrameResources[frameIndex].UnlitPass.SetNumElements(1);  // Recall: One cbuffer per frame
+		m_UniformFrameResources[frameIndex].UnlitPass.Map();
 
 
-			D3D12_GPU_VIRTUAL_ADDRESS unlitPassAddress = m_UniformFrameResources[frameIndex].UnlitPass.Resource()->GetGPUVirtualAddress();
+		D3D12_GPU_VIRTUAL_ADDRESS unlitPassAddress = m_UniformFrameResources[frameIndex].UnlitPass.Resource()->GetGPUVirtualAddress();
 
-			int heapIndex = frameIndex;
+		int heapIndex = frameIndex;
 
-			auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-				m_UnlitPassHeap->GetCPUDescriptorHandleForHeapStart());
-			cbvHandle.Offset(heapIndex, m_CbvDescriptorSize);
+		auto cbvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			m_UnlitPassHeap->GetCPUDescriptorHandleForHeapStart());
+		cbvHandle.Offset(heapIndex, m_CbvDescriptorSize);
 
-			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-			cbvDesc.BufferLocation = unlitPassAddress;
-			cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].UnlitPass.GetElementByteSize();
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
+		cbvDesc.BufferLocation = unlitPassAddress;
+		cbvDesc.SizeInBytes = m_UniformFrameResources[frameIndex].UnlitPass.GetElementByteSize();
 
-			m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
-		}
+		m_Device->CreateConstantBufferView(&cbvDesc, cbvHandle);
 	}
 }
 
@@ -146,19 +150,18 @@ void UniformManager::ResizeMainPropBuffers(UINT numMainProps)
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(m_Device->CreateDescriptorHeap(
-		&cbvHeapDesc, IID_PPV_ARGS(m_MainPropsHeap.GetAddressOf())
+		&cbvHeapDesc, IID_PPV_ARGS(m_MainPropsHeap.ReleaseAndGetAddressOf())
 	));
 	
 	for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 	{
-		auto& mainPropsBuffer = m_UniformFrameResources[frameIndex].MainProps;
-		mainPropsBuffer.SafeRelease();
-		mainPropsBuffer.SetNumElements(numMainProps);
-		mainPropsBuffer.Map();
+		m_UniformFrameResources[frameIndex].MainProps.SafeRelease();
+		m_UniformFrameResources[frameIndex].MainProps.SetNumElements(numMainProps);
+		m_UniformFrameResources[frameIndex].MainProps.Map();
 
 		for (UINT i = 0; i < m_NumMainProps; ++i)
 		{
-			D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = mainPropsBuffer.Resource()->GetGPUVirtualAddress();
+			D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = m_UniformFrameResources[frameIndex].MainProps.Resource()->GetGPUVirtualAddress();
 			mainPropsAddress += (UINT64)i * m_MainPropsAlignment;
 
 			UINT heapIndex = frameIndex * m_NumMainProps + i;
@@ -175,8 +178,6 @@ void UniformManager::ResizeMainPropBuffers(UINT numMainProps)
 	}
 }
 
-
-
 void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT numUnlitProps)
 {
 	if (type == ShadingType::UNLIT)
@@ -187,19 +188,18 @@ void UniformManager::ResizeShadingPropBuffers(ShadingType type, UINT numUnlitPro
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbvHeapDesc.NodeMask = 0;
 		ThrowIfFailed(m_Device->CreateDescriptorHeap(
-			&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPropsHeap.GetAddressOf())
+			&cbvHeapDesc, IID_PPV_ARGS(m_UnlitPropsHeap.ReleaseAndGetAddressOf())
 		));
 
 		for (UINT frameIndex = 0; frameIndex < NUM_FRAMES_IN_FLIGHT; ++frameIndex)
 		{
-			auto& unlitPropsBuffer = m_UniformFrameResources[frameIndex].UnlitProps;
-			unlitPropsBuffer.SafeRelease();
-			unlitPropsBuffer.SetNumElements(numUnlitProps);
-			unlitPropsBuffer.Map();
+			m_UniformFrameResources[frameIndex].UnlitProps.SafeRelease();
+			m_UniformFrameResources[frameIndex].UnlitProps.SetNumElements(numUnlitProps);
+			m_UniformFrameResources[frameIndex].UnlitProps.Map();
 
 			for (UINT i = 0; i < m_NumUnlitProps; ++i)
 			{
-				D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = unlitPropsBuffer.Resource()->GetGPUVirtualAddress();
+				D3D12_GPU_VIRTUAL_ADDRESS mainPropsAddress = m_UniformFrameResources[frameIndex].UnlitProps.Resource()->GetGPUVirtualAddress();
 				mainPropsAddress += (UINT64)i * m_UnlitPropsAlignment;
 
 				UINT heapIndex = frameIndex * m_NumUnlitProps + i;
@@ -228,4 +228,8 @@ void UniformFrameResource::Init(ID3D12Device* device)
 	MainPass.Init(device, true);
 	UnlitPass.Init(device, true);
 	UnlitProps.Init(device, true);
+}
+
+UnlitShadingProperty::~UnlitShadingProperty()
+{
 }

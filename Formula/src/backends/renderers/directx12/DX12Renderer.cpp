@@ -133,13 +133,13 @@ void DX12Renderer::RequestService(GraphicsService::PreProcess what, const void* 
 	
 	else
 	{
-		LOG_INFO("Only PreProcess(GRPHICS_PIPELINE) is supported for now");
+		LOG_INFO("Not supported for now");
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_info_)
+void DX12Renderer::RequestService(GraphicsService::UploadStaticResource what, const std::wstring& path, const void* _opt_in_Info, void* _opt_out_info_)
 {
-	if (what == GraphicsService::LoadResource::MESH)
+	if (what == GraphicsService::UploadStaticResource::MESH)
 	{
 		//TODO: Add flag to determine the intended behavior
 		if (_opt_out_info_ != nullptr)
@@ -216,25 +216,52 @@ void DX12Renderer::RequestService(GraphicsService::LoadResource what, const std:
 	}
 }
 
-void DX12Renderer::RequestService(GraphicsService::AllocateResource what, const void* _opt_in_Info, void* _opt_out_info_)
+void DX12Renderer::RequestService(GraphicsService::AllocateDynamicResource what, const void* _opt_in_Info, void* _opt_out_info_)
 {
-	if (what == GraphicsService::AllocateResource::UNIFORM)
+	if (what == GraphicsService::AllocateDynamicResource::MAIN_PASS)
 	{
+		// On Entity being created, the Application adds MainEditorCamera component by design,
+		//then it allocates GPU upload buffer for each frame in flight which frame index is also an buffer index.
+		
+		m_UniformBuffers.AllocateMainPassBuffers();
+	}
+
+	else if (what == GraphicsService::AllocateDynamicResource::MAIN_PROP)
+	{
+		// On Entity being created, the Application adds Transform component by design,
+		//then it invokes GetMainPropBufferIdx to assigns, if any, the appropriate index to corresponding RenderItem
+		//otherwise re-/allocate its GPU upload buffer first before assigning it.
+
+	}
+
+	//TEMP
+	else if (what == GraphicsService::AllocateDynamicResource::UNLIT_PASS)
+	{
+		// On Entity being created, the Application adds Material component holding reference to Unlit shader by design,
+		//then it allocates GPU upload buffer for each frame in flight which frame index is also an buffer index.
+
+		m_UniformBuffers.AllocateUnlitPassBuffers();
+	}
+
+	else if (what == GraphicsService::AllocateDynamicResource::UNLIT_PROP)
+	{
+		// On Entity being created, the Application adds Material component holding reference to Unlit shader by design
+		//then it invokes GetUnlitPropBufferIdx to assigns, if any, the appropriate index to corresponding RenderItem
+		//otherwise re-/allocate its GPU upload buffer first before assigning it.
 
 	}
 	else
 	{
-		LOG_INFO("Only AllocateResource(UNIFORM) is supported for now");
+		LOG_INFO("Not supported for now");
 	}
 }
 
 // ECS's signaled function that listens to both engine/user entity
-void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt_in_Info, void* _opt_out_info_)
+void DX12Renderer::RequestService(GraphicsService::UploadDynamicResource what, const void* _opt_in_Info, void* _opt_out_info_)
 {
-	if (what == GraphicsService::Update::UNIFORM)
+	if (what == GraphicsService::UploadDynamicResource::MAIN_PASS)
 	{
-		// On Entity being created, it adds Transform and EditorCamera component by design,
-		//which invokes GetMainPassBufferIdx and GetMainPropBufferIdx to assign the appropriate indices to corresponding RenderItem.
+
 		 
 		// On Entity having Transform component updated, it gets a signal from ECS to update EngineObjectProperty and its corresponding uniform buffer subresource,
 		//whereas EditorCamera is updated by standard input (e.g. keyboard, mouse, etc.) to in turn update EnginePassProperty and its corresponding uniform buffer subresource.
@@ -250,7 +277,7 @@ void DX12Renderer::RequestService(GraphicsService::Update what, const void* _opt
 	}
 	else
 	{
-		LOG_INFO("Only Update(UNIFORM) is supported for now");
+		LOG_INFO("Not supported for now");
 	}
 }
 
@@ -278,7 +305,7 @@ void DX12Renderer::RequestService(GraphicsService::SetViewPort what, const int w
 	}
 	else  // == GraphicsService::SetViewPort::GAME, AUXn
 	{
-		LOG_INFO("Only SetViewPort(Editor) is supported for now");
+		LOG_INFO("Not supported for now");
 	}
 }
 

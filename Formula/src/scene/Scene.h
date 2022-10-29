@@ -1,12 +1,14 @@
 #pragma once
 
 #include "renderer/Renderer.h"
+#include "scene/CameraController.h"
 
 class Entity;
 
 class Scene
 {
 	friend class Entity;
+	friend class EditorMainCamera;
 
 public:
 	Scene() = default;
@@ -61,6 +63,8 @@ private:
 	// Scene Render Informations
 	std::string m_GraphicsAPI;
 	Renderer* m_Renderer;
+
+	EditorMainCamera m_MainCamera;
 
 	//TEMP
 	void* m_TexID;
