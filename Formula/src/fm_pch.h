@@ -167,13 +167,13 @@ struct FMMat4
 		_31(m20), _32(m21), _33(m22), _34(m23),
 		_41(m30), _42(m31), _43(m32), _44(m33) {}
 	
-	explicit FMMat4(_In_reads_(16) const float* pArray)
+	explicit FMMat4(const float* pArray)
 		: _11(pArray[0]), _12(pArray[1]), _13(pArray[2]), _14(pArray[3]),
 		_21(pArray[4]),  _22(pArray[5]),  _23(pArray[6]),  _24(pArray[7]),
 		_31(pArray[8]),  _32(pArray[9]),  _33(pArray[10]), _34(pArray[11]),
 		_41(pArray[12]), _42(pArray[13]), _43(pArray[14]), _44(pArray[15]) {}
 
-	explicit FMMat4(_In_reads_(1) const float k)
+	explicit FMMat4(const float k)
 		: _11(k), _12(0), _13(0), _14(0),
 		_21(0), _22(k), _23(0), _24(0),
 		_31(0), _32(0), _33(k), _34(0),

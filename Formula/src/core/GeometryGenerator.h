@@ -3,7 +3,7 @@
 class GeometryGenerator
 {
 public:
-	static MeshData CreateCube();
+	static MeshData CreateCube(std::string name = "Cube");
 
 	static MeshData CreateGrid(float width, float depth, UINT32 m, UINT32 n, std::string name = "Grid");
 
