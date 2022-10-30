@@ -89,7 +89,6 @@ void Scene::Init()
 
 void Scene::Begin(const int width, const int height)
 {
-
 	{
 		void* info = nullptr;
 		m_Renderer->RequestService(
@@ -110,8 +109,6 @@ void Scene::Begin(const int width, const int height)
 
 		//ParseAndProcessResponse(info);
 	}
-
-
 }
 
 void Scene::Update()
@@ -128,15 +125,29 @@ void Scene::End()
 	delete m_Renderer;
 }
 
-Entity Scene::CreateEntity(const std::wstring& name)
-{
-	Entity entity = { m_Registry.create(), Ref<Scene>(this) };
 
-	entity.AddComponent<TransformComponent>();
-	auto& tag = entity.AddComponent<TagComponent>();
+
+Entity Scene::CreateGameObject(const std::wstring& name)
+{
+	Entity gameObj = { m_Registry.create(), Ref<Scene>(this) };
+
+	gameObj.AddComponent<TransformComponent>();
+	auto& tag = gameObj.AddComponent<TagComponent>();
 	
-	tag.Tag = name.empty() ? L"Entity" : name;
+	tag.Tag = name.empty() ? L"Untitled" : name;
 	
-	return entity;
+	return gameObj;
+}
+
+Entity Scene::CreateEditorCamera()
+{
+	Entity mainCam = { m_Registry.create(), Ref<Scene>(this) };
+	
+	auto& tag = mainCam.AddComponent<TagComponent>();
+	tag.Tag = L"Main Camera";
+
+	mainCam.AddComponent<CameraComponent>();  // Updated by CameraController
+
+	return mainCam;
 }
 

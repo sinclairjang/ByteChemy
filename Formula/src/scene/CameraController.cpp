@@ -110,13 +110,3 @@ void EditorMainCamera::SetCameraMotion(CameraMotionType motionType, FM_VECTOR_MU
 }
 #endif
 
-void EditorMainCamera::Update(const Scene& scene)
-{
-	if (m_DirtyFlag)
-	{
-		scene.m_Renderer->RequestService(GraphicsService::Update::UNIFORM, nullptr, nullptr);
-
-
-		m_DirtyFlag = false;
-	}
-}

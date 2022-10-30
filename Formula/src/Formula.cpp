@@ -5,7 +5,7 @@
 #include "fm_pch.h"
 
 // This will provide various backends support for the editor later on.
-#if defined(FM_BACKENDS_PLATFORMS_WIN32) && defined(FM_BACKENDS_RENDERERS_DIRECTX_12)
+#if defined(FM_BACKENDS_PLATFORM_WIN32) && defined(FM_BACKENDS_RENDERER_DIRECTX_12)
 
 	#include "backends/frameworks/dx12_on_win32/main.h"
 

@@ -21,9 +21,6 @@ public:
 	// Adjust camera coordinates
 	void SetCameraMotion(CameraMotionType motionType, FM_VECTOR_MULTIPLY_ADD_ARGS);
 	
-	// On dirty flag, update view and projection matrix
-	void Update(const Scene& scene);
-
 private:
 	// Camera coordinate with respect to the world space
 	FMVec3 m_CameraPos	= { 0.0f, 0.0f, 0.0f };
@@ -40,7 +37,7 @@ private:
 	float m_FarPlaneHeight	= 0.0f;
 
 	// Checked on update loop to determine whether the game editor loop should update the associated shader data, in this case MainPassProperty 
-	bool m_DirtyFlag = true;
+	//bool m_DirtyFlag = true;  //Deprecated: we use Entt's reactive system instead.
 
 	// Main engine camera data staged in system memory before it affects its associated shader data, in this case MainPassProperty
 	FMMat4 m_View = FMMat4(1);

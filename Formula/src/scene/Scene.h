@@ -59,7 +59,9 @@ public:
 
 public:
 	// Register the entity to the scene
-	Entity CreateEntity(const std::wstring& name);
+	Entity CreateGameObject(const std::wstring& name);
+	
+	Entity CreateEditorCamera();
 
 	template<typename Component>
 	void OnCreateEntity(void freeFunc(entt::registry&, entt::entity))
@@ -78,12 +80,12 @@ public:
 	void OnDestroyEntity(void freeFunc(entt::registry&, entt::entity))
 	{
 		m_Registry.on_destroy<Component>().connect<freeFunc>;
-
 	}
 
 public:
 	// Locate graphics API
 	void SetRenderAPI(const GraphicsService::GrpahicsAPI& graphicsAPI);
+	
 	void* GetTexID() const { return m_TexID; }
 
 	void ParseAndProcessResponse(void*& _opt_out_info_);
@@ -96,7 +98,7 @@ private:
 	Renderer* m_Renderer;
 
 	EditorMainCamera m_MainCamera;
-
+	
 	//TEMP
 	void* m_TexID;
 };

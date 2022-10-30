@@ -18,7 +18,7 @@ struct TransformComponent
 {
 	FMMat4 Transform{ 1.0f };
 
-	operator FMMat4& () { return Transform; }
+	operator FMMat4() const { return Transform; }
 
 	TransformComponent() = default;
 	TransformComponent(const TransformComponent&) = default;
@@ -26,35 +26,32 @@ struct TransformComponent
 		Transform(transform) {}
 };
 
-struct MainEditorCameraComponent
+struct CameraComponent
 {
+	FMMat4 View{ 1.0f };
+	FMMat4 Projection{ 1.0f };
 
+	CameraComponent() = default;
+	CameraComponent(const CameraComponent&) = default;
+	CameraComponent(const FMMat4& view, const FMMat4& proj)
+		: View(view), Projection(proj) {}
+};
+
+struct UnlitMaterialComponent
+{
+	FMVec4 MainColor;
+
+	operator FMVec4() { return MainColor; }
+
+	UnlitMaterialComponent() = default;
+	UnlitMaterialComponent(const UnlitMaterialComponent&) = default;
+	UnlitMaterialComponent(const FMVec4& color)
+		: MainColor(color) {}
 };
 
 struct MeshFilterComponent
 {
-	// Input Filter
-	//TODO: Extract input data per shader applied to a mesh object
-	// For the time being, we assume a mesh object is given vertex positions, normals, tangents, uvs and indices.
-	using VertexCount = UINT;
-	using IndexCount = UINT;
-	using MeshInfo = std::pair<VertexCount, IndexCount>;
-
-	std::string ModelName; // TODO: to be replaced and handled by GUID system
-	
-	MeshInfo meshInfo;
-	
-	MeshFilterComponent() = default;
-	
-	// Opt out costly copy operations
-	MeshFilterComponent(const MeshFilterComponent& other) = delete;
-	MeshFilterComponent&
-		operator=(const MeshFilterComponent&) = default;
-
-	MeshFilterComponent(const std::string name = "Unnamed") 
-		: ModelName(name)
-	{
-	}
+	//TODO: Extract input data from MeshData
 };
 
 struct MeshRendererComponent
@@ -74,17 +71,6 @@ struct ParticleRendererComponent
 	// Activates particle render pipeline
 	// Shader name = standard (default)
 };
-
-struct UnlitMaterialComponent
-{
-	FMVec4 MainColor;
-
-	UnlitMaterialComponent() = default;
-	UnlitMaterialComponent(const UnlitMaterialComponent&) = default;
-	UnlitMaterialComponent(const FMVec4& color)
-		: MainColor(color) {}
-};
-
 
 // Backend render data associated with a game object represented by Entity
 

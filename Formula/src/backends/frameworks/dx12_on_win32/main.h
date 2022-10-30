@@ -4,8 +4,9 @@
 // Implemented features:
 //	[ ] Editor UI Layout
 //	[X] Render-to-texture
-//	[ ] Entity Component System
+//	[X] Entity Component System
 //  [ ] Scene Graph
+
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx12.h>
@@ -127,13 +128,12 @@ int main(int, char**)
 
     // Load scene
     Scope<Scene> scene = CreateScope<Scene>();
-
     scene->SetRenderAPI(GraphicsService::GrpahicsAPI::DirectX12);
 
-    scene->LoadEngineShaderAssets();
-    scene->LoadEngineMeshAssets();
-    scene->LoadEngineTexImageAssets();
-
+    // Prepare scene
+    scene->Init();
+    scene->CreateEditorCamera();
+    
     // Main loop
     bool done = false;
     while (!done)
@@ -156,14 +156,24 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-       // Draw the scene to texture
-        ImGui::ShowDemoWindow(&show_demo_window);
+        // Controll editor camera
+        //update camera component 
+
+        // CRUD game objects
+        //on create: invoke allocate dynamic resource
+        //update game object component
+        //on destroy: invoke release dynamic resource
+
+        // Update shader bind entries using entt::observer and RenderInfoComponent
+        // Invoke update dynamic resource
         
+        // Draw the scene to texture
+        //...
         //ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
         //scene->Begin( (const int)viewportPanelSize.x, (const int)viewportPanelSize.y );
-
+        //...
         //D3D12_GPU_DESCRIPTOR_HANDLE* texID = (D3D12_GPU_DESCRIPTOR_HANDLE*)scene->GetTexID();
-        //e.g. texID[n];
+        //ImGui::Image(texID, ...)
         
         // Rendering
         ImGui::Render();

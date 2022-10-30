@@ -6,8 +6,6 @@
 #include "core/DX12App_SceneBuffer.h"
 #include "core/DX12App_RootSigner.h"
 
-#include "scene/Entity.h"
-
 // Impoprt from ImGui
 extern int const NUM_FRAMES_IN_FLIGHT;
 extern int const NUM_BACK_BUFFERS;
@@ -55,9 +53,6 @@ private:
 	// Mesh buffers
 	HashTable<std::string,  Scope<MeshGeometry>> m_Meshes;
 	
-	// Render objects
-	std::vector<Entity> m_Renderables;
-
 	// Scene frame contexts
 	SceneFrameContext m_SceneFrameContexts[NUM_BACK_BUFFERS];
 	SceneFrameContext* m_CurrSceneFrameContext;

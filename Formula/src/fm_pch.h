@@ -1,5 +1,4 @@
 #pragma once
-
 #include "fm_config.h"
 
 //-----------------------------------------------------------------------------
@@ -189,6 +188,18 @@ struct FMMat4
 #endif
 };
 
+#ifdef FM_MAT4_STORE_HELPER
+	
+	FM_MAT4_STORE_HELPER
+
+#endif
+
+#ifdef FM_VEC3_STORE_HELPER
+
+	FM_VEC3_STORE_HELPER
+
+#endif
+
 struct Vertex
 {
 	Vertex() {}
@@ -216,6 +227,8 @@ struct Vertex
 	FMVec3 TangentU;
 	FMVec2 TexC;
 };
+
+
 
 struct MeshData
 {
