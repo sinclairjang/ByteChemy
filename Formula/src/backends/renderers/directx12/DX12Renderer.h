@@ -6,28 +6,11 @@
 #include "core/DX12App_SceneBuffer.h"
 #include "core/DX12App_RootSigner.h"
 
+#include "scene/Entity.h"
+
 // Impoprt from ImGui
 extern int const NUM_FRAMES_IN_FLIGHT;
 extern int const NUM_BACK_BUFFERS;
-
-// Backend render data associated with a game object represented by entt::entity
-struct RenderItem
-{	
-	Scope<EngineObjectProperty> EngineObjProp;
-	Scope<ShadingProperty> ShadingProp;  // Polymorphic
-		
-	UINT EngineUniformIdx = -1;
-	UINT ShadingUniformIdx = -1;
-
-	//Note: This pointer is stable (i.e. valid as long as DX12Renderer object lifetime).
-	MeshGeometry* meshGeo = nullptr;
-
-	D3D12_PRIMITIVE_TOPOLOGY primType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	UINT IndexCount = 0;
-	UINT StartIndexLocation = 0;
-	int BaseVertexLocation = 0;
-};
 
 class DX12Renderer : public Renderer
 {
@@ -70,10 +53,10 @@ private:
 	//------------------------------------------------------------//	
 	
 	// Mesh buffers
-	HashTable<std::string,  Scope<MeshGeometry>> m_MeshObjects;
+	HashTable<std::string,  Scope<MeshGeometry>> m_Meshes;
 	
 	// Render objects
-	HashTable<Entity, Scope<RenderItem>> m_RenderObjects;
+	std::vector<Entity> m_Renderables;
 
 	// Scene frame contexts
 	SceneFrameContext m_SceneFrameContexts[NUM_BACK_BUFFERS];
@@ -102,4 +85,3 @@ private:
 	// Particle render pipelines per shader
 	HashTable<std::string, ComPtr<ID3D12PipelineState>> m_ParticleRendererPSOs;
 };
-

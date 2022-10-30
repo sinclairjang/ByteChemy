@@ -5,6 +5,12 @@
 
 class Entity;
 
+// Application's basic program flow is	1) ImGui polls user events
+//										2) ImGui provides graphical interface to Scene responsible for managing its game objects (i.e. entities) via entt library
+//										3) Scene in turn requests appropriate tasks from its graphics backend
+//										4) ImGui creates window(s) containing Scene's viewports among others
+//										4) Jump to step 1) and repeat
+
 class Scene
 {
 	friend class Entity;
@@ -50,6 +56,9 @@ public:
 public:
 	// Register the entity to the scene
 	Entity CreateEntity(const std::wstring& name);
+
+	void OnCreateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc);
+	void OnUpdateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc);
 
 	// Locate graphics API
 	void SetRenderAPI(const GraphicsService::GrpahicsAPI& graphicsAPI);

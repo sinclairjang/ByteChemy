@@ -43,7 +43,7 @@ void Scene::LoadEngineMeshAssets()
 	MeshData& grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
 	void* info = nullptr;
 
-	m_Renderer->RequestService(GraphicsService::LoadResource::MESH, BUILT_IN, &grid, info);
+	m_Renderer->RequestService(GraphicsService::UploadStaticResource::MESH, BUILT_IN, &grid, info);
 	
 	//ParseAndProcessResponse(info);
 }
@@ -52,7 +52,7 @@ void Scene::LoadEngineTexImageAssets()
 {
 	void* info = nullptr;
 	m_Renderer->RequestService(
-		GraphicsService::LoadResource::TEXTURE, 
+		GraphicsService::UploadStaticResource::TEXTURE,
 		L"assets\\texture\\White.jpeg", 
 		nullptr, info);
 
@@ -107,4 +107,13 @@ Entity Scene::CreateEntity(const std::wstring& name)
 	tag.Tag = name.empty() ? L"Entity" : name;
 	
 	return entity;
+}
+
+void Scene::OnCreateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc)
+{
+
+}
+
+void Scene::OnUpdateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc)
+{
 }

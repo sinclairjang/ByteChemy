@@ -6,7 +6,7 @@
 // [SECTION] Platform's Precompiled Headers
 //-----------------------------------------------------------------------------
 
-#ifdef FM_BACKENDS_PLATFORMS_WIN32
+#ifdef FM_BACKENDS_PLATFORM_WIN32
 
 	#include <windows.h>
 	#include <windowsx.h> // GET_X_LPARAM(), GET_Y_LPARAM()
@@ -19,7 +19,7 @@
 // [SECTION] Renderer's Precompiled Headers
 //-----------------------------------------------------------------------------
 
-#ifdef FM_BACKENDS_RENDERERS_DIRECTX_12
+#ifdef FM_BACKENDS_RENDERER_DIRECTX_12
 	
 	#include "backends/renderers/directx12/core/d3dx12.h"
 

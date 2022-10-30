@@ -1,6 +1,13 @@
 #pragma once
 
+//  Uniform Memory Management 
+// 
+//	Group uniforms based on	1) update frequencies (e.g. per objects or render pass etc)
+//							2) render pipelines (e.g. unlit or standard etc)
+//							3) commonality with respect to shaders (e.g. engine or otherwise)
+
 #include "DX12App_ResourceAllocator.h"
+#include "backends/renderers/directx12/template/DX12App_BindEntry.h"
 
 using namespace DirectX;
 
@@ -11,82 +18,9 @@ extern ID3D12Device* g_pd3dDevice;
 static int const NUM_FRAMES_IN_FLIGHT = 3;
 static int const NUM_BACK_BUFFERS = 3;
 
-//	Group uniforms based on	1) update frequencies (e.g. per objects or render pass etc)
-//							2) render pipelines (e.g. unlit or standard etc)
-//							3) commonality with respect to shaders (e.g. engine or otherwise)
-
-// This groups of uniforms will be bound to the common memory scheme (i.e. root signature) that defines the set of shader registers to provide consistent interface with the underlying hardware per draw call.
-
-struct EngineObjectProperty		// -> register(b0)
-{
-	//TEMP
-	XMFLOAT4X4 gWorld = FMMat4(1);	// == 4x4 identity matrix
-};
-
-struct EnginPass					// -> register(b1)
-{
-	//TEMP
-	XMFLOAT4X4 gView;
-	XMFLOAT4X4 gInvView;
-	XMFLOAT4X4 gProj;
-	XMFLOAT4X4 gInvProj;
-	XMFLOAT4X4 gViewProj;
-	XMFLOAT4X4 gInvViewProj;
-	XMFLOAT3 gEyePosW;
-	float _Pad1;
-};
-
-enum class ShadingType : UINT8
-{
-    STANDARD,
-    UNLIT,
-    PARTICLE,
-};
-
-//DEBUG MARKER: should I supply placeholder data?
-struct UnlitShadingPass			// -> register(b2)
-{
-	//TEMP
-    XMFLOAT4 _Placeholder;
-};
-
-struct ShadingProperty
-{
-    virtual ~ShadingProperty() = 0;
-};
-
-struct UnlitShadingProperty : public ShadingProperty		// -> register(b3)
-{
-    virtual ~UnlitShadingProperty();
-	
-    //TEMP
-	XMFLOAT4 gColor;
-};
-
-//TODO:
-//struct ParticleShadingPass		// -> register(b2)
-//{
-//
-//};
-//
-//struct ParticleShadingProperties	// -> register(b3)
-//{
-//
-//};
-//struct StandardShadingPass		// -> register(b2)
-//{
-//
-//};
-//
-//struct StandardShadingProperties	// -> register(b3)
-//{
-//
-//};
-
 // UniformManager is responsible for 1) allocations and resizing of upload buffers upon creations of Entities
 //									 2) managing buffer indices to map Entites to upload buffers
 //									 3) flipping upload buffers upon new frame
-
 
 struct UniformFrameResource
 {

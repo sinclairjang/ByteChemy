@@ -54,28 +54,63 @@ struct MeshFilterComponent
 
 struct MeshRendererComponent
 {
-	// activates mesh render pipeline
-	// shader name = standard (default)
+	// Activates mesh render pipeline
+	// Shader name = standard (default)
 };
 
 struct LineRendererComponent
 {
-	// activates line render pipeline
-	// shader name = standard (default)
+	// Activates line render pipeline
+	// Shader name = standard (default)
 };
 
 struct ParticleRendererComponent
 {
-	// activates particle render pipeline
-	// shader name = standard (default)
+	// Activates particle render pipeline
+	// Shader name = standard (default)
 };
 
-struct UnlitMatericalComponent
+struct UnlitMaterialComponent
 {
 	FMVec4 MainColor;
 
-	UnlitMatericalComponent() = default;
-	UnlitMatericalComponent(const UnlitMatericalComponent&) = default;
-	UnlitMatericalComponent(const FMVec4& color)
+	UnlitMaterialComponent() = default;
+	UnlitMaterialComponent(const UnlitMaterialComponent&) = default;
+	UnlitMaterialComponent(const FMVec4& color)
 		: MainColor(color) {}
 };
+
+
+// Backend render data associated with a game object represented by Entity
+
+// DX12
+#ifdef FM_BACKENDS_RENDERER_DIRECTX_12
+
+class MeshGeometry;
+
+struct RenderInfoComponent
+{
+	// Index to uniform data
+	UINT EngineUniformIdx = -1;
+	UINT ShadingUniformIdx = -1;
+
+	// Reference to mesh data
+	MeshGeometry* meshGeo = nullptr;  //Note: Pointer stability guaranteed
+
+	D3D12_PRIMITIVE_TOPOLOGY primType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	// Parameters for draw call
+	UINT ElementCount = 0;
+	UINT StartElementLocation = 0;
+	int BaseVertexLocation = 0;  //Optional: reserved for DrawIndexedInstanced function
+};
+
+// VULKAN
+#elif FM_BACKENDS_RENDERER_VULKAN
+	
+struct RenderInfoComponent
+{
+	//TODO: ...
+};
+
+#endif

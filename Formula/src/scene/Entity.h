@@ -4,6 +4,11 @@
 
 class Scene;
 
+// We follow Single Responsibility Principle as mcuch as possible:
+//Scene manages(i.e. creates, updates, destroys) entities.
+//Renderer renders entities, hence the name.
+//Entt glues them together as an external Entity Component System.
+
 class Entity
 {
 public:

@@ -193,8 +193,6 @@ void DX12Renderer::RequestService(GraphicsService::UploadStaticResource what, co
 			meshGeo->IndexBufferGPU = DefaultBufferAllocator(m_Device, pMesh->GetIndices16().data(), meshGeo->IndexBufferByteSize);
 		}
 
-
-
 		//Temp
 		meshGeo->DrawArgs[subMeshName] = subMeshGeo;
 
