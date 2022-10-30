@@ -17,8 +17,6 @@ void Scene::SetRenderAPI(const GraphicsService::GrpahicsAPI& graphicsAPI)
 
 		m_GraphicsAPI = "DirectX 12";
 	}
-
-
 }
 
 void Scene::ParseAndProcessResponse(void*& _opt_out_info_)
@@ -28,8 +26,8 @@ void Scene::ParseAndProcessResponse(void*& _opt_out_info_)
 
 void Scene::LoadEngineShaderAssets()
 {
-	void* info = nullptr;
-	m_Renderer->RequestService(GraphicsService::PreProcess::GRAPHICS_PIPELINE, nullptr, info);
+	//void* info = nullptr;
+	m_Renderer->RequestService(GraphicsService::PreProcess::GRAPHICS_PIPELINE, nullptr, nullptr);
 
 	//ParseAndProcessResponse(info);
 }
@@ -41,26 +39,57 @@ void Scene::LoadEngineMeshAssets()
 	//Simple geometries such as plane grid is sufficinet for now.
 	
 	MeshData& grid = GeometryGenerator::CreateGrid(20.0f, 30.0f, 60, 40);
-	void* info = nullptr;
 
-	m_Renderer->RequestService(GraphicsService::UploadStaticResource::MESH, BUILT_IN, &grid, info);
+	//void* info = nullptr;
+	m_Renderer->RequestService(GraphicsService::UploadStaticResource::MESH, BUILT_IN, &grid, nullptr);
 	
 	//ParseAndProcessResponse(info);
 }
 
 void Scene::LoadEngineTexImageAssets()
 {
-	void* info = nullptr;
+	//void* info = nullptr;
 	m_Renderer->RequestService(
 		GraphicsService::UploadStaticResource::TEXTURE,
 		L"assets\\texture\\White.jpeg", 
-		nullptr, info);
+		nullptr, nullptr);
 
 	//ParseAndProcessResponse(info);
 }
 
+void Scene::AllocatePassBuffers()
+{
+	{
+		//void* info = nullptr;
+		m_Renderer->RequestService(
+			GraphicsService::AllocateDynamicResource::MAIN_PASS,
+			nullptr, nullptr);
+
+		//ParseAndProcessResponse(info);
+	}
+
+	{
+		//void* info = nullptr;
+		m_Renderer->RequestService(
+			GraphicsService::AllocateDynamicResource::UNLIT_PASS,
+			nullptr, nullptr);
+
+		//ParseAndProcessResponse(info);
+	}
+}
+
+void Scene::Init()
+{
+	LoadEngineShaderAssets();
+	LoadEngineMeshAssets();
+	LoadEngineTexImageAssets();
+
+	AllocatePassBuffers();
+}
+
 void Scene::Begin(const int width, const int height)
 {
+
 	{
 		void* info = nullptr;
 		m_Renderer->RequestService(
@@ -74,13 +103,15 @@ void Scene::Begin(const int width, const int height)
 	}
 	
 	{
-		void* info = nullptr;
+		//void* info = nullptr;
 		m_Renderer->RequestService(
 			GraphicsService::SetViewPort::EDITOR,
-			width, height, nullptr, info);
+			width, height, nullptr, nullptr);
 
 		//ParseAndProcessResponse(info);
 	}
+
+
 }
 
 void Scene::Update()
@@ -109,11 +140,3 @@ Entity Scene::CreateEntity(const std::wstring& name)
 	return entity;
 }
 
-void Scene::OnCreateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc)
-{
-
-}
-
-void Scene::OnUpdateEntity(std::function<void(entt::registry&, entt::entity)> freeFunc)
-{
-}

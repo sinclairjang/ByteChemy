@@ -196,7 +196,7 @@ void DX12Renderer::RequestService(GraphicsService::UploadStaticResource what, co
 		//Temp
 		meshGeo->DrawArgs[subMeshName] = subMeshGeo;
 
-		m_MeshObjects[meshGeo->Name] = std::move(meshGeo);
+		m_Meshes[meshGeo->Name] = std::move(meshGeo);
 	}
 
 	else  // == GraphicsService::AllocateGPUMemory::TEXTURE
@@ -213,13 +213,19 @@ void DX12Renderer::RequestService(GraphicsService::UploadStaticResource what, co
 		m_ImageTex[ws2s(stem)] = std::move(imageTex);
 	}
 }
+//Transform
+void foo(entt::registry&, entt::entity)
+{
+	//m_Renderer->RequestService(GraphicsService::AllocateDynamicResource::MAIN_PROP, nullptr, nullptr)
+
+}
 
 void DX12Renderer::RequestService(GraphicsService::AllocateDynamicResource what, const void* _opt_in_Info, void* _opt_out_info_)
 {
 	if (what == GraphicsService::AllocateDynamicResource::MAIN_PASS)
 	{
 		// On Entity being created, the Application adds MainEditorCamera component by design,
-		//then it allocates GPU upload buffer for each frame in flight which frame index is also an buffer index.
+		///with GPU upload buffer having been allocated on Scene::Begin for each frame in flight which frame index is also an buffer index.
 		
 		m_UniformBuffers.AllocateMainPassBuffers();
 	}
@@ -236,7 +242,7 @@ void DX12Renderer::RequestService(GraphicsService::AllocateDynamicResource what,
 	else if (what == GraphicsService::AllocateDynamicResource::UNLIT_PASS)
 	{
 		// On Entity being created, the Application adds Material component holding reference to Unlit shader by design,
-		//then it allocates GPU upload buffer for each frame in flight which frame index is also an buffer index.
+		//with GPU upload buffer having been allocated on Scene::Begin for each frame in flight which frame index is also an buffer index.
 
 		m_UniformBuffers.AllocateUnlitPassBuffers();
 	}

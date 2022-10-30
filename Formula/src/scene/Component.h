@@ -26,6 +26,11 @@ struct TransformComponent
 		Transform(transform) {}
 };
 
+struct MainEditorCameraComponent
+{
+
+};
+
 struct MeshFilterComponent
 {
 	// Input Filter
